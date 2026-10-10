@@ -1,8 +1,8 @@
-# Two Links, One Target
+# Planar Inverse Kinematics
 
 A bilingual (English / Traditional Chinese), build-free educational website prototype for a MATH3900 project on 2-DOF planar robot-arm inverse kinematics.
 
-Live site: <https://jackyli-hkust.github.io/two-links-one-target/>
+Live site: <https://jackyli-hkust.github.io/planar-inverse-kinematics/>
 
 ## Open it
 
