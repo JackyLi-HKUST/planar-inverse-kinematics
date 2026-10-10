@@ -1,4 +1,4 @@
-# `planar-inverse-kinematics`
+# Geometric Inverse Kinematics for a Planar Two-Link Manipulator
 
 A bilingual (English / Traditional Chinese), build-free educational website prototype for an HKUST [MATH3900](https://researchportal.hkust.edu.hk/en/courses/2026-27-fall-math3900-communicating-mathematics-to-the-public/) project on 2-DOF planar robot-arm inverse kinematics.
 
