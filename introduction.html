@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Why forward and inverse kinematics matter in robotics, introduced through an approachable 2-DOF planar robot arm.">
+  <title>Introduction — Two Links, One Target</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-page="introduction">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <button class="mobile-menu" id="mobileMenu" aria-label="Open navigation" aria-expanded="false">☰</button>
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="index.html" aria-label="Two Links, One Target home">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span><strong data-i18n="brand">Two Links, One Target</strong><small>MATH3900 · 2-DOF IK</small></span>
+    </a>
+    <nav class="nav" aria-label="Main navigation">
+      <p data-i18n="navExplore">EXPLORE</p>
+      <a class="active" href="introduction.html"><span>00</span><b><span data-lang-en>Introduction</span><span data-lang-zh>導論</span></b></a>
+      <a href="index.html"><span>01</span><b data-i18n="navPlayground">Playground</b></a>
+      <a href="guide.html"><span>02</span><b data-i18n="navGuide">How it works</b></a>
+      <a href="proof.html"><span>03</span><b><span data-lang-en>Rigorous proofs</span><span data-lang-zh>嚴謹證明</span></b></a>
+      <a href="about.html"><span>04</span><b><span data-lang-en>About &amp; credits</span><span data-lang-zh>關於與鳴謝</span></b></a>
+      <p data-i18n="navOnPage">ON THIS PAGE</p>
+      <a href="#why"><span>·</span><b><span data-lang-en>The inverse problem</span><span data-lang-zh>逆問題</span></b></a>
+      <a href="#fk-ik"><span>·</span><b><span data-lang-en>FK and IK</span><span data-lang-zh>FK 與 IK</span></b></a>
+      <a href="#workflow"><span>·</span><b><span data-lang-en>The mathematical journey</span><span data-lang-zh>數學推理路線</span></b></a>
+      <a href="#scope"><span>·</span><b><span data-lang-en>What we will learn</span><span data-lang-zh>我們會學甚麼</span></b></a>
+    </nav>
+    <div class="sidebar-foot">
+      <button class="language-toggle" type="button" data-language-toggle aria-label="Switch language"><span class="selected">EN</span><span>繁中</span></button>
+      <p data-i18n="offline">Works fully offline</p>
+    </div>
+  </aside>
+
+  <main id="main" class="main intro-main">
+    <header class="intro-hero">
+      <div class="intro-hero-copy">
+        <p class="eyebrow"><span data-lang-en>00 · INTRODUCTION</span><span data-lang-zh>00 · 導論</span></p>
+        <h1><span data-lang-en>How does reaching a point become an inverse problem?</span><span data-lang-zh>「到達一個點」為何是一個逆問題？</span></h1>
+        <p class="lede" data-lang-en>A robot arm gives us a concrete way to study functions and their inverses. Joint angles determine a position easily; reversing that relationship raises richer questions about existence, uniqueness and multiple solutions.</p>
+        <p class="lede" data-lang-zh>機械臂提供了一個具體情境，讓我們研究函數與逆問題。由關節角度求位置很直接；反過來由位置求角度，卻會引出解是否存在、是否唯一，以及為何會有多個解。</p>
+        <div class="intro-actions">
+          <a class="primary-link" href="index.html"><span data-lang-en>Open the playground</span><span data-lang-zh>開啟互動實驗室</span><span aria-hidden="true">→</span></a>
+          <a class="quiet-link" href="guide.html"><span data-lang-en>Read the derivation</span><span data-lang-zh>閱讀數學推導</span><span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+      <figure class="intro-hero-media">
+        <img src="assets/industrial-robot-arm.jpg" alt="A robotic gripper handling components in a manufacturing cell" width="1280" height="720">
+        <figcaption><span data-lang-en>The physical machine motivates the mathematics: a target point is known, while the joint angles that reach it are unknown.</span><span data-lang-zh>真實機械臂提供數學動機：目標點已知，能到達它的關節角度則是未知數。</span></figcaption>
+      </figure>
+    </header>
+
+    <section class="intro-section why-section" id="why">
+      <div class="intro-section-heading">
+        <p class="eyebrow"><span data-lang-en>THE MATHEMATICAL QUESTION</span><span data-lang-zh>數學核心問題</span></p>
+        <h2><span data-lang-en>Going backwards through a function is not always a function.</span><span data-lang-zh>把函數反過來求，不一定仍然是單值函數。</span></h2>
+      </div>
+      <div class="why-grid">
+        <article><span class="intro-number">01</span><h3><span data-lang-en>Build a mathematical model</span><span data-lang-zh>建立數學模型</span></h3><p data-lang-en>Two link lengths and two angles determine a point in the plane. The physical arm becomes a map from an angle pair to a coordinate pair.</p><p data-lang-zh>兩條連桿的長度與兩個角度可決定平面上一個點。機械臂因而變成一個由角度對映射至座標對的數學模型。</p></article>
+        <article><span class="intro-number">02</span><h3><span data-lang-en>The forward map is single-valued</span><span data-lang-zh>正向映射是單值的</span></h3><p data-lang-en>Every chosen pair (θ₁,θ₂) produces exactly one end point (x,y). This is a familiar function: one input gives one output.</p><p data-lang-zh>每一組 (θ₁,θ₂) 都只會產生一個末端位置 (x,y)。這是熟悉的函數概念：一個輸入對應一個輸出。</p></article>
+        <article><span class="intro-number">03</span><h3><span data-lang-en>The inverse is a relation</span><span data-lang-zh>逆向未必是單值函數</span></h3><p data-lang-en>Starting from (x,y), there may be two angle pairs, one boundary pair, or no pair at all. IK therefore asks about existence and number of preimages—not only calculation.</p><p data-lang-zh>從 (x,y) 反求時，可能對應兩組角度、邊界上的一組，或完全沒有。因此 IK 不只是計算，還在研究原像是否存在及其數量。</p></article>
+      </div>
+    </section>
+
+    <section class="intro-section fkik-section" id="fk-ik">
+      <div class="intro-section-heading">
+        <p class="eyebrow"><span data-lang-en>TWO DIRECTIONS</span><span data-lang-zh>兩個方向</span></p>
+        <h2><span data-lang-en>Forward kinematics evaluates a function. Inverse kinematics solves an equation.</span><span data-lang-zh>正運動學是求函數值；逆運動學是解方程。</span></h2>
+      </div>
+      <div class="kinematics-compare">
+        <article class="kinematics-card fk-card">
+          <span class="kinematics-tag">FK · FORWARD</span>
+          <h3><span data-lang-en>Angles → position</span><span data-lang-zh>角度 → 位置</span></h3>
+          <div class="mapping"><b>(θ₁, θ₂)</b><span>→</span><b>(x,y)</b></div>
+          <p data-lang-en>If the joint angles are already known, FK calculates where the end effector will be. For a simple arm, this is a direct substitution into sine and cosine formulas.</p>
+          <p data-lang-zh>若關節角度已知，FK 計算末端將到達哪裏。對簡單機械臂而言，這通常是把角度直接代入正弦、餘弦公式。</p>
+          <p class="question">F(θ₁,θ₂) = (x,y)</p>
+        </article>
+        <article class="kinematics-card ik-card">
+          <span class="kinematics-tag">IK · INVERSE</span>
+          <h3><span data-lang-en>Position → angles</span><span data-lang-zh>位置 → 角度</span></h3>
+          <div class="mapping"><b>(x,y)</b><span>→</span><b>(θ₁, θ₂)</b></div>
+          <p data-lang-en>If the desired position is known, IK finds joint angles that reach it. This direction is more subtle: the target may have two solutions, one solution, or no solution.</p>
+          <p data-lang-zh>若已知希望位置，IK 反求能到達該處的關節角度。這個方向更複雜：一個目標可能有兩個解、一個解，也可能沒有解。</p>
+          <p class="question">F⁻¹(x,y) = { (θ₁,θ₂) }</p>
+        </article>
+      </div>
+      <div class="ik-importance">
+        <strong><span data-lang-en>The central mathematical asymmetry</span><span data-lang-zh>這兩個方向並不對稱</span></strong>
+        <p data-lang-en>FK substitutes numbers into formulas and always produces one point. IK must first test whether a solution exists, then choose between branches when several solutions exist. This makes inverse kinematics a compact study of inverse problems, domains, geometry and multiplicity.</p>
+        <p data-lang-zh>FK 把數值代入公式，一定產生一個點。IK 卻必須先判斷解是否存在；若有多個解，還要分開不同分支。因此它是一個精簡而完整的逆問題例子，連結定義域、幾何與解的重數。</p>
+      </div>
+    </section>
+
+    <section class="intro-section workflow-section" id="workflow">
+      <div class="intro-section-heading">
+        <p class="eyebrow"><span data-lang-en>THE ARGUMENT</span><span data-lang-zh>推理路線</span></p>
+        <h2><span data-lang-en>The whole solution is a chain of elementary geometry.</span><span data-lang-zh>完整解法是一條由基礎幾何組成的邏輯鏈。</span></h2>
+      </div>
+      <div class="robot-workflow" aria-label="Inverse kinematics mathematical argument">
+        <article><span>1</span><small data-lang-en>GIVEN</small><small data-lang-zh>已知</small><b data-lang-en>Name the target</b><b data-lang-zh>寫出目標座標</b><code>T=(x,y)</code></article>
+        <i aria-hidden="true">→</i>
+        <article><span>2</span><small data-lang-en>DISTANCE</small><small data-lang-zh>距離</small><b data-lang-en>Use Pythagoras</b><b data-lang-zh>使用勾股定理</b><code>r=√(x²+y²)</code></article>
+        <i aria-hidden="true">→</i>
+        <article class="active"><span>3</span><small data-lang-en>EXISTENCE</small><small data-lang-zh>存在性</small><b data-lang-en>Test reachability</b><b data-lang-zh>檢查可達性</b><code>|L₁−L₂| ≤ r ≤ L₁+L₂</code></article>
+        <i aria-hidden="true">→</i>
+        <article><span>4</span><small data-lang-en>SOLVE</small><small data-lang-zh>求解</small><b data-lang-en>Apply cosine law</b><b data-lang-zh>使用餘弦定理</b><code>θ₂, then θ₁</code></article>
+        <i aria-hidden="true">→</i>
+        <article><span>5</span><small data-lang-en>INTERPRET</small><small data-lang-zh>解釋</small><b data-lang-en>Count the branches</b><b data-lang-zh>理解兩個分支</b><code>0, 1 or 2 solutions</code></article>
+      </div>
+    </section>
+
+    <section class="intro-section scope-section" id="scope">
+      <figure class="scope-figure">
+        <img src="assets/robot-arm-nih.png" alt="Illustration of a multi-jointed industrial robot arm" width="960" height="715">
+        <figcaption><span data-lang-en>Real arms may have six or more joints. We simplify one plane and two rotating joints so every idea remains visible.</span><span data-lang-zh>真實機械臂可以有六個或更多關節。我們先把問題簡化為一個平面和兩個旋轉關節，讓每個數學關係都看得見。</span></figcaption>
+      </figure>
+      <div class="scope-copy">
+        <p class="eyebrow"><span data-lang-en>THE MODEL IN THIS WEBSITE</span><span data-lang-zh>本網站的模型</span></p>
+        <h2><span data-lang-en>Start small: a 2D arm with two joints.</span><span data-lang-zh>從小模型開始：二維、兩個關節的機械臂。</span></h2>
+        <p data-lang-en>This introduction is designed for curious secondary-school students. It keeps the robot simple enough to solve by hand while preserving the central inverse-kinematics ideas used by larger systems.</p>
+        <p data-lang-zh>這份內容是為初中至高中程度的學生而設。模型足夠簡單，可以用紙筆推導；同時仍保留大型機器人系統中最核心的逆運動學思想。</p>
+        <div class="scope-list">
+          <article><b><span data-lang-en>Geometry we use</span><span data-lang-zh>會用到的幾何</span></b><p><span data-lang-en>Pythagoras, circles and intersections, the law of cosines, and basic trigonometry.</span><span data-lang-zh>勾股定理、圓與交點、餘弦定理，以及基礎三角學。</span></p></article>
+          <article><b><span data-lang-en>Questions we answer</span><span data-lang-zh>我們會回答的問題</span></b><p><span data-lang-en>Can the arm reach the target? Which angles work? Why can there be two answers—or none?</span><span data-lang-zh>機械臂能否到達目標？哪些角度有效？為何會有兩個解，甚至沒有解？</span></p></article>
+          <article><b><span data-lang-en>How we learn</span><span data-lang-zh>學習方式</span></b><p><span data-lang-en>Drag a target, watch the geometry change, then follow an interactive notebook that derives the equations.</span><span data-lang-zh>先拖動目標並觀察幾何變化，再用互動筆記逐步推導公式。</span></p></article>
+        </div>
+        <div class="intro-actions closing-actions">
+          <a class="primary-link" href="index.html"><span data-lang-en>Try the 2-DOF playground</span><span data-lang-zh>開始 2-DOF 互動實驗</span><span aria-hidden="true">→</span></a>
+          <a class="quiet-link" href="guide.html"><span data-lang-en>Then explain the maths</span><span data-lang-zh>再理解背後數學</span><span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="intro-credits">
+      <p><span data-lang-en>Image credits:</span><span data-lang-zh>圖片來源：</span> <a href="https://commons.wikimedia.org/wiki/File:Lexington_Medical,_Inc._Manufacturing_Robot_Arm.jpg">Lexington Medical, Inc. manufacturing robot arm</a> (CC0); <a href="https://commons.wikimedia.org/wiki/File:Robot_Arm_(NIH_BioArt_457).png">NIAID / Ryan Kissinger robot-arm illustration</a> (U.S. public domain).</p>
+      <a href="index.html"><span data-lang-en>Continue to Playground 01</span><span data-lang-zh>繼續前往 01 互動實驗室</span> →</a>
+    </footer>
+  </main>
+
+  <script src="assets/i18n.js"></script>
+</body>
+</html>

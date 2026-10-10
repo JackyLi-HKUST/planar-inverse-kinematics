@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Rigorous algebraic and analytic proofs for inverse functions and two-link planar robot-arm inverse kinematics.">
+  <title>Rigorous Proofs — Two Links, One Target</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-page="proof">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <button class="mobile-menu" id="mobileMenu" aria-label="Open navigation" aria-expanded="false">☰</button>
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span><strong data-i18n="brand">Two Links, One Target</strong><small>MATH3900 · 2-DOF IK</small></span></a>
+    <nav class="nav" aria-label="Main navigation">
+      <p data-i18n="navExplore">EXPLORE</p>
+      <a href="introduction.html"><span>00</span><b><span data-lang-en>Introduction</span><span data-lang-zh>導論</span></b></a>
+      <a href="index.html"><span>01</span><b data-i18n="navPlayground">Playground</b></a>
+      <a href="guide.html"><span>02</span><b data-i18n="navGuide">How it works</b></a>
+      <a class="active" href="proof.html"><span>03</span><b><span data-lang-en>Rigorous proofs</span><span data-lang-zh>嚴謹證明</span></b></a>
+      <a href="about.html"><span>04</span><b><span data-lang-en>About &amp; credits</span><span data-lang-zh>關於與鳴謝</span></b></a>
+      <p data-i18n="navOnPage">ON THIS PAGE</p>
+      <a href="#background"><span>·</span><b><span data-lang-en>Background</span><span data-lang-zh>預備知識</span></b></a>
+      <a href="#inverse-theorem"><span>·</span><b><span data-lang-en>Inverse theorem</span><span data-lang-zh>逆函數定理</span></b></a>
+      <a href="#robot-map"><span>·</span><b><span data-lang-en>The robot map</span><span data-lang-zh>機械臂映射</span></b></a>
+      <a href="#two-proof"><span>·</span><b><span data-lang-en>Exactly two solutions</span><span data-lang-zh>嚴謹證明兩個解</span></b></a>
+      <a href="#classification"><span>·</span><b><span data-lang-en>Complete classification</span><span data-lang-zh>完整解的分類</span></b></a>
+      <a href="#analysis"><span>·</span><b><span data-lang-en>Analysis viewpoint</span><span data-lang-zh>分析觀點</span></b></a>
+    </nav>
+    <div class="sidebar-foot"><button class="language-toggle" type="button" data-language-toggle><span class="selected">EN</span><span>繁中</span></button><p data-i18n="offline">Works fully offline</p></div>
+  </aside>
+
+  <main id="main" class="main proof-main">
+    <header class="proof-hero">
+      <p class="eyebrow"><span data-lang-en>03 · MORE RIGOROUS</span><span data-lang-zh>03 · 更嚴謹的證明</span></p>
+      <h1><span data-lang-en>When is inverse kinematics really an inverse?</span><span data-lang-zh>逆運動學甚麼時候真的是「逆函數」？</span></h1>
+      <p class="lede" data-lang-en>We now replace visual intuition with definitions, quantified statements and proofs. The central issue is not merely how to calculate an answer, but whether an answer exists, whether it is unique, and how many branches the inverse relation contains.</p>
+      <p class="lede" data-lang-zh>這一頁把直觀圖像提升為正式定義、帶量詞的敘述與證明。核心不只是如何計算答案，而是答案是否存在、是否唯一，以及逆關係究竟有幾個分支。</p>
+      <div class="proof-route">
+        <span><b data-lang-en>Core proof</b><b data-lang-zh>主證明</b><small><span data-lang-en>algebra + trigonometry</span><span data-lang-zh>代數＋三角學</span></small></span>
+        <i>→</i>
+        <span><b data-lang-en>Optional final section</b><b data-lang-zh>選讀最後一節</b><small><span data-lang-en>multivariable calculus</span><span data-lang-zh>多變量微積分</span></small></span>
+      </div>
+    </header>
+
+    <article class="proof-notebook">
+      <section class="proof-section" id="background">
+        <div class="proof-section-heading">
+          <p class="step-label"><span>0</span><span data-lang-en>BACKGROUND AND ASSUMPTIONS</span><span data-lang-zh>預備知識與假設</span></p>
+          <h2><span data-lang-en>What is needed—and what is being idealised?</span><span data-lang-zh>需要哪些數學？我們又簡化了甚麼？</span></h2>
+        </div>
+        <div class="background-grid">
+          <article><span>A</span><h3><span data-lang-en>Essential algebra</span><span data-lang-zh>必需代數</span></h3><p data-lang-en>Functions, image and preimage, injective/surjective/bijective maps, inequalities, and solving equations.</p><p data-lang-zh>函數、像與原像、單射／滿射／雙射、不等式與解方程。</p></article>
+          <article><span>T</span><h3><span data-lang-en>Essential trigonometry</span><span data-lang-zh>必需三角學</span></h3><p data-lang-en>The identities sin²u+cos²u=1 and cos(u−v)=cosu cosv+sinu sinv, together with inverse cosine and atan2.</p><p data-lang-zh>sin²u+cos²u=1、cos(u−v)=cosu cosv+sinu sinv，以及反餘弦與 atan2。</p></article>
+          <article><span>∂</span><h3><span data-lang-en>Optional analysis</span><span data-lang-zh>選讀分析</span></h3><p data-lang-en>Partial derivatives, Jacobian matrices, determinants, and the multivariable inverse function theorem are used only in the final section.</p><p data-lang-zh>偏微分、Jacobian 矩陣、行列式與多變量逆函數定理只會在最後一節出現。</p></article>
+        </div>
+        <div class="assumption-strip"><strong><span data-lang-en>Model assumptions</span><span data-lang-zh>模型假設</span></strong><span>L₁,L₂&gt;0</span><span>θᵢ modulo 2π</span><span data-lang-en>unrestricted revolute joints</span><span data-lang-zh>關節可自由旋轉</span><span data-lang-en>position only; no obstacles</span><span data-lang-zh>只考慮位置；沒有障礙物</span></div>
+      </section>
+
+      <section class="proof-section" id="inverse-theorem">
+        <div class="proof-section-heading">
+          <p class="step-label"><span>1</span><span data-lang-en>INVERSE FUNCTIONS AND INJECTIVITY</span><span data-lang-zh>逆函數與單射</span></p>
+          <h2><span data-lang-en>A function can be reversed as a function exactly when outputs identify inputs uniquely.</span><span data-lang-zh>只有當輸出能唯一識別輸入，函數才能被反轉成另一個函數。</span></h2>
+        </div>
+
+        <div class="definition-grid">
+          <article><small>f(A)</small><h3><span data-lang-en>Image</span><span data-lang-zh>像</span></h3><p><span data-lang-en>All outputs actually reached:</span><span data-lang-zh>真正被取得的所有輸出：</span> {f(x):x∈A}.</p></article>
+          <article><small>f⁻¹({y})</small><h3><span data-lang-en>Preimage</span><span data-lang-zh>原像</span></h3><p><span data-lang-en>Every input mapping to y:</span><span data-lang-zh>所有被映至 y 的輸入：</span> {x∈A:f(x)=y}.</p></article>
+          <article><small>1–1</small><h3><span data-lang-en>Injective</span><span data-lang-zh>單射</span></h3><p>f(a)=f(b) ⇒ a=b.</p></article>
+          <article><small>onto</small><h3><span data-lang-en>Surjective</span><span data-lang-zh>滿射</span></h3><p>f(A)=B.</p></article>
+        </div>
+
+        <div class="mapping-panel">
+          <div class="mapping-heading"><span data-lang-en>Not injective</span><span data-lang-zh>非單射</span></div>
+          <div class="mapping-heading"><span data-lang-en>Injective, not onto</span><span data-lang-zh>單射但非滿射</span></div>
+          <div class="mapping-heading"><span data-lang-en>Bijective</span><span data-lang-zh>雙射</span></div>
+          <svg class="mapping-svg" viewBox="0 0 900 250" role="img" aria-label="Diagrams comparing non-injective, injective and bijective maps">
+            <defs><marker id="proofArrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#8b9098"/></marker></defs>
+            <g transform="translate(0 0)"><ellipse cx="68" cy="125" rx="55" ry="100"/><ellipse cx="232" cy="125" rx="55" ry="100"/><text x="68" y="17">A</text><text x="232" y="17">B</text><circle cx="68" cy="80" r="7"/><circle cx="68" cy="165" r="7"/><circle cx="232" cy="125" r="7"/><line x1="76" y1="80" x2="222" y2="121"/><line x1="76" y1="165" x2="222" y2="129"/><text x="145" y="220">f(a₁)=f(a₂)</text></g>
+            <g transform="translate(300 0)"><ellipse cx="68" cy="125" rx="55" ry="100"/><ellipse cx="232" cy="125" rx="55" ry="100"/><text x="68" y="17">A</text><text x="232" y="17">B</text><circle cx="68" cy="80" r="7"/><circle cx="68" cy="165" r="7"/><circle cx="232" cy="65" r="7"/><circle cx="232" cy="125" r="7"/><circle cx="232" cy="185" r="7"/><line x1="76" y1="80" x2="222" y2="67"/><line x1="76" y1="165" x2="222" y2="183"/><text x="145" y="220">f(A) ⊊ B</text></g>
+            <g transform="translate(600 0)"><ellipse cx="68" cy="125" rx="55" ry="100"/><ellipse cx="232" cy="125" rx="55" ry="100"/><text x="68" y="17">A</text><text x="232" y="17">B</text><circle cx="68" cy="65" r="7"/><circle cx="68" cy="125" r="7"/><circle cx="68" cy="185" r="7"/><circle cx="232" cy="65" r="7"/><circle cx="232" cy="125" r="7"/><circle cx="232" cy="185" r="7"/><line x1="76" y1="65" x2="222" y2="65"/><line x1="76" y1="125" x2="222" y2="125"/><line x1="76" y1="185" x2="222" y2="185"/><text x="145" y="220">A ↔ B</text></g>
+          </svg>
+          <p><span data-lang-en>The left map cannot have an inverse function because one output would need two inverse values. The middle map has an inverse on its image f(A), but not on all of B. The right map has an inverse B→A.</span><span data-lang-zh>左圖不能有逆函數，因為同一輸出需要對應兩個逆向值。中圖在像 f(A) 上有逆函數，但不能把逆函數定義於整個 B。右圖則有逆函數 B→A。</span></p>
+        </div>
+
+        <div class="theorem-box">
+          <span class="theorem-label"><span data-lang-en>THEOREM 1</span><span data-lang-zh>定理 1</span></span>
+          <h3><span data-lang-en>Inverse on the image ⇔ injective</span><span data-lang-zh>像上存在逆函數 ⇔ 單射</span></h3>
+          <p data-lang-en>Let f:A→B. There exists a function g:f(A)→A satisfying g(f(x))=x for every x∈A if and only if f is injective.</p>
+          <p data-lang-zh>設 f:A→B。存在函數 g:f(A)→A，使所有 x∈A 均滿足 g(f(x))=x，當且僅當 f 是單射。</p>
+        </div>
+
+        <div class="proof-columns">
+          <article class="formal-proof">
+            <span class="proof-direction"><span data-lang-en>Necessity (⇒)</span><span data-lang-zh>必要性（⇒）</span></span>
+            <ol>
+              <li><span data-lang-en>Assume an inverse g:f(A)→A exists.</span><span data-lang-zh>假設逆函數 g:f(A)→A 存在。</span></li>
+              <li><span data-lang-en>Let a,b∈A and suppose f(a)=f(b).</span><span data-lang-zh>任取 a,b∈A，並假設 f(a)=f(b)。</span></li>
+              <li><span data-lang-en>Apply g to both sides:</span><span data-lang-zh>對兩邊同時套用 g：</span> g(f(a))=g(f(b)).</li>
+              <li><span data-lang-en>Because g is an inverse, a=b. Hence f is injective.</span><span data-lang-zh>由於 g 是逆函數，所以 a=b。因此 f 是單射。</span></li>
+            </ol>
+          </article>
+          <article class="formal-proof">
+            <span class="proof-direction"><span data-lang-en>Sufficiency (⇐)</span><span data-lang-zh>充分性（⇐）</span></span>
+            <ol>
+              <li><span data-lang-en>Assume f is injective.</span><span data-lang-zh>假設 f 是單射。</span></li>
+              <li><span data-lang-en>For each y∈f(A), at least one x∈A satisfies f(x)=y, by the definition of image.</span><span data-lang-zh>對每個 y∈f(A)，依像的定義，至少存在一個 x∈A 使 f(x)=y。</span></li>
+              <li><span data-lang-en>Injectivity makes that x unique.</span><span data-lang-zh>單射性保證這個 x 是唯一的。</span></li>
+              <li><span data-lang-en>Define g(y) to be this unique x. Then g is a well-defined inverse on f(A).</span><span data-lang-zh>定義 g(y) 為該唯一的 x，則 g 是 f(A) 上定義良好的逆函數。</span> □</li>
+            </ol>
+          </article>
+        </div>
+        <div class="rigour-note"><b><span data-lang-en>Codomain note.</span><span data-lang-zh>到達集註記。</span></b> <span data-lang-en>To define f⁻¹ on all of B, f must also be surjective; equivalently, f must be bijective. A set-valued preimage relation always exists, but it is an ordinary function only when every relevant preimage is a singleton.</span><span data-lang-zh>若要把 f⁻¹ 定義在整個 B 上，f 還必須是滿射；也就是說 f 必須是雙射。集合值的原像關係永遠可以定義，但只有每個相關原像都是單點集時，它才是普通函數。</span></div>
+      </section>
+
+      <section class="proof-section" id="robot-map">
+        <div class="proof-section-heading">
+          <p class="step-label"><span>2</span><span data-lang-en>THE ROBOT AS A MAP</span><span data-lang-zh>把機械臂寫成映射</span></p>
+          <h2><span data-lang-en>The global inverse fails because the forward map is generically two-to-one.</span><span data-lang-zh>整體逆函數不存在，因為正向映射在一般情況下是二對一。</span></h2>
+        </div>
+        <div class="robot-map-grid">
+          <div class="math-display large"><math display="block" aria-label="F maps the angle torus to the plane"><mrow><mi>F</mi><mo>:</mo><msup><mrow><mo>(</mo><mi>ℝ</mi><mo>/</mo><mn>2</mn><mi>π</mi><mi>ℤ</mi><mo>)</mo></mrow><mn>2</mn></msup><mo>→</mo><msup><mi>ℝ</mi><mn>2</mn></msup></mrow></math></div>
+          <div class="math-display matrix-display"><math display="block" aria-label="Forward kinematics map"><mrow><mi>F</mi><mo>(</mo><msub><mi>θ</mi><mn>1</mn></msub><mo>,</mo><msub><mi>θ</mi><mn>2</mn></msub><mo>)</mo><mo>=</mo><mrow><mo>[</mo><mtable rowspacing=".45em"><mtr><mtd><msub><mi>L</mi><mn>1</mn></msub><mi mathvariant="normal">cos</mi><msub><mi>θ</mi><mn>1</mn></msub><mo>+</mo><msub><mi>L</mi><mn>2</mn></msub><mi mathvariant="normal">cos</mi><mo>(</mo><msub><mi>θ</mi><mn>1</mn></msub><mo>+</mo><msub><mi>θ</mi><mn>2</mn></msub><mo>)</mo></mtd></mtr><mtr><mtd><msub><mi>L</mi><mn>1</mn></msub><mi mathvariant="normal">sin</mi><msub><mi>θ</mi><mn>1</mn></msub><mo>+</mo><msub><mi>L</mi><mn>2</mn></msub><mi mathvariant="normal">sin</mi><mo>(</mo><msub><mi>θ</mi><mn>1</mn></msub><mo>+</mo><msub><mi>θ</mi><mn>2</mn></msub><mo>)</mo></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+          </div>
+          <p data-lang-en>Writing each angle modulo 2π identifies configurations that differ only by full rotations. The domain is therefore a torus, not the whole plane ℝ² of raw angle numbers.</p>
+          <p data-lang-zh>把每個角度視為模 2π，等同於把只相差完整圈數的姿態視為同一個姿態。因此定義域是環面，而不是原始角度數對組成的整個平面 ℝ²。</p>
+        </div>
+        <div class="preimage-example">
+          <div><span class="branch-dot up"></span><b>q₊=(θ₁⁺,θ₂⁺)</b><small data-lang-en>elbow-up configuration</small><small data-lang-zh>肘部向上姿態</small></div>
+          <span>F(q₊)</span><strong>= T =</strong><span>F(q₋)</span>
+          <div><span class="branch-dot down"></span><b>q₋=(θ₁⁻,θ₂⁻)</b><small data-lang-en>elbow-down configuration</small><small data-lang-zh>肘部向下姿態</small></div>
+        </div>
+        <p class="proof-consequence"><span data-lang-en>For an interior reachable target T, q₊≠q₋ but F(q₊)=F(q₋). Therefore F is not injective, so Theorem 1 rules out a single global inverse function. IK must instead return the preimage set F⁻¹({T}).</span><span data-lang-zh>對於可達區域內部的目標 T，q₊≠q₋，但 F(q₊)=F(q₋)。所以 F 不是單射；依定理 1，單一整體逆函數不存在。IK 應返回的是原像集 F⁻¹({T})。</span></p>
+      </section>
+
+      <section class="proof-section" id="two-proof">
+        <div class="proof-section-heading">
+          <p class="step-label"><span>3</span><span data-lang-en>THE EXACTLY-TWO THEOREM</span><span data-lang-zh>「恰有兩解」定理</span></p>
+          <h2><span data-lang-en>Strictly inside the reachable annulus, every target has exactly two configurations.</span><span data-lang-zh>在可達圓環的內部，每個目標恰有兩個姿態。</span></h2>
+        </div>
+        <div class="theorem-box accent">
+          <span class="theorem-label"><span data-lang-en>THEOREM 2</span><span data-lang-zh>定理 2</span></span>
+          <h3><span data-lang-en>Two solutions for planar 2-link IK</span><span data-lang-zh>二連桿平面 IK 的兩個解</span></h3>
+          <p data-lang-en>Let <math><mrow><msub><mi>L</mi><mn>1</mn></msub><mo>,</mo><msub><mi>L</mi><mn>2</mn></msub><mo>&gt;</mo><mn>0</mn></mrow></math> and <math><mrow><mi>T</mi><mo>=</mo><mo>(</mo><mi>x</mi><mo>,</mo><mi>y</mi><mo>)</mo></mrow></math>, with <math><mrow><mi>r</mi><mo>=</mo><msqrt><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup></mrow></msqrt></mrow></math>. If <math><mrow><mo>|</mo><msub><mi>L</mi><mn>1</mn></msub><mo>−</mo><msub><mi>L</mi><mn>2</mn></msub><mo>|</mo><mo>&lt;</mo><mi>r</mi><mo>&lt;</mo><msub><mi>L</mi><mn>1</mn></msub><mo>+</mo><msub><mi>L</mi><mn>2</mn></msub></mrow></math>, then exactly two distinct configurations modulo <math><mrow><mn>2</mn><mi>π</mi></mrow></math> reach <math><mi>T</mi></math>.</p>
+          <p data-lang-zh>設 <math><mrow><msub><mi>L</mi><mn>1</mn></msub><mo>,</mo><msub><mi>L</mi><mn>2</mn></msub><mo>&gt;</mo><mn>0</mn></mrow></math>、<math><mrow><mi>T</mi><mo>=</mo><mo>(</mo><mi>x</mi><mo>,</mo><mi>y</mi><mo>)</mo></mrow></math>，並令 <math><mrow><mi>r</mi><mo>=</mo><msqrt><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup></mrow></msqrt></mrow></math>。若 <math><mrow><mo>|</mo><msub><mi>L</mi><mn>1</mn></msub><mo>−</mo><msub><mi>L</mi><mn>2</mn></msub><mo>|</mo><mo>&lt;</mo><mi>r</mi><mo>&lt;</mo><msub><mi>L</mi><mn>1</mn></msub><mo>+</mo><msub><mi>L</mi><mn>2</mn></msub></mrow></math>，則在模 <math><mrow><mn>2</mn><mi>π</mi></mrow></math> 意義下，恰有兩個不同姿態能到達 <math><mi>T</mi></math>。</p>
+        </div>
+
+        <div class="proof-chain">
+          <article>
+            <span class="chain-number">1</span><h3><span data-lang-en>Eliminate θ₁ by computing r²</span><span data-lang-zh>藉計算 r² 消去 θ₁</span></h3>
+            <div class="math-display math-derivation"><math display="block" aria-label="Derivation of r squared"><mtable columnalign="right center left" columnspacing=".55em" rowspacing=".75em"><mtr><mtd><msup><mi>r</mi><mn>2</mn></msup></mtd><mtd><mo>=</mo></mtd><mtd><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup></mtd></mtr><mtr><mtd></mtd><mtd><mo>=</mo></mtd><mtd><msubsup><mi>L</mi><mn>1</mn><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>L</mi><mn>2</mn><mn>2</mn></msubsup><mo>+</mo><mn>2</mn><msub><mi>L</mi><mn>1</mn></msub><msub><mi>L</mi><mn>2</mn></msub><mo>[</mo><mi mathvariant="normal">cos</mi><msub><mi>θ</mi><mn>1</mn></msub><mi mathvariant="normal">cos</mi><mo>(</mo><msub><mi>θ</mi><mn>1</mn></msub><mo>+</mo><msub><mi>θ</mi><mn>2</mn></msub><mo>)</mo><mo>+</mo><mi mathvariant="normal">sin</mi><msub><mi>θ</mi><mn>1</mn></msub><mi mathvariant="normal">sin</mi><mo>(</mo><msub><mi>θ</mi><mn>1</mn></msub><mo>+</mo><msub><mi>θ</mi><mn>2</mn></msub><mo>)</mo><mo>]</mo></mtd></mtr><mtr><mtd></mtd><mtd><mo>=</mo></mtd><mtd><msubsup><mi>L</mi><mn>1</mn><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>L</mi><mn>2</mn><mn>2</mn></msubsup><mo>+</mo><mn>2</mn><msub><mi>L</mi><mn>1</mn></msub><msub><mi>L</mi><mn>2</mn></msub><mi mathvariant="normal">cos</mi><msub><mi>θ</mi><mn>2</mn></msub><mo>.</mo></mtd></mtr></mtable></math></div>
+            <p data-lang-en>The final equality uses cos(u−v)=cosu cosv+sinu sinv with u=θ₁+θ₂ and v=θ₁.</p><p data-lang-zh>最後一步使用 cos(u−v)=cosu cosv+sinu sinv，其中 u=θ₁+θ₂、v=θ₁。</p>
+          </article>
+          <article>
+            <span class="chain-number">2</span><h3><span data-lang-en>Convert reachability into a cosine inequality</span><span data-lang-zh>把可達條件轉為餘弦不等式</span></h3>
+            <div class="chain-math-stack">
+              <div class="math-display centered-formula"><math display="block" aria-label="D equals cosine theta two"><mrow><mi>D</mi><mo>:=</mo><mfrac><mrow><msup><mi>r</mi><mn>2</mn></msup><mo>−</mo><msubsup><mi>L</mi><mn>1</mn><mn>2</mn></msubsup><mo>−</mo><msubsup><mi>L</mi><mn>2</mn><mn>2</mn></msubsup></mrow><mrow><mn>2</mn><msub><mi>L</mi><mn>1</mn></msub><msub><mi>L</mi><mn>2</mn></msub></mrow></mfrac><mo>=</mo><mi mathvariant="normal">cos</mi><msub><mi>θ</mi><mn>2</mn></msub></mrow></math></div>
+              <div class="equivalence-chain"><math display="block"><mrow><mo>|</mo><msub><mi>L</mi><mn>1</mn></msub><mo>−</mo><msub><mi>L</mi><mn>2</mn></msub><mo>|</mo><mo>&lt;</mo><mi>r</mi><mo>&lt;</mo><msub><mi>L</mi><mn>1</mn></msub><mo>+</mo><msub><mi>L</mi><mn>2</mn></msub></mrow></math><b>⇔</b><math display="block"><mrow><msup><mrow><mo>(</mo><msub><mi>L</mi><mn>1</mn></msub><mo>−</mo><msub><mi>L</mi><mn>2</mn></msub><mo>)</mo></mrow><mn>2</mn></msup><mo>&lt;</mo><msup><mi>r</mi><mn>2</mn></msup><mo>&lt;</mo><msup><mrow><mo>(</mo><msub><mi>L</mi><mn>1</mn></msub><mo>+</mo><msub><mi>L</mi><mn>2</mn></msub><mo>)</mo></mrow><mn>2</mn></msup></mrow></math><b>⇔</b><math display="block"><mrow><mo>−</mo><mn>1</mn><mo>&lt;</mo><mi>D</mi><mo>&lt;</mo><mn>1</mn></mrow></math></div>
+            </div>
+            <p data-lang-en>Squaring preserves the inequalities because every quantity is non-negative; division preserves them because 2L₁L₂&gt;0.</p><p data-lang-zh>所有量皆非負，所以平方後不等號不變；又因 2L₁L₂&gt;0，除以它也不會改變不等號方向。</p>
+          </article>
+          <article>
+            <span class="chain-number">3</span><h3><span data-lang-en>Count the elbow angles</span><span data-lang-zh>計算肘角解的數量</span></h3>
+            <div class="math-display math-split"><math display="block"><mrow><mi>α</mi><mo>:=</mo><msup><mi mathvariant="normal">cos</mi><mrow><mo>−</mo><mn>1</mn></mrow></msup><mo>(</mo><mi>D</mi><mo>)</mo><mo>∈</mo><mo>(</mo><mn>0</mn><mo>,</mo><mi>π</mi><mo>)</mo></mrow></math><span class="boxed-inline"><math><mrow><msub><mi>θ</mi><mn>2</mn></msub><mo>≡</mo><mo>±</mo><mi>α</mi><mspace width=".45em"/><mo>(</mo><mi mathvariant="normal">mod</mi><mspace width=".3em"/><mn>2</mn><mi>π</mi><mo>)</mo></mrow></math></span></div>
+            <p data-lang-en>On one full turn, cosθ=D with −1&lt;D&lt;1 has exactly two solutions. They are distinct because α is neither 0 nor π.</p><p data-lang-zh>在一個完整週期內，當 −1&lt;D&lt;1 時，cosθ=D 恰有兩解。由於 α 既不是 0 也不是 π，這兩解確實不同。</p>
+          </article>
+          <article>
+            <span class="chain-number">4</span><h3><span data-lang-en>For each θ₂, prove θ₁ is unique</span><span data-lang-zh>對每個 θ₂，證明 θ₁ 唯一</span></h3>
+            <p data-lang-en>Write z=x+iy. The forward equations combine into</p><p data-lang-zh>令 z=x+iy。兩條正運動學公式可合併為</p>
+            <div class="math-display math-derivation"><math display="block" aria-label="Complex number derivation of theta one"><mtable columnalign="right center left" columnspacing=".55em" rowspacing=".8em"><mtr><mtd><mi>z</mi></mtd><mtd><mo>=</mo></mtd><mtd><msup><mi>e</mi><mrow><mi>i</mi><msub><mi>θ</mi><mn>1</mn></msub></mrow></msup><mo>(</mo><msub><mi>L</mi><mn>1</mn></msub><mo>+</mo><msub><mi>L</mi><mn>2</mn></msub><msup><mi>e</mi><mrow><mi>i</mi><msub><mi>θ</mi><mn>2</mn></msub></mrow></msup><mo>)</mo></mtd></mtr><mtr><mtd><mrow><mo>|</mo><msub><mi>L</mi><mn>1</mn></msub><mo>+</mo><msub><mi>L</mi><mn>2</mn></msub><msup><mi>e</mi><mrow><mi>i</mi><msub><mi>θ</mi><mn>2</mn></msub></mrow></msup><mo>|</mo></mrow></mtd><mtd><mo>=</mo></mtd><mtd><mo>|</mo><mi>z</mi><mo>|</mo><mo>=</mo><mi>r</mi><mo>&gt;</mo><mn>0</mn></mtd></mtr><mtr><mtd><msup><mi>e</mi><mrow><mi>i</mi><msub><mi>θ</mi><mn>1</mn></msub></mrow></msup></mtd><mtd><mo>=</mo></mtd><mtd><mfrac><mi>z</mi><mrow><msub><mi>L</mi><mn>1</mn></msub><mo>+</mo><msub><mi>L</mi><mn>2</mn></msub><msup><mi>e</mi><mrow><mi>i</mi><msub><mi>θ</mi><mn>2</mn></msub></mrow></msup></mrow></mfrac><mo>.</mo></mtd></mtr></mtable></math></div>
+            <p data-lang-en>The right-hand side is a single point on the unit circle, so it determines one θ₁ modulo 2π. Equivalently,</p><p data-lang-zh>右邊是單位圓上的一個確定點，因此在模 2π 下唯一決定 θ₁。等價地，</p>
+            <div class="math-display centered-formula final-formula"><math display="block" aria-label="Formula for theta one"><mrow><msub><mi>θ</mi><mn>1</mn></msub><mo>≡</mo><mi mathvariant="normal">atan2</mi><mo>(</mo><mi>y</mi><mo>,</mo><mi>x</mi><mo>)</mo><mo>−</mo><mi mathvariant="normal">atan2</mi><mo>(</mo><msub><mi>L</mi><mn>2</mn></msub><mi mathvariant="normal">sin</mi><msub><mi>θ</mi><mn>2</mn></msub><mo>,</mo><msub><mi>L</mi><mn>1</mn></msub><mo>+</mo><msub><mi>L</mi><mn>2</mn></msub><mi mathvariant="normal">cos</mi><msub><mi>θ</mi><mn>2</mn></msub><mo>)</mo><mspace width=".6em"/><mo>(</mo><mi mathvariant="normal">mod</mi><mspace width=".3em"/><mn>2</mn><mi>π</mi><mo>)</mo><mo>.</mo></mrow></math></div>
+          </article>
+        </div>
+        <div class="qed-box"><strong>∎</strong><p><span data-lang-en>There are exactly two possible θ₂ values, and each determines exactly one θ₁. Hence exactly two configurations exist modulo full rotations.</span><span data-lang-zh>θ₂ 恰有兩個可能值，而每個 θ₂ 又恰好唯一決定一個 θ₁。因此在忽略完整圈數後，恰有兩個姿態。</span></p></div>
+      </section>
+
+      <section class="proof-section" id="classification">
+        <div class="proof-section-heading">
+          <p class="step-label"><span>4</span><span data-lang-en>COMPLETE SOLUTION CLASSIFICATION</span><span data-lang-zh>完整的解數分類</span></p>
+          <h2><span data-lang-en>Zero, one, two, or infinitely many: every case follows from the same inequality.</span><span data-lang-zh>零個、一個、兩個或無限多個：所有情況都來自同一條不等式。</span></h2>
+        </div>
+        <div class="classification-table-wrap">
+          <table class="classification-table">
+            <thead><tr><th><span data-lang-en>Target condition</span><span data-lang-zh>目標條件</span></th><th><span data-lang-en>Geometry / algebra</span><span data-lang-zh>幾何／代數現象</span></th><th><span data-lang-en>Configurations</span><span data-lang-zh>姿態數量</span></th></tr></thead>
+            <tbody>
+              <tr><td>r&gt;L₁+L₂ <span data-lang-en>or</span><span data-lang-zh>或</span> 0≤r&lt;|L₁−L₂|</td><td>D∉[−1,1]; <span data-lang-en>the two circles do not meet</span><span data-lang-zh>兩圓不相交</span></td><td><b>0</b></td></tr>
+              <tr><td>|L₁−L₂|&lt;r&lt;L₁+L₂</td><td>−1&lt;D&lt;1; <span data-lang-en>two transverse intersections</span><span data-lang-zh>兩個不同交點</span></td><td><b>2</b></td></tr>
+              <tr><td>r=L₁+L₂</td><td>D=1, θ₂=0; <span data-lang-en>fully extended</span><span data-lang-zh>完全伸直</span></td><td><b>1</b></td></tr>
+              <tr><td>r=|L₁−L₂|&gt;0</td><td>D=−1, θ₂=π; <span data-lang-en>fully folded</span><span data-lang-zh>完全折疊</span></td><td><b>1</b></td></tr>
+              <tr><td>r=0 <span data-lang-en>and</span><span data-lang-zh>且</span> L₁=L₂</td><td>θ₂=π, <span data-lang-en>but θ₁ is arbitrary</span><span data-lang-zh>但 θ₁ 可任意選擇</span></td><td><b>∞</b></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="proof-demo-layout">
+          <div class="proof-demo-copy">
+            <h3><span data-lang-en>Test the theorem, including its exceptional case.</span><span data-lang-zh>互動檢驗定理，包括無限多解的特例。</span></h3>
+            <p data-lang-en>The shaded annulus is the image F(Q). Move T or use a preset; the displayed preimage count is computed from the theorem.</p><p data-lang-zh>陰影圓環就是像 F(Q)。移動 T 或選擇預設，頁面會依定理顯示原像的數量。</p>
+            <div class="proof-controls">
+              <label><span>x</span><input id="proofX" type="range" min="-5" max="5" step="0.01" value="3.2"><output id="proofXValue">3.20</output></label>
+              <label><span>y</span><input id="proofY" type="range" min="-5" max="5" step="0.01" value="1.6"><output id="proofYValue">1.60</output></label>
+              <label><span>L₁</span><input id="proofL1" type="range" min="1" max="3.5" step="0.1" value="2.7"><output id="proofL1Value">2.7</output></label>
+              <label><span>L₂</span><input id="proofL2" type="range" min="1" max="3.5" step="0.1" value="2.0"><output id="proofL2Value">2.0</output></label>
+            </div>
+            <div class="proof-presets"><button type="button" data-proof-preset="interior"><span data-lang-en>2 solutions</span><span data-lang-zh>2 個解</span></button><button type="button" data-proof-preset="boundary"><span data-lang-en>1 solution</span><span data-lang-zh>1 個解</span></button><button type="button" data-proof-preset="outside"><span data-lang-en>0 solutions</span><span data-lang-zh>0 個解</span></button><button type="button" data-proof-preset="infinite"><span data-lang-en>∞ solutions</span><span data-lang-zh>∞ 個解</span></button></div>
+            <div class="proof-live-result"><span id="proofCount">2</span><div><b><span data-lang-en>configurations</span><span data-lang-zh>個姿態</span></b><small id="proofReason">strictly inside the annulus</small></div></div>
+          </div>
+          <div class="demo-card proof-canvas-card"><div class="demo-title"><span data-lang-en>IMAGE AND PREIMAGE COUNT</span><span data-lang-zh>像與原像數量</span><output id="proofReadout">r = 3.58</output></div><canvas id="proofWorkspaceCanvas" width="660" height="520" aria-label="Reachable annulus and inverse kinematics solution count"></canvas><p class="boundary-key"><span><i class="outer"></i>r=L₁+L₂</span><span><i class="inner"></i>r=|L₁−L₂|</span><em data-lang-en>Move T to test the theorem.</em><em data-lang-zh>拖動 T 以檢驗定理。</em></p></div>
+        </div>
+      </section>
+
+      <section class="proof-section" id="analysis">
+        <div class="proof-section-heading">
+          <p class="step-label"><span>5</span><span data-lang-en>OPTIONAL ANALYSIS VIEWPOINT</span><span data-lang-zh>選讀：分析觀點</span></p>
+          <h2><span data-lang-en>The Jacobian explains local invertibility and singular boundaries.</span><span data-lang-zh>Jacobian 解釋了局部可逆性與邊界奇異點。</span></h2>
+          <p data-lang-en>This section uses partial derivatives and the multivariable inverse function theorem. It is not needed for Theorem 2, but it reveals why the two IK branches are smooth away from the boundaries.</p>
+          <p data-lang-zh>這一節需要偏微分與多變量逆函數定理。它不是定理 2 的必需工具，但能解釋為甚麼離開邊界後，兩個 IK 分支都是光滑的。</p>
+        </div>
+        <div class="jacobian-grid">
+          <div class="jacobian-copy">
+            <div class="math-display matrix-equation"><math display="block" aria-label="Jacobian matrix"><mrow><mi>DF</mi><mo>(</mo><msub><mi>θ</mi><mn>1</mn></msub><mo>,</mo><msub><mi>θ</mi><mn>2</mn></msub><mo>)</mo><mo>=</mo><mrow><mo>[</mo><mtable columnspacing="1.2em" rowspacing=".65em"><mtr><mtd><mo>−</mo><msub><mi>L</mi><mn>1</mn></msub><mi mathvariant="normal">sin</mi><msub><mi>θ</mi><mn>1</mn></msub><mo>−</mo><msub><mi>L</mi><mn>2</mn></msub><mi mathvariant="normal">sin</mi><mo>(</mo><msub><mi>θ</mi><mn>1</mn></msub><mo>+</mo><msub><mi>θ</mi><mn>2</mn></msub><mo>)</mo></mtd><mtd><mo>−</mo><msub><mi>L</mi><mn>2</mn></msub><mi mathvariant="normal">sin</mi><mo>(</mo><msub><mi>θ</mi><mn>1</mn></msub><mo>+</mo><msub><mi>θ</mi><mn>2</mn></msub><mo>)</mo></mtd></mtr><mtr><mtd><msub><mi>L</mi><mn>1</mn></msub><mi mathvariant="normal">cos</mi><msub><mi>θ</mi><mn>1</mn></msub><mo>+</mo><msub><mi>L</mi><mn>2</mn></msub><mi mathvariant="normal">cos</mi><mo>(</mo><msub><mi>θ</mi><mn>1</mn></msub><mo>+</mo><msub><mi>θ</mi><mn>2</mn></msub><mo>)</mo></mtd><mtd><msub><mi>L</mi><mn>2</mn></msub><mi mathvariant="normal">cos</mi><mo>(</mo><msub><mi>θ</mi><mn>1</mn></msub><mo>+</mo><msub><mi>θ</mi><mn>2</mn></msub><mo>)</mo></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math></div>
+            <div class="math-display determinant"><math display="block"><mrow><mi mathvariant="normal">det</mi><mspace width=".3em"/><mi>DF</mi><mo>=</mo><msub><mi>L</mi><mn>1</mn></msub><msub><mi>L</mi><mn>2</mn></msub><mi mathvariant="normal">sin</mi><msub><mi>θ</mi><mn>2</mn></msub><mo>.</mo></mrow></math></div>
+            <div class="analysis-cases">
+              <article><b>sinθ₂≠0</b><p><span data-lang-en>The determinant is non-zero. The inverse function theorem gives a unique smooth local inverse near that configuration.</span><span data-lang-zh>行列式非零。逆函數定理保證該姿態附近有唯一、光滑的局部逆函數。</span></p></article>
+              <article><b>sinθ₂=0</b><p><span data-lang-en>Thus θ₂=0 or π modulo 2π. The Jacobian loses rank exactly at the fully extended or folded boundaries.</span><span data-lang-zh>即 θ₂≡0 或 π（模 2π）。Jacobian 恰好在完全伸直或折疊的邊界失去滿秩。</span></p></article>
+            </div>
+          </div>
+          <div class="demo-card proof-canvas-card"><div class="demo-title"><span>det DF / (L₁L₂) = sin θ₂</span><output id="jacobianStatus">regular</output></div><canvas id="jacobianCanvas" width="660" height="420" aria-label="Graph of normalized Jacobian determinant sine theta two"></canvas><p><span data-lang-en>The two interior branches sit on opposite sides of the graph; both meet a zero determinant at a boundary.</span><span data-lang-zh>兩個內部分支分別位於圖像兩側；它們在邊界處合併，而該處的行列式為零。</span></p></div>
+        </div>
+        <div class="branch-bijection">
+          <div><b>Q₊={(θ₁,θ₂):0&lt;θ₂&lt;π}</b><span>F|ₒ₊</span></div><strong>→</strong><div class="annulus-label"><b>|L₁−L₂|&lt;r&lt;L₁+L₂</b><small data-lang-en>open reachable annulus</small><small data-lang-zh>開可達圓環</small></div><strong>←</strong><div><span>F|ₒ₋</span><b>Q₋={(θ₁,θ₂):−π&lt;θ₂&lt;0}</b></div>
+          <p><span data-lang-en>Globally, F is not injective. After restricting to either sign branch, however, it becomes a smooth bijection onto the open annulus. IK is therefore best understood as two inverse branches, not one global inverse.</span><span data-lang-zh>整體上 F 不是單射。但當我們把定義域限制在任一符號分支上，它就會成為映至開圓環的光滑雙射。因此 IK 應被理解為兩個逆分支，而不是一個整體逆函數。</span></p>
+        </div>
+      </section>
+
+      <footer class="proof-footer"><a href="guide.html">← <span data-lang-en>Return to the visual derivation</span><span data-lang-zh>返回圖像化推導</span></a><a href="index.html"><span data-lang-en>Test it in the playground</span><span data-lang-zh>在互動實驗室測試</span> →</a></footer>
+    </article>
+  </main>
+
+  <script src="assets/i18n.js"></script>
+  <script src="assets/kinematics.js"></script>
+  <script src="assets/proof.js"></script>
+</body>
+</html>

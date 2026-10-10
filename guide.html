@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A visual, bilingual explanation of 2-DOF planar inverse kinematics.">
+  <title>How It Works — Two Links, One Target</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-page="guide">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <button class="mobile-menu" id="mobileMenu" aria-label="Open navigation" aria-expanded="false">☰</button>
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span><strong data-i18n="brand">Two Links, One Target</strong><small>MATH3900 · 2-DOF IK</small></span></a>
+    <nav class="nav" aria-label="Main navigation">
+      <p data-i18n="navExplore">EXPLORE</p>
+      <a href="introduction.html"><span>00</span><b><span data-lang-en>Introduction</span><span data-lang-zh>導論</span></b></a>
+      <a href="index.html"><span>01</span><b data-i18n="navPlayground">Playground</b></a>
+      <a class="active" href="guide.html"><span>02</span><b data-i18n="navGuide">How it works</b></a>
+      <a href="proof.html"><span>03</span><b><span data-lang-en>Rigorous proofs</span><span data-lang-zh>嚴謹證明</span></b></a>
+      <a href="about.html"><span>04</span><b><span data-lang-en>About &amp; credits</span><span data-lang-zh>關於與鳴謝</span></b></a>
+      <p data-i18n="navOnPage">ON THIS PAGE</p>
+      <a href="#convention"><span>·</span><b><span data-lang-en>Define θ₁ and θ₂</span><span data-lang-zh>先定義 θ₁、θ₂</span></b></a>
+      <a href="#problem"><span>·</span><b><span data-lang-en>The problem</span><span data-lang-zh>問題是甚麼</span></b></a>
+      <a href="#reachability"><span>·</span><b><span data-lang-en>Reachability check</span><span data-lang-zh>可達性判斷</span></b></a>
+      <a href="#triangle" data-derivation-nav><span>·</span><b><span data-lang-en>Calculate r</span><span data-lang-zh>計算 r</span></b></a>
+      <a href="#elbow" data-derivation-nav><span>·</span><b><span data-lang-en>Find θ₂</span><span data-lang-zh>求 θ₂</span></b></a>
+      <a href="#two-solutions" data-derivation-nav><span>·</span><b><span data-lang-en>Why two answers?</span><span data-lang-zh>為何有兩個解</span></b></a>
+      <a href="#shoulder" data-derivation-nav><span>·</span><b><span data-lang-en>Find θ₁</span><span data-lang-zh>求 θ₁</span></b></a>
+    </nav>
+    <div class="sidebar-foot"><button class="language-toggle" type="button" data-language-toggle><span class="selected">EN</span><span>繁中</span></button><p data-i18n="offline">Works fully offline</p></div>
+  </aside>
+
+  <main id="main" class="main article-main">
+    <header class="article-hero">
+      <p class="eyebrow" data-i18n="notebook">INTERACTIVE NOTEBOOK</p>
+      <h1 data-i18n="guideTitle">From a target (x, y) to joint angles</h1>
+      <p class="lede" data-lang-en>We will not begin with a formula. First we will name the geometry, identify exactly which angle we need, and only then calculate it.</p>
+      <p class="lede" data-lang-zh>我們不會一開始就套公式。先為幾何圖形命名，弄清楚要求的是哪一個角，再開始計算。</p>
+      <div class="given-strip"><span data-i18n="given">GIVEN</span><b>T = (<span data-guide-x>3.2</span>, <span data-guide-y>1.6</span>)</b><b>L₁ = 2.7</b><b>L₂ = 2.0</b></div>
+      <div class="logic-flow" aria-label="Inverse kinematics reasoning flow">
+        <div><small data-lang-en>DEFINE</small><small data-lang-zh>定義</small><strong>θ₁ and θ₂</strong></div>
+        <span>→</span>
+        <div><small data-lang-en>TEST</small><small data-lang-zh>判斷</small><strong>|L₁−L₂| ≤ r ≤ L₁+L₂</strong></div>
+        <span>→</span>
+        <div><small data-lang-en>EXPLAIN</small><small data-lang-zh>解釋</small><strong>r = √(x²+y²)</strong></div>
+        <span>→</span>
+        <div><small data-lang-en>SOLVE</small><small data-lang-zh>求解</small><strong>θ₂, then θ₁</strong></div>
+      </div>
+    </header>
+
+    <article class="notebook">
+      <section class="angle-convention-section" id="convention">
+        <div class="section-intro">
+          <p class="step-label"><span>0</span><span data-lang-en>ANGLE CONVENTION</span><span data-lang-zh>角度定義</span></p>
+          <h2><span data-lang-en>First define exactly what θ₁ and θ₂ measure.</span><span data-lang-zh>開始計算前，先準確定義 θ₁、θ₂ 量度甚麼。</span></h2>
+          <p data-lang-en>A directed angle needs a start ray, an end ray, and a positive turning direction. Here, counter-clockwise rotation is positive and clockwise rotation is negative.</p>
+          <p data-lang-zh>一個有方向的角度必須說明起始射線、終止射線和正方向。本網站規定逆時針為正，順時針為負。</p>
+        </div>
+
+        <div class="angle-definition-grid">
+          <article class="demo-card angle-definition-card">
+            <div class="demo-title"><span data-lang-en>SHOULDER ANGLE</span><span data-lang-zh>肩部角度</span><output>θ₁</output></div>
+            <canvas id="theta1DefinitionCanvas" width="540" height="330" aria-label="Definition of theta one from the positive x-axis to link one"></canvas>
+            <div class="angle-definition-copy">
+              <h3><span class="math-blue">θ₁</span><span data-lang-en> is the absolute direction of link 1</span><span data-lang-zh> 是第一段連桿的絕對方向</span></h3>
+              <dl>
+                <div><dt data-lang-en>Start ray</dt><dt data-lang-zh>起始射線</dt><dd>O <span aria-hidden="true">→</span> +x</dd></div>
+                <div><dt data-lang-en>End ray</dt><dt data-lang-zh>終止射線</dt><dd>O <span aria-hidden="true">→</span> E</dd></div>
+              </dl>
+              <p><span data-lang-en>So θ₁ is measured at O, from the fixed positive x-axis to OE. When θ₁=0°, link 1 points along +x.</span><span data-lang-zh>因此，θ₁ 在 O 點由固定的正 x 軸量到 OE；當 θ₁=0°，第一段連桿沿正 x 軸伸出。</span></p>
+            </div>
+          </article>
+
+          <article class="demo-card angle-definition-card">
+            <div class="demo-title"><span data-lang-en>ELBOW ANGLE</span><span data-lang-zh>肘部角度</span><output>θ₂</output></div>
+            <canvas id="theta2DefinitionCanvas" width="540" height="330" aria-label="Definition of theta two from link one's forward direction to link two"></canvas>
+            <div class="angle-definition-copy">
+              <h3><span class="math-orange">θ₂</span><span data-lang-en> is link 2's direction relative to link 1</span><span data-lang-zh> 是第二段相對於第一段的方向</span></h3>
+              <dl>
+                <div><dt data-lang-en>Start ray</dt><dt data-lang-zh>起始射線</dt><dd><span data-lang-en>link 1 forward</span><span data-lang-zh>第一段向前延伸線</span></dd></div>
+                <div><dt data-lang-en>End ray</dt><dt data-lang-zh>終止射線</dt><dd>E <span aria-hidden="true">→</span> T</dd></div>
+              </dl>
+              <p><span data-lang-en>θ₂ is measured at E. Its start is the forward continuation of OE—not the ray back to O. When θ₂=0°, both links continue in one straight line.</span><span data-lang-zh>θ₂ 在 E 點量度；起點是 OE 的向前延伸方向，而不是返回 O 的射線。當 θ₂=0°，兩段連桿沿同一直線完全伸直。</span></p>
+            </div>
+          </article>
+        </div>
+
+        <div class="orientation-equation"><span data-lang-en>Therefore the absolute direction of link 2 is</span><span data-lang-zh>因此，第二段連桿的絕對方向是</span><strong>θ₁ + θ₂</strong></div>
+
+        <div class="angle-range-note">
+          <div>
+            <strong><span data-lang-en>What about 360°?</span><span data-lang-zh>那麼 360° 呢？</span></strong>
+            <p data-lang-en>Angles repeat every full turn: θ, θ+360° and θ−360° describe the same link direction. For example, 370° and 10° are geometrically equivalent.</p>
+            <p data-lang-zh>角度每轉一圈便重複：θ、θ+360°、θ−360° 表示相同的連桿方向。例如 370° 與 10° 在幾何上等價。</p>
+          </div>
+          <div>
+            <strong><span data-lang-en>Range used on this site</span><span data-lang-zh>本網站採用的範圍</span></strong>
+            <p data-lang-en>We report one principal representative between −180° and 180°. The mathematical model allows a full rotation; a real robot may have narrower mechanical joint limits.</p>
+            <p data-lang-zh>本網站顯示 −180° 至 180° 之間的一個主值。數學模型容許完整旋轉；真實機械臂則可能受較窄的機械關節限制。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="logic-section" id="problem">
+        <div class="section-copy">
+          <p class="step-label"><span>A</span><span data-lang-en>NAME THE PROBLEM</span><span data-lang-zh>先為問題命名</span></p>
+          <h2><span data-lang-en>What is known, and what are we solving for?</span><span data-lang-zh>我們知道甚麼？要求甚麼？</span></h2>
+          <p data-lang-en>A 2-DOF arm has a base <b>O</b>, an elbow <b>E</b>, and a target/end-effector position <b>T</b>. The two rigid links have fixed lengths L₁ and L₂.</p>
+          <p data-lang-zh>二自由度機械臂有底座 <b>O</b>、肘部 <b>E</b>，以及目標／末端位置 <b>T</b>。兩段剛性連桿的長度固定為 L₁、L₂。</p>
+          <div class="known-unknown">
+            <div><small data-lang-en>KNOWN</small><small data-lang-zh>已知</small><b>T=(x,y), L₁, L₂</b></div>
+            <div><small data-lang-en>UNKNOWN</small><small data-lang-zh>未知</small><b>θ₁, θ₂</b></div>
+          </div>
+          <p data-lang-en>The inverse-kinematics question is: <em>which two joint angles place the gripper exactly at T?</em></p>
+          <p data-lang-zh>逆運動學要回答的是：<em>哪兩個關節角度能讓夾爪剛好到達 T？</em></p>
+        </div>
+        <div class="demo-card">
+          <div class="demo-title"><span data-lang-en>THE PHYSICAL ARM</span><span data-lang-zh>實際機械臂</span><output id="targetReadout">T = (3.20, 1.60)</output></div>
+          <canvas id="problemCanvas" width="640" height="430" aria-label="Robot arm with base, elbow and target labels"></canvas>
+          <p><span data-lang-en>Drag T anywhere—even beyond the arm—to test reachable and unreachable targets.</span><span data-lang-zh>把 T 拖到任何位置，包括機械臂之外，測試可達與不可達的目標。</span></p>
+        </div>
+      </section>
+
+      <section class="reachability-strip" id="reachability" aria-label="Reachability test">
+        <div><p class="eyebrow"><span data-lang-en>THE DECISION GATE</span><span data-lang-zh>關鍵判斷</span></p><h2><span data-lang-en>Can r, L₁ and L₂ form a triangle?</span><span data-lang-zh>r、L₁、L₂ 能否組成三角形？</span></h2></div>
+        <div class="reach-result reachable" id="reachStatusBox">
+          <strong id="reachHeadline">Yes — they can form a triangle.</strong>
+          <p id="reachReason">The target distance lies inside the reachable interval.</p>
+          <div class="condition">|L₁ − L₂| ≤ r ≤ L₁ + L₂</div>
+          <output id="reachCheck">0.7 ≤ 3.58 ≤ 4.7 ✓</output>
+        </div>
+      </section>
+
+      <div id="derivationContent">
+
+      <section class="logic-section" id="triangle">
+        <div class="section-copy">
+          <p class="step-label"><span>B</span><span data-lang-en>FROM COORDINATES TO A DISTANCE</span><span data-lang-zh>由座標求距離</span></p>
+          <h2><span data-lang-en>Now explain r, the straight-line distance to the target.</span><span data-lang-zh>現在解釋 r：底座到目標的直線距離。</span></h2>
+          <p data-lang-en>Drop a vertical line from T=(x,y) to P=(x,0). This creates the right triangle OPT: its horizontal leg has length |x|, its vertical leg has length |y|, and its hypotenuse is r.</p>
+          <p data-lang-zh>從 T=(x,y) 向 x 軸畫垂線，落點為 P=(x,0)。這就建立了直角三角形 OPT：水平直角邊長為 |x|，垂直直角邊長為 |y|，斜邊就是 r。</p>
+          <div class="math-block">
+            <p>r = |OT| = √(x² + y²)</p>
+            <p class="calculation">= √(<span data-guide-x>3.2</span>² + <span data-guide-y>1.6</span>²)</p>
+            <p class="boxed">r = <span id="guideR">3.58</span></p>
+          </div>
+        </div>
+        <div class="demo-card">
+          <div class="demo-title"><span data-lang-en>COORDINATE TRIANGLE + ROBOT LINKS</span><span data-lang-zh>座標直角三角形＋機械臂連桿</span><output>△OPT</output></div>
+          <canvas id="triangleCanvas" width="640" height="430" aria-label="Right triangle OPT with x, y, r and the coloured L1 and L2 robot links"></canvas>
+          <p><span data-lang-en>The dashed legs explain r; the faint blue and orange segments show where L₁ and L₂ sit on the same geometry.</span><span data-lang-zh>虛線直角邊用來解釋 r；淡藍與橙色線則補充 L₁、L₂ 在同一幾何圖中的位置。</span></p>
+        </div>
+      </section>
+
+      <section class="explanation-section" id="elbow">
+        <div class="section-intro">
+          <p class="step-label"><span>C</span><span data-lang-en>FIND THE ELBOW BEND θ₂</span><span data-lang-zh>求肘部彎曲角 θ₂</span></p>
+          <h2><span data-lang-en>First identify the angle the cosine law actually gives.</span><span data-lang-zh>先弄清楚餘弦定理真正求出的是哪一個角。</span></h2>
+          <p data-lang-en>The cosine law applies to the internal angle <b>β</b> of triangle OET. But the robot convention uses <b>θ₂</b>: the turn from link 1's forward direction to link 2. These are supplementary angles.</p>
+          <p data-lang-zh>餘弦定理直接處理的是三角形 OET 的內角 <b>β</b>；但機械臂慣例使用的 <b>θ₂</b>，是從第一段連桿的延伸方向轉到第二段連桿的角度。兩者互為補角。</p>
+        </div>
+        <div class="paired-diagrams">
+          <div class="demo-card mini-diagram">
+            <div class="demo-title"><span data-lang-en>TRIANGLE ANGLE</span><span data-lang-zh>三角形內角</span><output>β</output></div>
+            <canvas id="betaCanvas" width="480" height="340" aria-label="Internal triangle angle beta"></canvas>
+            <p><span data-lang-en>β is inside △OET, opposite side r.</span><span data-lang-zh>β 位於 △OET 內部，正對着邊 r。</span></p>
+          </div>
+          <div class="demo-card mini-diagram">
+            <div class="demo-title"><span data-lang-en>ROBOT JOINT ANGLE</span><span data-lang-zh>機械臂關節角</span><output>θ₂</output></div>
+            <canvas id="theta2Canvas" width="480" height="340" aria-label="Robot joint angle theta two"></canvas>
+            <p><span data-lang-en>θ₂ is measured from link 1's forward extension.</span><span data-lang-zh>θ₂ 從第一段連桿的向前延伸線開始量度。</span></p>
+          </div>
+        </div>
+        <div class="angle-relation"><span>β + |θ₂| = 180°</span><strong>|θ₂| = 180° − β</strong></div>
+        <div class="derivation-grid">
+          <div class="derivation-copy">
+            <h3><span data-lang-en>Now apply the cosine law to △OET</span><span data-lang-zh>現在才對 △OET 使用餘弦定理</span></h3>
+            <p data-lang-en>Side r is opposite β, so the standard form is:</p>
+            <p data-lang-zh>邊 r 正對 β，因此標準形式是：</p>
+            <div class="math-block compact">
+              <p>r² = L₁² + L₂² − 2L₁L₂ cos β</p>
+              <p>cos β = <span class="fraction"><span>L₁² + L₂² − r²</span><span>2L₁L₂</span></span></p>
+              <p class="boxed">β = <span id="betaValue">98.0°</span></p>
+            </div>
+          </div>
+          <div class="derivation-copy">
+            <h3><span data-lang-en>Convert β into the robot angle θ₂</span><span data-lang-zh>把 β 轉換成機械臂角度 θ₂</span></h3>
+            <p data-lang-en>Substituting β = 180° − |θ₂| gives the familiar IK formula:</p>
+            <p data-lang-zh>代入 β = 180° − |θ₂|，就得到常見的 IK 公式：</p>
+            <div class="math-block compact">
+              <p>cos θ₂ = <span class="fraction"><span>r² − L₁² − L₂²</span><span>2L₁L₂</span></span></p>
+              <p class="calculation" id="guideC2Calc">= (12.80 − 7.29 − 4.00) / 10.80</p>
+              <p class="boxed">θ₂ = ± cos⁻¹(<span id="guideC2">0.140</span>) = ±<span id="guideTheta2">82.0°</span></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="explanation-section" id="two-solutions">
+        <div class="section-intro">
+          <p class="step-label"><span>D</span><span data-lang-en>FROM ± TO TWO ELBOW POSITIONS</span><span data-lang-zh>由 ± 連接到兩個肘部位置</span></p>
+          <h2><span data-lang-en>To understand the two answers, locate the unknown elbow E.</span><span data-lang-zh>要理解為何有兩個答案，先找出未知的肘點 E 可以在哪裏。</span></h2>
+          <p data-lang-en>The target T is fixed, but the elbow position is unknown. For the arm to reach T, E must obey both rigid-link lengths: it must be L₁ from the base O and L₂ from the target T. The circle construction is simply a way to show every position allowed by each rule.</p>
+          <p data-lang-zh>目標 T 已固定，但肘部 E 的位置仍未知。若機械臂要到達 T，E 必須同時符合兩段剛性連桿的長度：它與底座 O 相距 L₁，也與目標 T 相距 L₂。畫圓只是把每個限制所允許的全部位置顯示出來。</p>
+        </div>
+        <div class="constraint-question">
+          <span class="constraint-label"><span data-lang-en>THE GEOMETRIC QUESTION</span><span data-lang-zh>真正的幾何問題</span></span>
+          <div><strong><span data-lang-en>Find E such that</span><span data-lang-zh>找出同時滿足以下條件的 E：</span></strong><b class="math-blue">|OE| = L₁</b><span data-lang-en>and</span><span data-lang-zh>以及</span><b class="math-orange">|ET| = L₂</b></div>
+        </div>
+        <div class="circle-sequence">
+          <article class="demo-card constraint-card">
+            <div class="demo-title"><span>1 · <span data-lang-en>FIRST CONSTRAINT</span><span data-lang-zh>第一個限制</span></span><output>|OE| = L₁</output></div>
+            <div class="constraint-copy">
+              <h3><span data-lang-en>What positions does link 1 allow?</span><span data-lang-zh>第一段連桿允許 E 在哪裏？</span></h3>
+              <p data-lang-en>Link 1 has fixed length L₁. If it rotates around O, its endpoint E can be anywhere exactly L₁ from O.</p>
+              <p data-lang-zh>第一段連桿的長度固定為 L₁。當它繞 O 旋轉時，末端 E 可以出現在所有與 O 距離恰好為 L₁ 的位置。</p>
+            </div>
+            <canvas id="radiusBaseCanvas" width="420" height="320" aria-label="Circle centered at base O with radius L1"></canvas>
+            <p class="constraint-result"><span data-lang-en>Those candidate positions form the blue circle centred at O.</span><span data-lang-zh>這些候選位置組成以 O 為圓心的藍色圓。</span></p>
+          </article>
+          <article class="demo-card constraint-card">
+            <div class="demo-title"><span>2 · <span data-lang-en>SECOND CONSTRAINT</span><span data-lang-zh>第二個限制</span></span><output>|ET| = L₂</output></div>
+            <div class="constraint-copy">
+              <h3><span data-lang-en>What positions let link 2 end at T?</span><span data-lang-zh>哪些 E 能讓第二段連桿到達 T？</span></h3>
+              <p data-lang-en>The second link must bridge E to the fixed target T. Because its length is L₂, E must be exactly L₂ from T.</p>
+              <p data-lang-zh>第二段連桿必須由 E 連到固定目標 T。由於它的長度是 L₂，E 與 T 的距離必須恰好為 L₂。</p>
+            </div>
+            <canvas id="radiusTargetCanvas" width="420" height="320" aria-label="Circle centered at target T with radius L2"></canvas>
+            <p class="constraint-result"><span data-lang-en>Those candidate positions form the orange circle centred at T.</span><span data-lang-zh>這些候選位置組成以 T 為圓心的橙色圓。</span></p>
+          </article>
+          <article class="demo-card constraint-card intersection-card">
+            <div class="demo-title"><span>3 · <span data-lang-en>APPLY BOTH</span><span data-lang-zh>同時套用</span></span><output id="intersectionCount">2 intersections</output></div>
+            <div class="intersection-copy-column">
+              <div class="constraint-copy">
+                <h3><span data-lang-en>Which candidates satisfy both links?</span><span data-lang-zh>哪些候選位置同時符合兩段連桿？</span></h3>
+                <p data-lang-en>A legal elbow must lie on both circles—not merely one. Therefore the possible elbow positions are exactly their intersections.</p>
+                <p data-lang-zh>合法的肘點必須同時位於兩個圓上，而不是只符合其中一個。因此，兩圓交點正是所有可能的 E。</p>
+              </div>
+              <p class="constraint-result"><span data-lang-en>Two intersections give E₊ and E₋: two arm shapes that reach the same T.</span><span data-lang-zh>兩個交點得到 E₊、E₋：兩種不同手臂姿態，但都到達同一個 T。</span></p>
+            </div>
+            <canvas id="intersectionsCanvas" width="420" height="320" aria-label="Two circles with two elbow intersections"></canvas>
+          </article>
+        </div>
+        <div class="intersection-conclusion">
+          <span class="math-blue">circle(O, L₁)</span><strong>∩</strong><span class="math-orange">circle(T, L₂)</span><strong>=</strong><span>{ E₊, E₋ }</span>
+          <p><span data-lang-en>This is the geometric meaning of the ± sign: the same three side lengths can form a triangle above or below OT.</span><span data-lang-zh>這就是 ± 的幾何意義：相同的三條邊，可以在 OT 的上方或下方組成三角形。</span></p>
+        </div>
+      </section>
+
+      <section class="explanation-section" id="shoulder">
+        <div class="section-intro">
+          <p class="step-label"><span>E</span><span data-lang-en>FIND THE SHOULDER ANGLE θ₁</span><span data-lang-zh>求肩部角度 θ₁</span></p>
+          <h2><span data-lang-en>Separate the target direction from the triangle offset.</span><span data-lang-zh>把「目標方向」和「三角形偏角」分開處理。</span></h2>
+          <p data-lang-en>θ₁ is not simply the direction to the target. Link 1 points from O to E, while the target direction points from O to T. We will find those two directions separately.</p>
+          <p data-lang-zh>θ₁ 並不等於目標方向。第一段連桿由 O 指向 E，但目標方向由 O 指向 T；因此先分別求出兩者之間的角度。</p>
+          <div class="diagram-key" aria-label="Diagram colour key">
+            <span><i class="key-blue"></i><b>L₁ / OE</b></span>
+            <span><i class="key-orange"></i><b>L₂ / ET</b></span>
+            <span><i class="key-purple"></i><b>r / OT / φ</b></span>
+          </div>
+          <p class="diagram-rule"><span data-lang-en>The drawings use symbols and colour only. Exact live values stay beside them in the formula panels, where they cannot cover the geometry.</span><span data-lang-zh>圖中只用符號與顏色分類；即時數值統一放在旁邊的公式框，避免遮住幾何關係。</span></p>
+        </div>
+
+        <div class="shoulder-steps">
+          <article class="mini-lesson">
+            <div class="mini-copy">
+              <span class="lesson-number">1</span>
+              <h3><span data-lang-en>Find φ: the direction from O to T</span><span data-lang-zh>求 φ：由 O 指向 T 的方向</span></h3>
+              <p data-lang-en>The coordinate projections x and y form a right triangle. atan2(y,x) measures the angle from the positive x-axis to the target ray OT.</p>
+              <p data-lang-zh>座標投影 x、y 形成直角三角形。atan2(y,x) 量度由正 x 軸轉到目標射線 OT 的角度。</p>
+              <div class="math-block compact"><p><span class="math-purple">φ</span> = atan2(y,x)</p><p class="boxed"><span class="math-purple">φ</span> = <span id="phiInline">26.6°</span></p></div>
+              <div class="note"><b>Why atan2?</b><p data-i18n="atanNote">Unlike arctan(y/x), atan2 keeps the correct quadrant and also works when x = 0.</p></div>
+            </div>
+            <div class="demo-card mini-diagram">
+              <div class="demo-title"><span data-lang-en>TARGET DIRECTION</span><span data-lang-zh>目標方向</span><output>φ</output></div>
+              <canvas id="phiCanvas" width="560" height="360" aria-label="Target direction phi measured from the positive x-axis"></canvas>
+              <p><span data-lang-en>Dashed projections show x and y; the purple ray is OT.</span><span data-lang-zh>虛線顯示 x、y 投影；紫色射線是 OT。</span></p>
+            </div>
+          </article>
+
+          <article class="mini-lesson">
+            <div class="mini-copy">
+              <span class="lesson-number">2</span>
+              <h3><span data-lang-en>Find α: the offset inside △OET</span><span data-lang-zh>求 α：△OET 內的偏角</span></h3>
+              <p data-lang-en>α is the angle at O between OT and the first link OE. Its opposite side is L₂, so the cosine law gives it directly.</p>
+              <p data-lang-zh>α 是 O 點處 OT 與第一段連桿 OE 之間的夾角；其對邊為 L₂，因此可直接使用餘弦定理。</p>
+              <div class="math-block compact">
+                <p>cos <span class="math-orange">α</span> = <span class="fraction"><span><span class="math-blue">L₁</span>² + <span class="math-purple">r</span>² − <span class="math-orange">L₂</span>²</span><span>2<span class="math-blue">L₁</span><span class="math-purple">r</span></span></span></p>
+                <p class="calculation" id="alphaCosCalc"></p>
+                <p class="boxed"><span class="math-orange">α</span> = <span id="alphaInline">33.6°</span></p>
+              </div>
+            </div>
+            <div class="demo-card mini-diagram">
+              <div class="demo-title"><span data-lang-en>TRIANGLE OFFSET</span><span data-lang-zh>三角形偏角</span><output>α</output></div>
+              <canvas id="alphaCanvas" width="560" height="360" aria-label="Triangle OET showing offset angle alpha at the base"></canvas>
+              <p><span data-lang-en>α lies only between OT and OE; L₂ is the side opposite it.</span><span data-lang-zh>α 只夾在 OT 與 OE 之間；L₂ 是它的對邊。</span></p>
+            </div>
+          </article>
+
+          <article class="mini-lesson">
+            <div class="mini-copy">
+              <span class="lesson-number">3</span>
+              <h3><span data-lang-en>Subtract the offset to obtain θ₁</span><span data-lang-zh>從目標方向扣除偏角，得到 θ₁</span></h3>
+              <p data-lang-en>For the elbow-up pose shown here, link 1 lies α below the target ray. Therefore the shoulder rotates through φ − α.</p>
+              <p data-lang-zh>在圖示的肘部向上姿態中，第一段連桿位於目標射線下方 α，所以肩部角度為 φ − α。</p>
+              <div class="math-block compact">
+                <p><span class="math-blue">θ₁</span> = <span class="math-purple">φ</span> − <span class="math-orange">α</span></p>
+                <p class="calculation">= <span class="math-purple" id="thetaPhi">26.6°</span> − <span class="math-orange" id="thetaAlpha">33.6°</span></p>
+                <p class="boxed"><span class="math-blue">θ₁</span> = <span id="guideTheta1">−7.0°</span></p>
+              </div>
+              <p class="branch-note"><span data-lang-en>For the mirrored elbow-down pose, α changes sign, giving θ₁ = φ + α.</span><span data-lang-zh>鏡像的肘部向下姿態會令 α 改變符號，因此 θ₁ = φ + α。</span></p>
+            </div>
+            <div class="demo-card mini-diagram">
+              <div class="demo-title"><span data-lang-en>FINAL SHOULDER ANGLE</span><span data-lang-zh>最終肩部角度</span><output>θ₁</output></div>
+              <canvas id="shoulderCanvas" width="560" height="360" aria-label="Final shoulder angle theta one measured from the positive x-axis to link one"></canvas>
+              <p><span data-lang-en>This final diagram labels only θ₁, avoiding overlap with φ and α.</span><span data-lang-zh>最後一張圖只標示 θ₁，避免與 φ、α 重疊。</span></p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="logic-section final-step" id="result">
+        <div class="section-copy">
+          <p class="step-label"><span>F</span><span data-lang-en>PUT THE TWO SIGNS BACK</span><span data-lang-zh>代入 θ₂ 的正負號</span></p>
+          <h2><span data-lang-en>Two angle pairs, one target.</span><span data-lang-zh>兩組角度，同一個目標。</span></h2>
+          <p data-lang-en>Use positive θ₂ for one elbow intersection and negative θ₂ for the other. Recalculate θ₁ each time; both pairs reproduce exactly the same T under forward kinematics.</p>
+          <p data-lang-zh>θ₂ 取正值時對應其中一個肘部交點，取負值時則對應另一個。每次重新計算 θ₁，兩組答案代回正運動學後都會得到同一個 T。</p>
+          <div class="solution-equations">
+            <div><span data-i18n="elbowUp">Elbow up</span><b id="guideUpPair">(θ₁, θ₂) = (−7.0°, 82.0°)</b></div>
+            <div><span data-i18n="elbowDown">Elbow down</span><b id="guideDownPair">(θ₁, θ₂) = (60.1°, −82.0°)</b></div>
+          </div>
+        </div>
+        <div class="demo-card final-demo">
+          <div class="demo-title"><span data-i18n="compareSolutions">COMPARE SOLUTIONS</span><button id="animateSolutions" type="button" data-i18n="switchPose">Switch pose</button></div>
+          <canvas id="solutionsCanvas" width="640" height="430" aria-label="Two robot arm inverse kinematics solutions"></canvas>
+          <p data-i18n="sameTarget">Both poses land on the same target.</p>
+        </div>
+      </section>
+
+      <section class="edge-cases">
+        <p class="eyebrow" data-i18n="edgeCases">EDGE CASES</p><h2 data-i18n="whenSolutions">When are there 0, 1, or 2 solutions?</h2>
+        <div class="case-grid"><article><span class="case-icon no">0</span><h3 data-i18n="zeroSolutions">0 solutions</h3><p data-i18n="zeroText">The circles do not meet. The target lies outside the reachable ring.</p></article><article><span class="case-icon one">1</span><h3 data-i18n="oneSolution">1 solution</h3><p data-i18n="oneText">The circles touch. The links are fully extended or folded.</p></article><article><span class="case-icon two">2</span><h3 data-i18n="twoSolutions">2 solutions</h3><p data-i18n="twoCaseText">The circles cross. Elbow-up and elbow-down are both possible.</p></article></div>
+      </section>
+      </div>
+      <footer class="article-footer"><a href="index.html"><span>←</span> <span data-i18n="backPlayground">Back to the playground</span></a><p data-i18n="footerText">Built as an approachable MATH3900 exploration of inverse problems.</p></footer>
+    </article>
+  </main>
+  <script src="assets/i18n.js"></script>
+  <script src="assets/kinematics.js"></script>
+  <script src="assets/guide.js"></script>
+</body>
+</html>

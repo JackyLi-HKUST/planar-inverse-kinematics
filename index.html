@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An interactive bilingual introduction to forward and inverse kinematics for a 2-DOF planar robot arm.">
+  <title>Two Links, One Target</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-page="playground">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <button class="mobile-menu" id="mobileMenu" aria-label="Open navigation" aria-expanded="false">☰</button>
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="index.html" aria-label="Two Links, One Target home">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span><strong data-i18n="brand">Two Links, One Target</strong><small>MATH3900 · 2-DOF IK</small></span>
+    </a>
+    <nav class="nav" aria-label="Main navigation">
+      <p data-i18n="navExplore">EXPLORE</p>
+      <a href="introduction.html"><span>00</span><b><span data-lang-en>Introduction</span><span data-lang-zh>導論</span></b></a>
+      <a class="active" href="index.html"><span>01</span><b data-i18n="navPlayground">Playground</b></a>
+      <a href="guide.html"><span>02</span><b data-i18n="navGuide">How it works</b></a>
+      <a href="proof.html"><span>03</span><b><span data-lang-en>Rigorous proofs</span><span data-lang-zh>嚴謹證明</span></b></a>
+      <a href="about.html"><span>04</span><b><span data-lang-en>About &amp; credits</span><span data-lang-zh>關於與鳴謝</span></b></a>
+      <p data-i18n="navOnPage">ON THIS PAGE</p>
+      <a href="#playground"><span>↳</span><b data-i18n="navLiveModel">Live model</b></a>
+      <a href="#reading"><span>↳</span><b data-i18n="navReading">Reading the maths</b></a>
+    </nav>
+    <div class="sidebar-foot">
+      <button class="language-toggle" type="button" data-language-toggle aria-label="Switch language"><span class="selected">EN</span><span>繁中</span></button>
+      <p data-i18n="offline">Works fully offline</p>
+    </div>
+  </aside>
+
+  <main id="main" class="main">
+    <header class="hero">
+      <div>
+        <p class="eyebrow" data-i18n="eyebrow">INTERACTIVE MATHEMATICS</p>
+        <h1 data-i18n="homeTitle">How does a robot arm reach a point?</h1>
+        <p class="lede" data-i18n="homeLede">Move the target. Watch geometry turn its position into two possible sets of joint angles.</p>
+      </div>
+      <a class="quiet-link" href="guide.html"><span data-i18n="learnLink">See the derivation</span> <span aria-hidden="true">→</span></a>
+    </header>
+
+    <section class="playground" id="playground" aria-label="Robot arm interactive playground">
+      <div class="stage-card">
+        <div class="stage-toolbar">
+          <div class="mode-switch" role="group" aria-label="Kinematics mode">
+            <button class="active" id="modeIK" type="button"><span data-i18n="ik">Inverse</span> <small>IK</small></button>
+            <button id="modeFK" type="button"><span data-i18n="fk">Forward</span> <small>FK</small></button>
+          </div>
+          <label class="check-control"><input id="showGeometry" type="checkbox" checked><span data-i18n="geometry">Geometry</span></label>
+          <label class="check-control"><input id="showWorkspace" type="checkbox" checked><span data-i18n="workspace">Workspace</span></label>
+          <button class="icon-button" id="resetButton" type="button" title="Reset" aria-label="Reset playground">↻</button>
+        </div>
+        <div class="canvas-wrap" id="canvasWrap">
+          <canvas id="robotCanvas" width="900" height="660" aria-label="Interactive two-link robot arm diagram"></canvas>
+          <div class="drag-hint" id="dragHint"><span>↕</span> <span data-i18n="dragHint">Drag the target</span></div>
+          <div class="canvas-legend">
+            <span><i class="dot target"></i><span data-i18n="target">Target</span></span>
+            <span><i class="dot elbow"></i><span data-i18n="elbowPositions">Elbow positions</span></span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="control-card">
+        <div class="status-line"><span class="status-pill" id="reachStatus" data-i18n="reachable">REACHABLE · 2 SOLUTIONS</span><span id="modeDescriptor">IK</span></div>
+
+        <section class="control-section ik-controls">
+          <div class="section-heading"><h2 data-i18n="targetPosition">Target position</h2><output id="targetPair">(3.20, 1.60)</output></div>
+          <label class="range-row"><span>x</span><input id="targetX" type="range" min="-4.8" max="4.8" step="0.01" value="3.2"><output id="targetXValue">3.20</output></label>
+          <label class="range-row"><span>y</span><input id="targetY" type="range" min="-4.2" max="4.8" step="0.01" value="1.6"><output id="targetYValue">1.60</output></label>
+        </section>
+
+        <section class="control-section fk-controls" hidden>
+          <div class="section-heading"><h2 data-i18n="jointAngles">Joint angles</h2><output id="anglePair">(−20°, 75°)</output></div>
+          <label class="range-row"><span>θ₁</span><input id="theta1" type="range" min="-180" max="180" step="1" value="-20"><output id="theta1Value">−20°</output></label>
+          <label class="range-row"><span>θ₂</span><input id="theta2" type="range" min="-180" max="180" step="1" value="75"><output id="theta2Value">75°</output></label>
+        </section>
+
+        <section class="control-section">
+          <div class="section-heading"><h2 data-i18n="linkLengths">Link lengths</h2><output id="lengthPair">2.7 + 2.0</output></div>
+          <label class="range-row"><span>L₁</span><input id="length1" type="range" min="1.2" max="3.2" step="0.1" value="2.7"><output id="length1Value">2.7</output></label>
+          <label class="range-row"><span>L₂</span><input id="length2" type="range" min="1.0" max="3.0" step="0.1" value="2.0"><output id="length2Value">2.0</output></label>
+        </section>
+
+        <section class="control-section solution-section ik-controls">
+          <h2 data-i18n="chooseSolution">Choose a solution</h2>
+          <div class="solution-toggle" role="group" aria-label="Inverse kinematics solution">
+            <button class="active" id="elbowUp" type="button"><span class="mini-arm up" aria-hidden="true"></span><span><b data-i18n="elbowUp">Elbow up</b><small id="upAngles">θ₁ −6.7° · θ₂ 77.3°</small></span></button>
+            <button id="elbowDown" type="button"><span class="mini-arm down" aria-hidden="true"></span><span><b data-i18n="elbowDown">Elbow down</b><small id="downAngles">θ₁ 59.8° · θ₂ −77.3°</small></span></button>
+          </div>
+        </section>
+
+        <section class="formula-card" aria-live="polite">
+          <div class="formula-label"><span id="formulaMode">IK</span><span data-i18n="liveCalculation">LIVE CALCULATION</span></div>
+          <div id="ikFormula">
+            <p>c₂ = <span class="fraction"><span>x² + y² − L₁² − L₂²</span><span>2L₁L₂</span></span></p>
+            <p class="substitution" id="c2Substitution">= (12.80 − 7.29 − 4.00) / 10.80</p>
+            <p class="result">θ₂ = <strong id="theta2Result">77.3°</strong></p>
+            <p>θ₁ = atan2(y,x) − atan2(L₂sinθ₂, L₁+L₂cosθ₂)</p>
+            <p class="result">θ₁ = <strong id="theta1Result">−6.7°</strong></p>
+          </div>
+          <div id="fkFormula" hidden>
+            <p>x = L₁cosθ₁ + L₂cos(θ₁+θ₂)</p>
+            <p class="substitution" id="xSubstitution"></p>
+            <p>y = L₁sinθ₁ + L₂sin(θ₁+θ₂)</p>
+            <p class="result">(x, y) = <strong id="xyResult"></strong></p>
+          </div>
+        </section>
+        <div class="playground-angle-key">
+          <p><b class="math-blue">θ₁</b><span data-lang-en>: +x axis → link 1</span><span data-lang-zh>：正 x 軸 → 第一段連桿</span></p>
+          <p><b class="math-orange">θ₂</b><span data-lang-en>: link 1 forward → link 2</span><span data-lang-zh>：第一段向前方向 → 第二段連桿</span></p>
+          <a href="guide.html#convention"><span data-lang-en>See the angle convention →</span><span data-lang-zh>查看完整角度定義 →</span></a>
+        </div>
+      </aside>
+    </section>
+
+    <section class="reading-section" id="reading">
+      <div><p class="eyebrow" data-i18n="whatSeeing">WHAT YOU ARE SEEING</p><h2 data-i18n="oneTargetTitle">One target can have two answers.</h2></div>
+      <div class="reading-grid">
+        <article><span class="number">01</span><h3 data-i18n="circleOneTitle">The elbow lies on two circles</h3><p data-i18n="circleOneText">It must be L₁ from the base and L₂ from the target. Their intersections are the only possible elbow positions.</p></article>
+        <article><span class="number">02</span><h3 data-i18n="circleTwoTitle">Two intersections, two poses</h3><p data-i18n="circleTwoText">The upper and lower intersections produce elbow-up and elbow-down configurations that reach the same point.</p></article>
+        <article><span class="number">03</span><h3 data-i18n="circleThreeTitle">No intersection, no solution</h3><p data-i18n="circleThreeText">If the target is too far away—or too close when the links differ—the arm cannot reach it.</p></article>
+      </div>
+      <a class="primary-link" href="guide.html"><span data-i18n="walkthrough">Walk through the mathematics</span><span>→</span></a>
+    </section>
+  </main>
+
+  <script src="assets/i18n.js"></script>
+  <script src="assets/kinematics.js"></script>
+  <script src="assets/playground.js"></script>
+</body>
+</html>

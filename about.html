@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="About, technology, references, and acknowledgements for Two Links, One Target.">
+  <title>About &amp; Credits — Two Links, One Target</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-page="about">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <button class="mobile-menu" id="mobileMenu" aria-label="Open navigation" aria-expanded="false">☰</button>
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="index.html" aria-label="Two Links, One Target home">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span><strong data-i18n="brand">Two Links, One Target</strong><small>MATH3900 · 2-DOF IK</small></span>
+    </a>
+    <nav class="nav" aria-label="Main navigation">
+      <p data-i18n="navExplore">EXPLORE</p>
+      <a href="introduction.html"><span>00</span><b><span data-lang-en>Introduction</span><span data-lang-zh>導論</span></b></a>
+      <a href="index.html"><span>01</span><b data-i18n="navPlayground">Playground</b></a>
+      <a href="guide.html"><span>02</span><b data-i18n="navGuide">How it works</b></a>
+      <a href="proof.html"><span>03</span><b><span data-lang-en>Rigorous proofs</span><span data-lang-zh>嚴謹證明</span></b></a>
+      <a class="active" href="about.html"><span>04</span><b><span data-lang-en>About &amp; credits</span><span data-lang-zh>關於與鳴謝</span></b></a>
+      <p data-i18n="navOnPage">ON THIS PAGE</p>
+      <a href="#project"><span>·</span><b><span data-lang-en>The project</span><span data-lang-zh>本專題</span></b></a>
+      <a href="#technology"><span>·</span><b><span data-lang-en>Technology</span><span data-lang-zh>技術</span></b></a>
+      <a href="#references"><span>·</span><b><span data-lang-en>References</span><span data-lang-zh>參考資料</span></b></a>
+      <a href="#acknowledgements"><span>·</span><b><span data-lang-en>Acknowledgements</span><span data-lang-zh>鳴謝</span></b></a>
+    </nav>
+    <div class="sidebar-foot"><button class="language-toggle" type="button" data-language-toggle aria-label="Switch language"><span class="selected">EN</span><span>繁中</span></button><p data-i18n="offline">Works fully offline</p></div>
+  </aside>
+
+  <main id="main" class="main about-main">
+    <header class="about-hero" id="project">
+      <p class="eyebrow"><span data-lang-en>04 · ABOUT THIS PROJECT</span><span data-lang-zh>04 · 關於本專題</span></p>
+      <h1><span data-lang-en>Made to make inverse kinematics understandable.</span><span data-lang-zh>把逆運動學變成看得見、想得通的數學。</span></h1>
+      <p class="lede" data-lang-en>Two Links, One Target is an interactive, bilingual mathematics project about existence, multiplicity and inverse functions—explored through a two-link planar robot arm.</p>
+      <p class="lede" data-lang-zh>《雙連桿，一個目標》是一個雙語互動數學專題，以平面雙連桿機械臂探索解的存在性、多解性與逆函數。</p>
+      <div class="project-signature">
+        <div><span data-lang-en>CREATED BY</span><span data-lang-zh>製作者</span><a href="https://jackyli-hkust.github.io/for" target="_blank" rel="noreferrer">Jacky Li ↗</a></div>
+        <div><span data-lang-en>COURSE</span><span data-lang-zh>課程</span><strong>MATH3900 · Communicating Mathematics to the Public</strong></div>
+        <div><span data-lang-en>COURSE INSTRUCTOR</span><span data-lang-zh>課程導師</span><a href="https://www.math.hkust.edu.hk/people/faculty/profile/masyleung/" target="_blank" rel="noreferrer"><span data-lang-en>Prof. Shing-Yu Leung ↗</span><span data-lang-zh>梁承裕教授 ↗</span></a></div>
+      </div>
+    </header>
+
+    <section class="about-section" id="technology">
+      <div class="about-section-heading">
+        <p class="eyebrow"><span data-lang-en>BUILT WITH</span><span data-lang-zh>使用技術</span></p>
+        <h2><span data-lang-en>Small, transparent and made for the open web.</span><span data-lang-zh>輕量、透明，為開放網頁而製作。</span></h2>
+        <p data-lang-en>The site has no framework, package manager or build step. Every page can be opened locally and the same files can be published directly with GitHub Pages.</p>
+        <p data-lang-zh>網站不使用框架、套件管理器或建置程序。每個頁面都可直接在本機開啟，同一套檔案亦可直接發佈至 GitHub Pages。</p>
+      </div>
+      <div class="tech-grid">
+        <article><span>01</span><h3>HTML5 + MathML</h3><p data-lang-en>Semantic page structure and native mathematical notation.</p><p data-lang-zh>語意化頁面結構與瀏覽器原生數學排版。</p></article>
+        <article><span>02</span><h3>CSS3</h3><p data-lang-en>A responsive, minimal documentation layout with no external font dependency.</p><p data-lang-zh>響應式極簡文件版面，不依賴外部字型。</p></article>
+        <article><span>03</span><h3>Vanilla JavaScript</h3><p data-lang-en>The kinematics model, bilingual interface and interactions use browser-native JavaScript.</p><p data-lang-zh>運動學模型、雙語介面與互動均使用瀏覽器原生 JavaScript。</p></article>
+        <article><span>04</span><h3>Canvas 2D</h3><p data-lang-en>Robot arms, geometric constructions and theorem diagrams are drawn in real time.</p><p data-lang-zh>機械臂、幾何作圖與定理圖像均即時繪製。</p></article>
+        <article><span>05</span><h3>GitHub Pages</h3><p data-lang-en>Static hosting keeps the project easy to inspect, download and reuse.</p><p data-lang-zh>靜態託管令專題容易查閱、下載及再利用。</p></article>
+        <article><span>06</span><h3>OpenAI Codex</h3><p data-lang-en>Used as a development assistant for implementation, interface iteration, testing and documentation.</p><p data-lang-zh>作為開發助手，協助程式實作、介面迭代、測試與文件整理。</p></article>
+      </div>
+    </section>
+
+    <section class="about-section" id="references">
+      <div class="about-section-heading">
+        <p class="eyebrow"><span data-lang-en>REFERENCES &amp; INSPIRATION</span><span data-lang-zh>參考資料與靈感</span></p>
+        <h2><span data-lang-en>Ideas, tools and visual references.</span><span data-lang-zh>概念、工具與視覺參考。</span></h2>
+      </div>
+      <div class="reference-list">
+        <a href="https://github.com/JackyLi-HKUST/two-links-one-target" target="_blank" rel="noreferrer"><span>SOURCE</span><div><strong>Project source on GitHub</strong><p data-lang-en>Download, inspect or adapt the complete static website and its mathematical tests.</p><p data-lang-zh>下載、查閱或修改完整靜態網站及其數學測試。</p></div><i>↗</i></a>
+        <a href="https://github.com/just-the-docs/just-the-docs" target="_blank" rel="noreferrer"><span>LAYOUT</span><div><strong>Just the Docs</strong><p data-lang-en>Inspiration for the persistent sidebar and content-first documentation structure; no source code was copied.</p><p data-lang-zh>左側固定導覽與內容優先文件架構的靈感來源；未複製其原始碼。</p></div><i>↗</i></a>
+        <a href="http://robotkinematics.study/" target="_blank" rel="noreferrer"><span>INTERACTION</span><div><strong>Robot Kinematics Simulator</strong><p data-lang-en>Visual and interaction reference for presenting robot kinematics; this project uses an independent implementation.</p><p data-lang-zh>機械臂運動學視覺與互動呈現的參考；本專題採用獨立實作。</p></div><i>↗</i></a>
+        <a href="https://developers.openai.com/learn/codex" target="_blank" rel="noreferrer"><span>DEVELOPMENT</span><div><strong>OpenAI Codex</strong><p data-lang-en>Official information about the coding assistant used during development.</p><p data-lang-zh>開發過程中所使用程式協作工具的官方資料。</p></div><i>↗</i></a>
+        <a href="https://www.math.hkust.edu.hk/people/faculty/profile/masyleung/" target="_blank" rel="noreferrer"><span>COURSE</span><div><strong>HKUST · MATH3900</strong><p data-lang-en>Course context: Communicating Mathematics to the Public, taught by Prof. Shing-Yu Leung.</p><p data-lang-zh>課程背景：梁承裕教授任教的「向公眾傳達數學」MATH3900。</p></div><i>↗</i></a>
+      </div>
+      <div class="math-basis">
+        <strong><span data-lang-en>Mathematical basis</span><span data-lang-zh>數學基礎</span></strong>
+        <p data-lang-en>The derivations use the Pythagorean theorem, triangle inequality, circle intersections, the law of cosines, trigonometric identities, injectivity and the multivariable inverse function theorem. Definitions and proofs are developed within the site.</p>
+        <p data-lang-zh>推導使用勾股定理、三角不等式、圓的交點、餘弦定理、三角恆等式、單射及多變量逆函數定理；相關定義與證明均在網站內逐步建立。</p>
+      </div>
+    </section>
+
+    <section class="about-section acknowledgements" id="acknowledgements">
+      <div class="about-section-heading">
+        <p class="eyebrow"><span data-lang-en>ACKNOWLEDGEMENTS</span><span data-lang-zh>鳴謝</span></p>
+        <h2><span data-lang-en>Credit where it belongs.</span><span data-lang-zh>清楚列明每一份貢獻。</span></h2>
+      </div>
+      <div class="ack-grid">
+        <article><h3><span data-lang-en>Authorship</span><span data-lang-zh>作者責任</span></h3><p data-lang-en>Concept, mathematical direction, content decisions and final review by Jacky Li. The author remains responsible for the mathematical accuracy and submitted work.</p><p data-lang-zh>專題概念、數學方向、內容取捨與最終審閱由 Jacky Li 負責；作者對數學準確性及提交作品承擔最終責任。</p></article>
+        <article><h3><span data-lang-en>Development assistance</span><span data-lang-zh>開發協助</span></h3><p data-lang-en>OpenAI Codex assisted with implementation, interface iteration, testing and documentation. Its output was reviewed and revised as part of the project process.</p><p data-lang-zh>OpenAI Codex 協助程式實作、介面迭代、測試與文件整理；其輸出在專題製作過程中經過審閱與修改。</p></article>
+        <article><h3><span data-lang-en>Image credits</span><span data-lang-zh>圖片來源</span></h3><p><a href="https://commons.wikimedia.org/wiki/File:Lexington_Medical,_Inc._Manufacturing_Robot_Arm.jpg" target="_blank" rel="noreferrer">Lexington Medical, Inc.</a> — CC0.<br><a href="https://commons.wikimedia.org/wiki/File:Robot_Arm_(NIH_BioArt_457).png" target="_blank" rel="noreferrer">NIAID / Ryan Kissinger</a> — U.S. public domain.</p></article>
+      </div>
+    </section>
+
+    <footer class="about-footer"><a href="proof.html">← <span data-lang-en>Return to rigorous proofs</span><span data-lang-zh>返回嚴謹證明</span></a><a href="index.html"><span data-lang-en>Open the playground</span><span data-lang-zh>開啟互動實驗室</span> →</a></footer>
+  </main>
+
+  <script src="assets/i18n.js"></script>
+</body>
+</html>
