@@ -45,6 +45,7 @@ a { color: inherit; }
 .nav a:hover { color: var(--ink); background: #f0f1f3; }
 .nav a.active { color: var(--ink); background: #eceef1; }
 .nav a.active span { color: var(--accent); }
+.nav a.nav-subpage { padding-left: 22px; }
 .sidebar-foot { margin-top: auto; }
 .sidebar-foot p { margin: 13px 4px 0; color: #a0a4ac; font-size: 10px; }
 .language-toggle { display: grid; grid-template-columns: 1fr 1fr; width: 100%; padding: 3px; border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--muted); cursor: pointer; }
@@ -307,6 +308,63 @@ input[type="range"] { width: 100%; height: 3px; accent-color: var(--ink); cursor
 .demo-title output { color: var(--ink); font: 10px ui-monospace, monospace; letter-spacing: 0; }
 .demo-title button { padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: white; color: var(--ink); font-size: 9px; cursor: pointer; }
 .demo-card canvas { display: block; width: 100%; height: auto; min-height: 300px; touch-action: none; }
+.demo-card canvas.guide-draggable { min-height: 0; cursor: grab; }
+.demo-card canvas.guide-draggable:active { cursor: grabbing; }
+.guide-controls { display: grid; gap: 7px; padding: 12px 15px; border-top: 1px solid var(--line); background: white; }
+.guide-control-hint { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.guide-slider { display: grid; grid-template-columns: minmax(74px, auto) minmax(45px, 1fr) 56px; gap: 8px; align-items: center; min-height: 28px; font-size: 11px; }
+.guide-slider input { min-width: 0; margin: 0; height: 22px; }
+.guide-slider-value, #absoluteDirectionValue { color: var(--ink); font: 11px ui-monospace, monospace; }
+.guide-slider-value { text-align: right; }
+.guide-demo-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+.guide-controls button, .case-grid [data-guide-case] { justify-self: start; padding: 6px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--soft); color: var(--ink); font: inherit; font-size: 11px; cursor: pointer; }
+.guide-controls button:hover:not(:disabled), .case-grid [data-guide-case]:hover { border-color: var(--muted); }
+.guide-controls button:disabled, #animateSolutions:disabled { cursor: default; opacity: .55; }
+.case-grid [data-guide-case] { margin-top: 10px; }
+.solution-equations [hidden] { display: none; }
+.game-layout { align-items: start; }
+.game-stage-bar, .game-legend { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; }
+.game-stage-bar { border-bottom: 1px solid var(--line); }
+.game-stage-bar h2, .game-controls h2 { margin: 0; font-size: 15px; }
+.game-score { color: var(--muted); font-size: 12px; }
+.game-score strong { margin-left: 5px; color: var(--ink); font: 700 18px ui-monospace, monospace; }
+.game-board { display: grid; place-items: center; padding: 6px; background-color: #fcfcfd; background-image: linear-gradient(#eef0f3 1px, transparent 1px), linear-gradient(90deg, #eef0f3 1px, transparent 1px); background-size: 24px 24px; }
+.game-board svg { display: block; width: min(100%, 560px); height: auto; }
+.game-board text { font: .21px ui-monospace, monospace; fill: var(--muted); }
+.game-board .game-target-label { fill: #bb381e; font-weight: 700; }
+.game-workspace { fill: #5475e80d; stroke: #5475e85c; stroke-width: .025; stroke-dasharray: .09 .08; }
+.game-axes { fill: none; stroke: #bec3ce; stroke-width: .018; }
+.game-error-line { stroke: #7c818b; stroke-width: .027; stroke-dasharray: .09 .07; }
+.game-target-ring { fill: #ff5a3622; stroke: #d94a2c; stroke-width: .052; }
+.game-target-dot { fill: #d94a2c; }
+.game-inside .game-target-ring, .game-hit .game-target-ring { fill: #12814c28; stroke: #12814c; }
+.game-hit .game-target-dot, .game-hit .game-target-label { fill: #12814c; }
+.game-link { stroke-linecap: round; }
+.game-link-1 { stroke: #5475e8; stroke-width: .38; }
+.game-link-2 { stroke: #ff7858; stroke-width: .3; }
+.game-joint { fill: white; stroke: #30343a; stroke-width: .062; }
+.game-joint-core { fill: #30343a; }
+#gameGripper path { fill: none; stroke: #30343a; stroke-width: .105; stroke-linecap: round; stroke-linejoin: round; }
+#gameGripper circle { fill: #5475e8; stroke: white; stroke-width: .03; }
+.game-legend { justify-content: flex-start; flex-wrap: wrap; gap: 12px 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+.game-legend > span { display: inline-flex; align-items: center; gap: 5px; }
+.game-controls { display: block; min-width: 0; }
+.game-copy { margin: 8px 0 16px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+.game-controls fieldset { min-width: 0; margin: 0 0 13px; padding: 10px 12px 12px; border: 1px solid var(--line); border-radius: 8px; }
+.game-controls legend { padding: 0 4px; font-size: 12px; font-weight: 650; }
+.game-key-hint { margin-bottom: 8px; color: var(--muted); font: 11px ui-monospace, monospace; }
+.game-key-hint kbd { display: inline-block; min-width: 19px; padding: 3px; border: 1px solid #d3d6dc; border-radius: 4px; color: var(--ink); text-align: center; background: var(--soft); }
+.game-angle-input { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 11px; align-items: center; }
+.game-angle-input input[type="range"] { min-width: 0; margin: 0; height: 22px; }
+.game-number { display: flex; align-items: center; gap: 4px; font: 12px ui-monospace, monospace; }
+.game-number input { width: 74px; padding: 5px; border: 1px solid #d3d6dc; border-radius: 5px; color: var(--ink); }
+.game-readouts { display: grid; gap: 8px; margin: 18px 0; font-size: 12px; }
+.game-readouts div { display: flex; justify-content: space-between; gap: 8px; }
+.game-readouts dd { margin: 0; font: 12px ui-monospace, monospace; }
+.game-status { min-height: 42px; margin: 0 0 10px; padding: 11px; border-radius: 6px; background: var(--soft); font-size: 12px; line-height: 1.5; }
+.game-status[data-phase="inside"], .game-status[data-phase="hit"] { color: #12603a; background: #eaf8ef; }
+.game-next { border: 0; cursor: pointer; }
+.game-math { margin-bottom: 0; }
 .demo-card > p { margin: 0; padding: 12px 15px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; }
 .angle-stats { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); }
 .angle-stats span { padding: 12px 15px; color: var(--muted); font: 10px ui-monospace, monospace; }

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A forward kinematics challenge: control two joint angles to reach a randomly chosen point.">
+  <title>Target Challenge — Planar Inverse Kinematics</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/styles.css?v=interactive-diagrams">
+</head>
+<body data-page="game">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <button class="mobile-menu" id="mobileMenu" aria-label="Open navigation" aria-expanded="false">☰</button>
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span><strong data-i18n="brand">Planar Inverse Kinematics</strong><small>MATH3900 · GEOMETRY OF IK</small></span></a>
+    <nav class="nav" aria-label="Main navigation">
+      <p data-i18n="navExplore">EXPLORE</p>
+      <a href="introduction.html"><span>00</span><b><span data-lang-en>Introduction</span><span data-lang-zh>導論</span></b></a>
+      <a href="index.html"><span>01</span><b data-i18n="navPlayground">Playground</b></a>
+      <a class="nav-subpage active" href="game.html" aria-current="page"><span aria-hidden="true">↳</span><b><span data-lang-en>Target Challenge</span><span data-lang-zh>目標挑戰</span></b></a>
+      <a href="guide.html"><span>02</span><b data-i18n="navGuide">How it works</b></a>
+      <a href="proof.html"><span>03</span><b><span data-lang-en>Rigorous proofs</span><span data-lang-zh>嚴謹證明</span></b></a>
+      <a href="about.html"><span>04</span><b><span data-lang-en>About &amp; credits</span><span data-lang-zh>關於與鳴謝</span></b></a>
+    </nav>
+    <div class="sidebar-foot"><button class="language-toggle" type="button" data-language-toggle aria-label="Switch language"><span class="selected">EN</span><span>繁中</span></button><p data-i18n="offline">Works fully offline</p></div>
+  </aside>
+
+  <main class="main" id="main">
+    <header class="hero">
+      <div>
+        <p class="eyebrow"><span data-lang-en>FORWARD KINEMATICS GAME</span><span data-lang-zh>正運動學遊戲</span></p>
+        <h1><span data-lang-en>Target Challenge</span><span data-lang-zh>目標挑戰</span></h1>
+        <p class="lede" data-lang-en>Control both joints to move the gripper’s centre into the target ring. Hold it there briefly to score a point.</p>
+        <p class="lede" data-lang-zh>控制兩個關節，把夾爪中心移進目標圈，短暫停留就能得一分。</p>
+      </div>
+      <a class="quiet-link" href="index.html"><span data-lang-en>Back to Playground</span><span data-lang-zh>返回互動實驗室</span> →</a>
+    </header>
+
+    <div class="playground game-layout">
+      <section class="stage-card" aria-labelledby="challenge-board-title">
+        <div class="game-stage-bar">
+          <h2 id="challenge-board-title"><span data-lang-en>Challenge board</span><span data-lang-zh>挑戰場地</span></h2>
+          <div class="game-score"><span data-lang-en>Targets hit</span><span data-lang-zh>已命中</span> <strong id="gameScore">0</strong></div>
+        </div>
+        <div class="game-board">
+          <svg id="gameBoard" viewBox="-5.45 -5.45 10.9 10.9" role="img" aria-labelledby="gameBoardTitle">
+            <title id="gameBoardTitle">Two-link arm, reachable region and target</title>
+            <path d="M4.7 0a4.7 4.7 0 1 0-9.4 0a4.7 4.7 0 1 0 9.4 0z M.7 0a.7 .7 0 1 0-1.4 0a.7 .7 0 1 0 1.4 0z" fill-rule="evenodd" class="game-workspace"/>
+            <path d="M-5 0H5M0-5V5" class="game-axes"/>
+            <text x="5" y="-.16" text-anchor="end">x</text><text x=".12" y="-4.94">y</text>
+            <line id="gameErrorLine" class="game-error-line"/>
+            <circle id="gameTargetRing" class="game-target-ring" r=".24"/>
+            <circle id="gameTargetDot" class="game-target-dot" r=".045"/>
+            <text id="gameTargetLabel" class="game-target-label">T</text>
+            <line id="gameLink1" class="game-link game-link-1" x1="0" y1="0"/>
+            <line id="gameLink2" class="game-link game-link-2"/>
+            <circle cx="0" cy="0" r=".23" class="game-joint"/><circle cx="0" cy="0" r=".075" class="game-joint-core"/>
+            <circle id="gameElbow" r=".19" class="game-joint"/><circle id="gameElbowCore" r=".065" class="game-joint-core"/>
+            <g id="gameGripper">
+              <path d="M-.36-.14H-.24L-.14-.24H.07M-.36.14H-.24L-.14.24H.07"/>
+              <circle r=".08"/>
+            </g>
+          </svg>
+        </div>
+        <div class="game-legend">
+          <span><i class="dot target"></i><span data-lang-en>Target T</span><span data-lang-zh>目標 T</span></span>
+          <span><i class="dot elbow"></i><span data-lang-en>Gripper centre P</span><span data-lang-zh>夾爪中心 P</span></span>
+        </div>
+      </section>
+
+      <section class="control-card game-controls" aria-labelledby="game-controls-title">
+        <h2 id="game-controls-title"><span data-lang-en>Joint controls</span><span data-lang-zh>關節控制</span></h2>
+        <p class="game-copy"><span data-lang-en>Tap a key for 1°, or hold it to turn continuously.</span><span data-lang-zh>輕按一次轉 1°，按住則持續轉動。</span></p>
+        <fieldset>
+          <legend><span class="math-blue">θ₁</span> <span data-lang-en>Shoulder</span><span data-lang-zh>肩角</span></legend>
+          <div class="game-key-hint"><kbd>D</kbd> − <kbd>F</kbd> +</div>
+          <div class="game-angle-input">
+            <input id="gameShoulder" type="range" min="-180" max="180" step="0.1" value="-30" aria-label="Shoulder angle slider">
+            <label class="game-number"><input id="gameShoulderNumber" type="number" min="-180" max="180" step="0.1" value="-30" aria-label="Shoulder angle in degrees">°</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend><span class="math-orange">θ₂</span> <span data-lang-en>Elbow</span><span data-lang-zh>肘角</span></legend>
+          <div class="game-key-hint"><kbd>J</kbd> − <kbd>K</kbd> +</div>
+          <div class="game-angle-input">
+            <input id="gameElbowAngle" type="range" min="-180" max="180" step="0.1" value="80" aria-label="Elbow angle slider">
+            <label class="game-number"><input id="gameElbowNumber" type="number" min="-180" max="180" step="0.1" value="80" aria-label="Elbow angle in degrees">°</label>
+          </div>
+        </fieldset>
+
+        <dl class="game-readouts">
+          <div><dt><span data-lang-en>Target T</span><span data-lang-zh>目標 T</span></dt><dd><output id="gameTargetPosition">—</output></dd></div>
+          <div><dt><span data-lang-en>Gripper P</span><span data-lang-zh>夾爪 P</span></dt><dd><output id="gamePosition">—</output></dd></div>
+          <div><dt><span data-lang-en>Distance |PT|</span><span data-lang-zh>距離 |PT|</span></dt><dd><output id="gameDistance">—</output></dd></div>
+        </dl>
+        <p class="game-status" id="gameStatus" role="status"></p>
+        <button type="button" class="primary-link game-next" id="gameNext"><span data-lang-en>New target</span><span data-lang-zh>換一個目標</span><span aria-hidden="true">→</span></button>
+        <p class="game-copy game-math"><span data-lang-en>The target is sampled from the reachable region for L₁ = 2.7 and L₂ = 2.0. You choose the angles; forward kinematics computes P.</span><span data-lang-zh>目標從 L₁ = 2.7、L₂ = 2.0 的可達範圍隨機選取。你選擇角度，正運動學算出 P。</span></p>
+      </section>
+    </div>
+  </main>
+  <script src="assets/i18n.js"></script>
+  <script src="assets/kinematics.js"></script>
+  <script src="assets/game.js?v=1"></script>
+</body>
+</html>

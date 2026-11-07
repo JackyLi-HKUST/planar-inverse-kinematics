@@ -6,7 +6,7 @@
   <meta name="description" content="A visual, bilingual explanation of 2-DOF planar inverse kinematics.">
   <title>How It Works — Planar Inverse Kinematics</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/styles.css">
+  <link rel="stylesheet" href="assets/styles.css?v=interactive-diagrams">
 </head>
 <body data-page="guide">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -17,6 +17,7 @@
       <p data-i18n="navExplore">EXPLORE</p>
       <a href="introduction.html"><span>00</span><b><span data-lang-en>Introduction</span><span data-lang-zh>導論</span></b></a>
       <a href="index.html"><span>01</span><b data-i18n="navPlayground">Playground</b></a>
+      <a class="nav-subpage" href="game.html"><span aria-hidden="true">↳</span><b><span data-lang-en>Target Challenge</span><span data-lang-zh>目標挑戰</span></b></a>
       <a class="active" href="guide.html"><span>02</span><b data-i18n="navGuide">How it works</b></a>
       <a href="proof.html"><span>03</span><b><span data-lang-en>Rigorous proofs</span><span data-lang-zh>嚴謹證明</span></b></a>
       <a href="about.html"><span>04</span><b><span data-lang-en>About &amp; credits</span><span data-lang-zh>關於與鳴謝</span></b></a>
@@ -38,7 +39,7 @@
       <h1 data-i18n="guideTitle">From a target (x, y) to joint angles</h1>
       <p class="lede" data-lang-en>We will not begin with a formula. First we will name the geometry, identify exactly which angle we need, and only then calculate it.</p>
       <p class="lede" data-lang-zh>我們不會一開始就套公式。先為幾何圖形命名，弄清楚要求的是哪一個角，再開始計算。</p>
-      <div class="given-strip"><span data-i18n="given">GIVEN</span><b>T = (<span data-guide-x>3.2</span>, <span data-guide-y>1.6</span>)</b><b>L₁ = 2.7</b><b>L₂ = 2.0</b></div>
+      <div class="given-strip"><span data-i18n="given">GIVEN</span><b>T = (<span data-guide-x>3.2</span>, <span data-guide-y>1.6</span>)</b><b>L₁ = <span id="guideLength1">2.7</span></b><b>L₂ = <span id="guideLength2">2.0</span></b></div>
       <div class="logic-flow" aria-label="Inverse kinematics reasoning flow">
         <div><small data-lang-en>DEFINE</small><small data-lang-zh>定義</small><strong>θ₁ and θ₂</strong></div>
         <span>→</span>
@@ -61,7 +62,7 @@
 
         <div class="angle-definition-grid">
           <article class="demo-card angle-definition-card">
-            <div class="demo-title"><span data-lang-en>SHOULDER ANGLE</span><span data-lang-zh>肩部角度</span><output>θ₁</output></div>
+            <div class="demo-title"><span data-lang-en>SHOULDER ANGLE</span><span data-lang-zh>肩部角度</span><output id="theta1DefinitionValue">θ₁ = 38°</output></div>
             <canvas id="theta1DefinitionCanvas" width="540" height="330" aria-label="Definition of theta one from the positive x-axis to link one"></canvas>
             <div class="angle-definition-copy">
               <h3><span class="math-blue">θ₁</span><span data-lang-en> is the absolute direction of link 1</span><span data-lang-zh> 是第一段連桿的絕對方向</span></h3>
@@ -74,7 +75,7 @@
           </article>
 
           <article class="demo-card angle-definition-card">
-            <div class="demo-title"><span data-lang-en>ELBOW ANGLE</span><span data-lang-zh>肘部角度</span><output>θ₂</output></div>
+            <div class="demo-title"><span data-lang-en>ELBOW ANGLE</span><span data-lang-zh>肘部角度</span><output id="theta2DefinitionValue">θ₂ = 72°</output></div>
             <canvas id="theta2DefinitionCanvas" width="540" height="330" aria-label="Definition of theta two from link one's forward direction to link two"></canvas>
             <div class="angle-definition-copy">
               <h3><span class="math-orange">θ₂</span><span data-lang-en> is link 2's direction relative to link 1</span><span data-lang-zh> 是第二段相對於第一段的方向</span></h3>
@@ -87,7 +88,7 @@
           </article>
         </div>
 
-        <div class="orientation-equation"><span data-lang-en>Therefore the absolute direction of link 2 is</span><span data-lang-zh>因此，第二段連桿的絕對方向是</span><strong>θ₁ + θ₂</strong></div>
+        <div class="orientation-equation"><span data-lang-en>Therefore the absolute direction of link 2 is</span><span data-lang-zh>因此，第二段連桿的絕對方向是</span><strong>θ₁ + θ₂</strong><output id="absoluteDirectionValue">38° + (72°) = 110°</output></div>
 
         <div class="angle-range-note">
           <div>
@@ -123,7 +124,7 @@
         </div>
       </section>
 
-      <section class="reachability-strip" id="reachability" aria-label="Reachability test">
+      <section class="reachability-strip" id="reachability" tabindex="-1" aria-label="Reachability test">
         <div><p class="eyebrow"><span data-lang-en>THE DECISION GATE</span><span data-lang-zh>關鍵判斷</span></p><h2><span data-lang-en>Can r, L₁ and L₂ form a triangle?</span><span data-lang-zh>r、L₁、L₂ 能否組成三角形？</span></h2></div>
         <div class="reach-result reachable" id="reachStatusBox">
           <strong id="reachHeadline">Yes — they can form a triangle.</strong>
@@ -192,7 +193,7 @@
             <div class="math-block compact">
               <p>cos θ₂ = <span class="fraction"><span>r² − L₁² − L₂²</span><span>2L₁L₂</span></span></p>
               <p class="calculation" id="guideC2Calc">= (12.80 − 7.29 − 4.00) / 10.80</p>
-              <p class="boxed">θ₂ = ± cos⁻¹(<span id="guideC2">0.140</span>) = ±<span id="guideTheta2">82.0°</span></p>
+              <p class="boxed">θ₂ = <span id="theta2Sign">± </span>cos⁻¹(<span id="guideC2">0.140</span>) = <span id="theta2ResultSign">±</span><span id="guideTheta2">82.0°</span></p>
             </div>
           </div>
         </div>
@@ -238,14 +239,14 @@
                 <p data-lang-en>A legal elbow must lie on both circles—not merely one. Therefore the possible elbow positions are exactly their intersections.</p>
                 <p data-lang-zh>合法的肘點必須同時位於兩個圓上，而不是只符合其中一個。因此，兩圓交點正是所有可能的 E。</p>
               </div>
-              <p class="constraint-result"><span data-lang-en>Two intersections give E₊ and E₋: two arm shapes that reach the same T.</span><span data-lang-zh>兩個交點得到 E₊、E₋：兩種不同手臂姿態，但都到達同一個 T。</span></p>
+              <p class="constraint-result" id="intersectionSummary">Two intersections give E₊ and E₋: two arm shapes that reach the same T.</p>
             </div>
             <canvas id="intersectionsCanvas" width="420" height="320" aria-label="Two circles with two elbow intersections"></canvas>
           </article>
         </div>
         <div class="intersection-conclusion">
-          <span class="math-blue">circle(O, L₁)</span><strong>∩</strong><span class="math-orange">circle(T, L₂)</span><strong>=</strong><span>{ E₊, E₋ }</span>
-          <p><span data-lang-en>This is the geometric meaning of the ± sign: the same three side lengths can form a triangle above or below OT.</span><span data-lang-zh>這就是 ± 的幾何意義：相同的三條邊，可以在 OT 的上方或下方組成三角形。</span></p>
+          <span class="math-blue">circle(O, L₁)</span><strong>∩</strong><span class="math-orange">circle(T, L₂)</span><strong>=</strong><span id="intersectionSet">{ E₊, E₋ }</span>
+          <p id="intersectionExplanation">The ± sign describes mirror triangles on opposite sides of OT.</p>
         </div>
       </section>
 
@@ -302,15 +303,15 @@
           <article class="mini-lesson">
             <div class="mini-copy">
               <span class="lesson-number">3</span>
-              <h3><span data-lang-en>Subtract the offset to obtain θ₁</span><span data-lang-zh>從目標方向扣除偏角，得到 θ₁</span></h3>
-              <p data-lang-en>For the elbow-up pose shown here, link 1 lies α below the target ray. Therefore the shoulder rotates through φ − α.</p>
-              <p data-lang-zh>在圖示的肘部向上姿態中，第一段連桿位於目標射線下方 α，所以肩部角度為 φ − α。</p>
+              <h3><span data-lang-en>Apply the offset to obtain θ₁</span><span data-lang-zh>用偏角修正目標方向，得到 θ₁</span></h3>
+              <p data-lang-en>When θ₂ is positive, rotate clockwise from OT by α to find OE. When θ₂ is negative, rotate counter-clockwise instead. Switch branches to compare the two.</p>
+              <p data-lang-zh>θ₂ 為正時，由 OT 順時針轉 α 得到 OE；θ₂ 為負時，則逆時針轉 α。切換分支比較兩種情況。</p>
               <div class="math-block compact">
-                <p><span class="math-blue">θ₁</span> = <span class="math-purple">φ</span> − <span class="math-orange">α</span></p>
-                <p class="calculation">= <span class="math-purple" id="thetaPhi">26.6°</span> − <span class="math-orange" id="thetaAlpha">33.6°</span></p>
+                <p><span class="math-blue">θ₁</span> = <span class="math-purple">φ</span> <span data-guide-offset-sign>−</span> <span class="math-orange">α</span> (mod 360°)</p>
+                <p class="calculation"><span class="math-purple" id="thetaPhi">26.6°</span> <span data-guide-offset-sign>−</span> <span class="math-orange" id="thetaAlpha">33.6°</span></p>
                 <p class="boxed"><span class="math-blue">θ₁</span> = <span id="guideTheta1">−7.0°</span></p>
               </div>
-              <p class="branch-note"><span data-lang-en>For the mirrored elbow-down pose, α changes sign, giving θ₁ = φ + α.</span><span data-lang-zh>鏡像的肘部向下姿態會令 α 改變符號，因此 θ₁ = φ + α。</span></p>
+              <p class="branch-note"><span data-lang-en>α stays non-negative. The branch determines whether to subtract or add it.</span><span data-lang-zh>α 始終非負；分支決定是減去還是加上 α。</span></p>
             </div>
             <div class="demo-card mini-diagram">
               <div class="demo-title"><span data-lang-en>FINAL SHOULDER ANGLE</span><span data-lang-zh>最終肩部角度</span><output>θ₁</output></div>
@@ -324,7 +325,7 @@
       <section class="logic-section final-step" id="result">
         <div class="section-copy">
           <p class="step-label"><span>F</span><span data-lang-en>PUT THE TWO SIGNS BACK</span><span data-lang-zh>代入 θ₂ 的正負號</span></p>
-          <h2><span data-lang-en>Two angle pairs, one target.</span><span data-lang-zh>兩組角度，同一個目標。</span></h2>
+          <h2 id="solutionHeading">Two angle pairs, one target.</h2>
           <p data-lang-en>Use positive θ₂ for one elbow intersection and negative θ₂ for the other. Recalculate θ₁ each time; both pairs reproduce exactly the same T under forward kinematics.</p>
           <p data-lang-zh>θ₂ 取正值時對應其中一個肘部交點，取負值時則對應另一個。每次重新計算 θ₁，兩組答案代回正運動學後都會得到同一個 T。</p>
           <div class="solution-equations">
@@ -335,13 +336,17 @@
         <div class="demo-card final-demo">
           <div class="demo-title"><span data-i18n="compareSolutions">COMPARE SOLUTIONS</span><button id="animateSolutions" type="button" data-i18n="switchPose">Switch pose</button></div>
           <canvas id="solutionsCanvas" width="640" height="430" aria-label="Two robot arm inverse kinematics solutions"></canvas>
-          <p data-i18n="sameTarget">Both poses land on the same target.</p>
+          <p id="solutionsCaption">Both poses land on the same target.</p>
         </div>
       </section>
 
       <section class="edge-cases">
         <p class="eyebrow" data-i18n="edgeCases">EDGE CASES</p><h2 data-i18n="whenSolutions">When are there 0, 1, or 2 solutions?</h2>
-        <div class="case-grid"><article><span class="case-icon no">0</span><h3 data-i18n="zeroSolutions">0 solutions</h3><p data-i18n="zeroText">The circles do not meet. The target lies outside the reachable ring.</p></article><article><span class="case-icon one">1</span><h3 data-i18n="oneSolution">1 solution</h3><p data-i18n="oneText">The circles touch. The links are fully extended or folded.</p></article><article><span class="case-icon two">2</span><h3 data-i18n="twoSolutions">2 solutions</h3><p data-i18n="twoCaseText">The circles cross. Elbow-up and elbow-down are both possible.</p></article></div>
+        <div class="case-grid">
+          <article><span class="case-icon no">0</span><h3 data-i18n="zeroSolutions">0 solutions</h3><p data-i18n="zeroText">The circles do not meet. The target lies outside the reachable ring.</p><button type="button" data-guide-case="2"><span data-lang-en>Try an unreachable target</span><span data-lang-zh>試試不可達的目標</span></button></article>
+          <article><span class="case-icon one">1</span><h3 data-i18n="oneSolution">1 solution</h3><p data-i18n="oneText">The circles touch. The links are fully extended or folded.</p><button type="button" data-guide-case="1"><span data-lang-en>Try the boundary</span><span data-lang-zh>試試邊界</span></button></article>
+          <article><span class="case-icon two">2</span><h3 data-i18n="twoSolutions">2 solutions</h3><p data-i18n="twoCaseText">The circles cross. Elbow-up and elbow-down are both possible.</p><button type="button" data-guide-case="0"><span data-lang-en>Try two solutions</span><span data-lang-zh>試試有兩組解的目標</span></button></article>
+        </div>
       </section>
       </div>
       <footer class="article-footer"><a href="index.html"><span>←</span> <span data-i18n="backPlayground">Back to the playground</span></a><p data-i18n="footerText">Built as an approachable MATH3900 exploration of inverse problems.</p></footer>
@@ -349,6 +354,6 @@
   </main>
   <script src="assets/i18n.js"></script>
   <script src="assets/kinematics.js"></script>
-  <script src="assets/guide.js"></script>
+  <script src="assets/guide.js?v=interactive-diagrams"></script>
 </body>
 </html>

@@ -1,9 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
   const K = window.Kinematics;
-  const state = { x: 3.2, y: 1.6, l1: 2.7, l2: 2.0, branch: 0, dragging: false };
+  const state = { x: 3.2, y: 1.6, l1: 2.7, l2: 2.0, branch: 0, theta1: 38, theta2: 72, baseAngle: 36, targetAngle: 143 };
   const $ = id => document.getElementById(id);
   const ids = ['theta1DefinitionCanvas', 'theta2DefinitionCanvas', 'problemCanvas', 'triangleCanvas', 'betaCanvas', 'theta2Canvas', 'radiusBaseCanvas', 'radiusTargetCanvas', 'intersectionsCanvas', 'phiCanvas', 'alphaCanvas', 'shoulderCanvas', 'solutionsCanvas'];
   const canvases = Object.fromEntries(ids.map(id => [id, $(id)]));
+  const sizes = new Map(Object.values(canvases).map(canvas => [canvas, canvas.width / canvas.height]));
+  const frames = new Map();
+  const origin = { x: 0, y: 0 };
+  let drag = null;
 
   const fmt = (number, digits = 1) => {
     const value = Number(number).toFixed(digits);
@@ -11,20 +15,39 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   const deg = radians => `${fmt(K.toDegrees(radians), 1)}°`;
   const chinese = () => document.documentElement.lang.startsWith('zh');
+  const trText = (en, zh) => chinese() ? zh : en;
+  const wrap = angle => ((angle + 180) % 360 + 360) % 360 - 180;
 
   function setup(canvas, view = 'world') {
     const ctx = canvas.getContext('2d');
-    const width = canvas.getBoundingClientRect().width || 520;
-    const ratio = Number(canvas.getAttribute('width')) / Number(canvas.getAttribute('height'));
+    const width = canvas.clientWidth || 520;
+    const ratio = sizes.get(canvas);
     const height = width / ratio;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
     canvas.style.height = `${height}px`;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const tr = view === 'intersections'
-      ? { width, height, scale: Math.min(width / 9.1, height / 6.8), ox: width * .31, oy: height * .59 }
-      : { width, height, scale: Math.min(width / 10.5, height / 7.2), ox: width * .40, oy: height * .67 };
+    const target = { x: state.x, y: state.y };
+    const { solution } = activeSolution();
+    const bounds = canvas === canvases.problemCanvas
+      ? [{ x: -6.5, y: -5.5 }, { x: 6.5, y: 5.5 }, target]
+      : view === 'intersections'
+      ? [{ x: -state.l1, y: -state.l1 }, { x: state.l1, y: state.l1 },
+        { x: target.x - state.l2, y: target.y - state.l2 }, { x: target.x + state.l2, y: target.y + state.l2 }]
+      : [origin, target, { x: target.x, y: 0 }, ...(solution ? [solution.elbow] : [])];
+    const minX = Math.min(...bounds.map(p => p.x)), maxX = Math.max(...bounds.map(p => p.x));
+    const minY = Math.min(...bounds.map(p => p.y)), maxY = Math.max(...bounds.map(p => p.y));
+    const tr = drag?.canvas === canvas && drag.world ? drag.frame : {
+      width, height,
+      scale: Math.min((width - 68) / Math.max(5.4, maxX - minX), (height - 70) / Math.max(3.5, maxY - minY)),
+      ox: width / 2, oy: height / 2
+    };
+    if (!(drag?.canvas === canvas && drag.world)) {
+      tr.ox -= (minX + maxX) / 2 * tr.scale;
+      tr.oy += (minY + maxY) / 2 * tr.scale;
+    }
+    frames.set(canvas, tr);
     return { ctx, tr };
   }
 
@@ -68,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function activeSolution() {
     const result = K.inverse(state.x, state.y, state.l1, state.l2);
-    return { result, solution: result.solutions[0] };
+    return { result, solution: result.solutions[state.branch] || result.solutions[0] };
   }
   function displayPose(result) {
     if (result.solutions.length) return result.solutions[0];
@@ -118,10 +141,10 @@ document.addEventListener('DOMContentLoaded', () => {
     return { x: center.x + (radius + 14) * Math.cos(mid), y: center.y + (radius + 14) * Math.sin(mid) };
   }
 
-  function directedArc(ctx, center, radius, startAngle, endAngle, color) {
-    let sweep = endAngle - startAngle;
+  function directedArc(ctx, center, radius, startAngle, sweep, color) {
     while (sweep > Math.PI) sweep -= Math.PI * 2;
     while (sweep < -Math.PI) sweep += Math.PI * 2;
+    if (Math.abs(sweep) < 1e-8) return { x: center.x + radius, y: center.y - 17 };
     const counterClockwise = sweep < 0;
     ctx.save();
     ctx.beginPath(); ctx.arc(center.x, center.y, radius, startAngle, startAngle + sweep, counterClockwise);
@@ -143,28 +166,29 @@ document.addEventListener('DOMContentLoaded', () => {
   function drawAngleDefinitions() {
     {
       const { ctx, tr } = setup(canvases.theta1DefinitionCanvas); const h = drawing(ctx, tr); clear(ctx, tr);
-      const o = { x: tr.width * .27, y: tr.height * .68 };
-      const length = Math.min(tr.width * .52, tr.height * .48);
-      const endAngle = -38 * Math.PI / 180;
+      const o = { x: tr.width * .5, y: tr.height * .53 };
+      const length = Math.min(tr.width * .34, tr.height * .32);
+      const endAngle = -K.toRadians(state.theta1);
+      tr.pivot = o;
       const xEnd = { x: o.x + length * 1.15, y: o.y };
       const e = { x: o.x + length * Math.cos(endAngle), y: o.y + length * Math.sin(endAngle) };
       h.line(o, xEnd, '#9da3ad', 2, [7, 5]);
       h.line(o, e, '#5475e8', 7);
       h.circle(o, 8, '#17191d', '#fff', 2); h.circle(e, 7, '#5475e8', '#fff', 2);
-      const labelAt = directedArc(ctx, o, 48, 0, endAngle, '#5475e8');
-      h.text('θ₁', labelAt, '#3f61d6', 'center', 13, 800);
+      const labelAt = directedArc(ctx, o, Math.min(44, length * .52), 0, endAngle, '#5475e8');
+      if (Math.abs(state.theta1) >= 14) h.text('θ₁', labelAt, '#3f61d6', 'center', 13, 800);
       h.text('O', { x: o.x - 13, y: o.y + 15 }, '#17191d', 'right', 11, 700);
       h.text('E', { x: e.x + 11, y: e.y - 10 }, '#5475e8', 'left', 11, 700);
       h.text(chinese() ? '起始：正 x 軸' : 'START · +x axis', { x: xEnd.x, y: xEnd.y + 17 }, '#7d828a', 'right', 10, 700);
-      h.text(chinese() ? '終止' : 'END', midpoint(o, e, 12, -17), '#3f61d6', 'center', 10, 700);
-      h.text(chinese() ? '逆時針為正' : 'counter-clockwise is +', { x: tr.width * .74, y: 30 }, '#6d727b', 'center', 10, 600);
     }
     {
       const { ctx, tr } = setup(canvases.theta2DefinitionCanvas); const h = drawing(ctx, tr); clear(ctx, tr);
-      const e = { x: tr.width * .36, y: tr.height * .68 };
-      const length = Math.min(tr.width * .46, tr.height * .46);
-      const startAngle = -20 * Math.PI / 180;
-      const endAngle = startAngle - 72 * Math.PI / 180;
+      const e = { x: tr.width * .5, y: tr.height * .53 };
+      const length = Math.min(tr.width * .37, tr.height * .37);
+      const startAngle = -K.toRadians(state.theta1);
+      const endAngle = startAngle - K.toRadians(state.theta2);
+      tr.pivot = e;
+      tr.start = state.theta1;
       const behind = { x: e.x - length * .60 * Math.cos(startAngle), y: e.y - length * .60 * Math.sin(startAngle) };
       const forward = { x: e.x + length * 1.02 * Math.cos(startAngle), y: e.y + length * 1.02 * Math.sin(startAngle) };
       const t = { x: e.x + length * .84 * Math.cos(endAngle), y: e.y + length * .84 * Math.sin(endAngle) };
@@ -172,14 +196,12 @@ document.addEventListener('DOMContentLoaded', () => {
       h.line(e, forward, '#9da3ad', 2, [7, 5]);
       h.line(e, t, '#ff5a36', 7);
       h.circle(e, 8, '#17191d', '#fff', 2); h.circle(t, 7, '#ff5a36', '#fff', 2);
-      const labelAt = directedArc(ctx, e, 47, startAngle, endAngle, '#ff5a36');
-      h.text('θ₂', labelAt, '#e24a2b', 'center', 13, 800);
+      const labelAt = directedArc(ctx, e, Math.min(44, length * .45), startAngle, -K.toRadians(state.theta2), '#ff5a36');
+      if (Math.abs(state.theta2) >= 14) h.text('θ₂', labelAt, '#e24a2b', 'center', 13, 800);
       h.text('E', { x: e.x - 13, y: e.y + 15 }, '#17191d', 'right', 11, 700);
       h.text('T', { x: t.x + 11, y: t.y - 9 }, '#ff5a36', 'left', 11, 700);
       h.text(chinese() ? '第一段連桿' : 'link 1', midpoint(behind, e, -5, 17), '#5475e8', 'center', 10, 700);
       h.text(chinese() ? '起始' : 'START', { x: forward.x - 10, y: forward.y + 20 }, '#7d828a', 'center', 10, 700);
-      h.text(chinese() ? '終止' : 'END', { x: t.x + 15, y: t.y + 17 }, '#e24a2b', 'left', 10, 700);
-      h.text(chinese() ? '逆時針為正' : 'counter-clockwise is +', { x: tr.width * .75, y: 30 }, '#6d727b', 'center', 10, 600);
     }
   }
 
@@ -268,20 +290,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const { solution } = activeSolution(); if (!solution) return;
     const o = h.point({ x: 0, y: 0 }), e = h.point(solution.elbow), t = h.point(solution.end);
     const dx = e.x - o.x, dy = e.y - o.y, length = Math.hypot(dx, dy);
-    const forward = { x: e.x + dx / length * 100, y: e.y + dy / length * 100 };
+    const extension = Math.min(57, tr.scale * 1.2);
+    const forward = { x: e.x + dx / length * extension, y: e.y + dy / length * extension };
     h.line(o, e, '#5475e8', 6); h.line(e, t, '#ff5a36', 6); h.line(e, forward, '#7f858e', 2, [6, 5]);
     h.circle(o, 6, '#17191d', '#fff', 2); h.circle(e, 7, '#5475e8', '#fff', 2); h.circle(t, 6, '#ff5a36', '#fff', 2);
-    const labelAt = arcBetween(ctx, e, 34, forward, t, '#ff5a36');
-    h.text('|θ₂|', labelAt, '#e24a2b', 'center', 12, 800);
-    h.text(chinese() ? '連桿 1 延伸線' : 'link 1 forward', { x: forward.x, y: forward.y - 13 }, '#7f858e');
+    const start = -solution.theta1;
+    const labelAt = directedArc(ctx, e, Math.min(30, extension * .55), start, -solution.theta2, '#ff5a36');
+    if (Math.abs(solution.theta2) > .2) h.text('θ₂', labelAt, '#e24a2b', 'center', 12, 800);
   }
 
   function drawSingleRadius(canvas, type) {
     const { ctx, tr } = setup(canvas); clear(ctx, tr);
     const h = drawing(ctx, tr);
     const center = { x: tr.width * .5, y: tr.height * .53 };
-    const radius = Math.min(tr.width, tr.height) * .29;
-    const angle = type === 'base' ? -0.62 : -2.50;
+    const radius = Math.min(tr.width, tr.height) * .32 * (type === 'base' ? state.l1 : state.l2) / 3.2;
+    const angle = -K.toRadians(type === 'base' ? state.baseAngle : state.targetAngle);
+    tr.pivot = center;
     const end = { x: center.x + radius * Math.cos(angle), y: center.y + radius * Math.sin(angle) };
     const color = type === 'base' ? '#5475e8' : '#ff5a36';
     const fill = type === 'base' ? 'rgba(84,117,232,.05)' : 'rgba(255,90,54,.045)';
@@ -310,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
     h.text('O', { x: o.x - 13, y: o.y + 14 }, '#17191d'); h.text('T', { x: t.x + 13, y: t.y + 12 }, '#ff5a36');
     result.solutions.forEach((solution, index) => {
       const e = h.point(solution.elbow); h.circle(e, 8, '#7b5bc7', '#fff', 2);
-      h.text(index === 0 ? 'E₊' : 'E₋', { x: e.x + 13, y: e.y + (index === 0 ? -12 : 13) }, '#6e4eb6', 'left', 12, 700);
+      h.text(result.count === 1 ? 'E' : index === 0 ? 'E₊' : 'E₋', { x: e.x + 13, y: e.y + (index === 0 ? -12 : 13) }, '#6e4eb6', 'left', 12, 700);
     });
   }
 
@@ -323,8 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
     h.line(p, t, '#a5aab2', 2, [6, 5]);
     h.line(o, t, '#7b5bc7', 4);
     h.circle(o, 7, '#17191d', '#fff', 2); h.circle(p, 4, '#a2a7af', '#fff', 1.5); h.circle(t, 8, '#ff5a36', '#fff', 2);
-    const xRef = { x: o.x + 100, y: o.y };
-    const phiAt = arcBetween(ctx, o, 48, xRef, t, '#7b5bc7');
+    const phiAt = directedArc(ctx, o, 35, 0, Math.atan2(t.y - o.y, t.x - o.x), '#7b5bc7');
     h.text('φ', phiAt, '#6e4eb6', 'center', 13, 800);
     h.text('x', midpoint(o, p, 0, state.y >= 0 ? 18 : -18), '#7d828a', 'center', 12, 700);
     h.text('y', midpoint(p, t, state.x >= 0 ? 20 : -20, 0), '#7d828a', 'center', 12, 700);
@@ -338,7 +361,6 @@ document.addEventListener('DOMContentLoaded', () => {
     h.line(o, e, '#5475e8', 5); h.line(e, t, '#ff5a36', 5); h.line(o, t, '#7b5bc7', 2.5, [7, 5]);
     h.circle(o, 8, '#17191d', '#fff', 2); h.circle(e, 7, '#5475e8', '#fff', 2); h.circle(t, 7, '#ff5a36', '#fff', 2);
     const alphaAt = arcBetween(ctx, o, 43, t, e, '#ff5a36');
-    const alpha = Math.acos(K.clamp((state.l1 ** 2 + Math.hypot(state.x, state.y) ** 2 - state.l2 ** 2) / (2 * state.l1 * Math.hypot(state.x, state.y)), -1, 1));
     h.text('α', alphaAt, '#e24a2b', 'center', 13, 800);
     sideLabel(h, o, e, 'L₁', '#5475e8', -20, .70);
     sideLabel(h, e, t, 'L₂', '#ff5a36', -20);
@@ -354,8 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
     h.line(o, e, '#5475e8', 7);
     h.line(e, t, 'rgba(255,90,54,.22)', 5);
     h.circle(o, 8, '#17191d', '#fff', 2); h.circle(e, 7, '#5475e8', '#fff', 2); h.circle(t, 6, '#ff5a36', '#fff', 2);
-    const xRef = { x: o.x + 100, y: o.y };
-    const thetaAt = arcBetween(ctx, o, 55, xRef, e, '#5475e8');
+    const thetaAt = directedArc(ctx, o, 37, 0, -solution.theta1, '#5475e8');
     h.text('θ₁', thetaAt, '#3f61d6', 'center', 13, 800);
     h.text(chinese() ? '第一段連桿 OE' : 'link 1 · OE', midpoint(o, e, 0, 22), '#5475e8');
     h.text(chinese() ? '目標方向 OT' : 'target direction · OT', midpoint(o, t, 0, -18), '#6e4eb6');
@@ -364,7 +385,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function drawSolutions() {
     const { ctx, tr } = setup(canvases.solutionsCanvas); const h = drawing(ctx, tr); clear(ctx, tr); axes(h, tr);
     const result = K.inverse(state.x, state.y, state.l1, state.l2);
-    result.solutions.forEach((solution, index) => robot(ctx, h, solution, index === state.branch ? 1 : .16));
+    const selected = result.solutions[state.branch] || result.solutions[0];
+    result.solutions.filter(solution => solution !== selected).forEach(solution => robot(ctx, h, solution, .16));
+    if (selected) robot(ctx, h, selected);
     const target = h.point({ x: state.x, y: state.y });
     h.circle(target, 12, '#ff5a36', '#fff', 2);
     h.text('T', { x: target.x + 16, y: target.y - 20 }, '#ff5a36', 'left', 12, 700);
@@ -374,22 +397,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const result = K.inverse(state.x, state.y, state.l1, state.l2);
     const r = Math.hypot(state.x, state.y);
     const derivation = $('derivationContent');
-    derivation.hidden = !result.reachable;
-    document.querySelectorAll('[data-derivation-nav]').forEach(link => { link.hidden = !result.reachable; });
-    document.querySelectorAll('[data-guide-x]').forEach(node => node.textContent = fmt(state.x, 1));
-    document.querySelectorAll('[data-guide-y]').forEach(node => node.textContent = fmt(state.y, 1));
+    const regular = result.reachable && result.count !== Infinity;
+    derivation.hidden = !regular;
+    document.querySelectorAll('[data-derivation-nav]').forEach(link => { link.hidden = !regular; });
+    document.querySelectorAll('[data-guide-x]').forEach(node => node.textContent = fmt(state.x, 2));
+    document.querySelectorAll('[data-guide-y]').forEach(node => node.textContent = fmt(state.y, 2));
+    $('guideLength1').textContent = fmt(state.l1);
+    $('guideLength2').textContent = fmt(state.l2);
     $('guideR').textContent = fmt(r, 2);
     $('targetReadout').textContent = `T = (${fmt(state.x, 2)}, ${fmt(state.y, 2)})`;
     const statusBox = $('reachStatusBox');
     statusBox.classList.toggle('unreachable', !result.reachable);
     statusBox.classList.toggle('reachable', result.reachable);
     if (result.reachable) {
-      $('reachHeadline').textContent = result.count === 1
+      $('reachHeadline').textContent = result.count === Infinity
+        ? trText('Infinitely many folded poses.', '有無限多種折疊姿態。')
+        : result.count === 1
         ? (chinese() ? '可以——但只是在邊界相切。' : 'Yes — but only at the boundary.')
         : (chinese() ? '可以組成三角形。' : 'Yes — they can form a triangle.');
-      $('reachReason').textContent = chinese()
-        ? '目標距離 r 位於機械臂可達的長度範圍內，因此可以繼續求角度。'
-        : 'The target distance r lies inside the arm’s reachable interval, so we can continue to the angles.';
+      $('reachReason').textContent = result.count === Infinity
+        ? trText('The circles coincide. With equal links and T at O, θ₂ = 180° and every θ₁ works. The ray OT has no direction.', '兩圓重合。兩段等長且 T 位於 O 時，θ₂ = 180°，而 θ₁ 可以是任何角度。此時 OT 沒有方向。')
+        : result.count === 1
+          ? trText('The links are collinear. The two branches meet in one pose.', '兩段連桿共線，兩個分支合併成一組解。')
+          : trText('The target distance r lies inside the arm’s reachable interval, so we can continue to the angles.', '目標距離 r 位於機械臂可達的長度範圍內，因此可以繼續求角度。');
       $('reachCheck').textContent = `${fmt(result.inner, 1)} ≤ ${fmt(r, 2)} ≤ ${fmt(result.outer, 1)}  ✓`;
     } else if (r > result.outer) {
       $('reachHeadline').textContent = chinese() ? '不能組成三角形——目標太遠。' : 'Cannot form a triangle — the target is too far away.';
@@ -404,49 +434,218 @@ document.addEventListener('DOMContentLoaded', () => {
         : `Even fully folded, the unequal links differ by ${fmt(result.inner, 1)}, but r is only ${fmt(r, 2)}.`;
       $('reachCheck').textContent = `${fmt(r, 2)} < |L₁ − L₂| = ${fmt(result.inner, 1)}  ✕`;
     }
-    if (result.solutions.length) {
+    if (regular) {
       $('guideC2Calc').textContent = `= (${fmt(r * r, 2)} − ${fmt(state.l1 ** 2, 2)} − ${fmt(state.l2 ** 2, 2)}) / ${fmt(2 * state.l1 * state.l2, 2)}`;
       $('guideC2').textContent = fmt(result.c2, 3);
       $('intersectionCount').textContent = chinese() ? `${result.count} 個交點` : `${result.count} intersection${result.count === 1 ? '' : 's'}`;
-      const up = result.solutions[0], down = result.solutions[result.solutions.length - 1];
+      const [up, down] = result.solutions;
+      const selected = result.solutions[state.branch] || up;
       const beta = Math.PI - Math.abs(up.theta2);
       const phi = Math.atan2(state.y, state.x);
-      const alpha = Math.acos(K.clamp((state.l1 ** 2 + r ** 2 - state.l2 ** 2) / (2 * state.l1 * r), -1, 1));
+      const alpha = Math.abs(Math.atan2(state.l2 * Math.sin(up.theta2), state.l1 + state.l2 * Math.cos(up.theta2)));
       $('betaValue').textContent = deg(beta); $('guideTheta2').textContent = deg(Math.abs(up.theta2));
-      $('guideTheta1').textContent = deg(up.theta1); $('phiInline').textContent = deg(phi);
+      $('theta2Sign').textContent = result.count === 2 ? '± ' : '';
+      $('theta2ResultSign').textContent = result.count === 2 ? '±' : '';
+      $('guideTheta1').textContent = `${fmt(wrap(K.toDegrees(selected.theta1)))}°`; $('phiInline').textContent = deg(phi);
       $('alphaCosCalc').textContent = `= (${fmt(state.l1 ** 2, 2)} + ${fmt(r ** 2, 2)} − ${fmt(state.l2 ** 2, 2)}) / ${fmt(2 * state.l1 * r, 2)}`;
       $('alphaInline').textContent = deg(alpha); $('thetaPhi').textContent = deg(phi); $('thetaAlpha').textContent = deg(alpha);
-      $('guideUpPair').textContent = `(θ₁, θ₂) = (${deg(up.theta1)}, ${deg(up.theta2)})`;
-      $('guideDownPair').textContent = `(θ₁, θ₂) = (${deg(down.theta1)}, ${deg(down.theta2)})`;
+      document.querySelectorAll('[data-guide-offset-sign]').forEach(node => { node.textContent = selected.theta2 < 0 ? '+' : '−'; });
+      $('guideUpPair').textContent = `(θ₁, θ₂) = (${fmt(wrap(K.toDegrees(up.theta1)))}°, ${deg(up.theta2)})`;
+      $('guideDownPair').parentElement.hidden = !down;
+      if (down) $('guideDownPair').textContent = `(θ₁, θ₂) = (${fmt(wrap(K.toDegrees(down.theta1)))}°, ${deg(down.theta2)})`;
+      $('intersectionSet').textContent = down ? '{ E₊, E₋ }' : '{ E }';
+      $('intersectionSummary').textContent = down
+        ? trText('The two intersections E₊ and E₋ give two poses that reach the same T.', '兩個交點 E₊、E₋ 對應兩種到達同一個 T 的姿態。')
+        : trText('The circles touch at E, so only one pose reaches T.', '兩圓在 E 點相切，因此只有一種姿態能到達 T。');
+      $('intersectionExplanation').textContent = down
+        ? trText('The ± sign describes mirror triangles on opposite sides of OT.', '± 代表位於 OT 兩側、互為鏡像的三角形。')
+        : trText('At tangency, the mirror triangles collapse onto the same line.', '兩圓相切時，鏡像三角形都退化在同一直線上。');
+      $('solutionHeading').textContent = down
+        ? trText('Two angle pairs, one target.', '兩組角度，同一個目標。')
+        : trText('One angle pair at the boundary.', '邊界上只有一組角度。');
+      $('solutionsCaption').textContent = down ? trText('Both poses land on the same target.', '兩種姿態都到達同一目標。') : trText('At the boundary, the two poses coincide.', '在邊界上，兩種姿態重合。');
     }
     drawAngleDefinitions(); drawProblem();
-    if (result.reachable) {
+    if (regular) {
       drawTriangle(); drawBeta(); drawTheta2();
       drawSingleRadius(canvases.radiusBaseCanvas, 'base'); drawSingleRadius(canvases.radiusTargetCanvas, 'target');
       drawIntersections(); drawPhi(); drawAlpha(); drawShoulder(); drawSolutions();
     }
+    syncControls(result);
   }
 
-  function pointerWorld(event) {
-    const canvas = canvases.problemCanvas;
-    const rect = canvas.getBoundingClientRect();
-    const tr = { width: rect.width, height: rect.height, scale: Math.min(rect.width / 10.5, rect.height / 7.2), ox: rect.width * .40, oy: rect.height * .67 };
-    return { x: (event.clientX - rect.left - tr.ox) / tr.scale, y: (tr.oy - (event.clientY - rect.top)) / tr.scale };
+  const controls = [];
+  const panels = new Map();
+  const localAngles = {
+    theta1DefinitionCanvas: 'theta1', theta2DefinitionCanvas: 'theta2',
+    radiusBaseCanvas: 'baseAngle', radiusTargetCanvas: 'targetAngle'
+  };
+  const targetAngle = () => Math.atan2(state.y, state.x);
+  const distance = () => Math.hypot(state.x, state.y);
+  const inner = () => Math.abs(state.l1 - state.l2);
+  const outer = () => state.l1 + state.l2;
+  const distanceMin = () => inner() || .01;
+  const setPolar = (r, angle = targetAngle()) => {
+    state.x = r * Math.cos(angle);
+    state.y = r * Math.sin(angle);
+  };
+  const setDistance = value => setPolar(K.clamp(value, distanceMin(), outer()));
+
+  function panel(id) {
+    if (panels.has(id)) return panels.get(id);
+    const canvas = canvases[id];
+    const element = document.createElement('div');
+    element.className = 'guide-controls';
+    const hint = document.createElement('p');
+    hint.className = 'guide-control-hint';
+    element.append(hint);
+    canvas.after(element);
+    panels.set(id, element);
+    return element;
   }
-  function moveTarget(event) {
-    let p = pointerWorld(event);
-    state.x = K.clamp(p.x, -4.2, 5.8);
-    state.y = K.clamp(p.y, -2.2, 4.5);
+
+  function slider(id, names, get, set, min, max, step, format) {
+    const label = document.createElement('label');
+    label.className = 'guide-slider';
+    const name = document.createElement('span');
+    const input = document.createElement('input');
+    input.type = 'range';
+    input.step = step;
+    const value = document.createElement('span');
+    value.className = 'guide-slider-value';
+    value.setAttribute('aria-hidden', 'true');
+    label.append(name, input, value);
+    panel(id).append(label);
+    input.addEventListener('input', () => { set(Number(input.value)); update(); });
+    controls.push(result => {
+      name.textContent = trText(...names);
+      input.min = typeof min === 'function' ? min() : min;
+      input.max = typeof max === 'function' ? max() : max;
+      const current = get(result);
+      input.value = current;
+      value.textContent = format(current);
+      input.setAttribute('aria-valuetext', value.textContent);
+    });
+  }
+
+  function button(container, names, action) {
+    const control = document.createElement('button');
+    control.type = 'button';
+    container.append(control);
+    control.addEventListener('click', action);
+    controls.push(() => { control.textContent = trText(...names); });
+    return control;
+  }
+
+  function syncControls(result) {
+    controls.forEach(sync => sync(result));
+    panels.forEach((element, id) => {
+      const hint = id.startsWith('theta') && id.endsWith('DefinitionCanvas')
+        ? trText('Drag the link endpoint or use the slider.', '拖動連桿端點，或使用滑桿。')
+        : localAngles[id] ? trText('Drag E around the circle or use the slider.', '沿圓周拖動 E，或使用滑桿。')
+          : id === 'problemCanvas' ? trText('Drag T or use the sliders. All steps share this target and these lengths.', '拖動 T 或使用滑桿。各步驟共用這個目標及連桿長度。')
+            : trText('Drag T within reach, or use the controls below.', '在可達範圍內拖動 T，或使用下方控制。');
+      element.firstElementChild.textContent = hint;
+    });
+    $('theta1DefinitionValue').textContent = `θ₁ = ${fmt(state.theta1, 0)}°`;
+    $('theta2DefinitionValue').textContent = `θ₂ = ${fmt(state.theta2, 0)}°`;
+    $('absoluteDirectionValue').textContent = `${fmt(state.theta1, 0)}° + (${fmt(state.theta2, 0)}°) = ${fmt(state.theta1 + state.theta2, 0)}°`;
+    const active = result.solutions[state.branch] || result.solutions[0];
+    const branchText = active?.theta2 < 0 ? 'θ₂ < 0' : 'θ₂ > 0';
+    [$('animateSolutions'), shoulderBranch].forEach(control => {
+      control.disabled = result.count !== 2;
+      control.textContent = result.count === 2
+        ? trText(`Switch branch · ${branchText}`, `切換分支 · ${branchText}`)
+        : trText('One branch at the boundary', '邊界上只有一組解');
+    });
+  }
+
+  const angleFmt = value => `${fmt(value, 0)}°`;
+  const addAngle = (id, key, names) => slider(id, names, () => state[key], value => { state[key] = value; }, -180, 180, 1, angleFmt);
+  addAngle('theta1DefinitionCanvas', 'theta1', ['θ₁ · shoulder', 'θ₁ · 肩角']);
+  addAngle('theta2DefinitionCanvas', 'theta2', ['θ₂ · elbow', 'θ₂ · 肘角']);
+  addAngle('radiusBaseCanvas', 'baseAngle', ['Turn around O', '繞 O 旋轉']);
+  addAngle('radiusTargetCanvas', 'targetAngle', ['Turn around T', '繞 T 旋轉']);
+  for (const axis of ['x', 'y']) {
+    slider('problemCanvas', [axis, axis], () => state[axis], value => { state[axis] = value; }, -8, 8, .01, v => fmt(v, 2));
+  }
+  for (const [key, label] of [['l1', 'L₁'], ['l2', 'L₂']]) {
+    slider('problemCanvas', [label, label], () => state[key], value => { state[key] = value; }, 1, 3.2, .1, fmt);
+  }
+  const examples = document.createElement('div');
+  examples.className = 'guide-demo-buttons';
+  panel('problemCanvas').append(examples);
+  const presets = [
+    [['Two solutions', '兩個解'], () => setPolar((inner() + outer()) / 2, Math.PI / 6)],
+    [['One solution', '一個解'], () => setPolar(outer(), Math.PI / 6)],
+    [['Too far', '太遠'], () => setPolar(outer() + .8, Math.PI / 6)],
+    [['Too close / centre', '太近／圓心'], () => setPolar(0, 0)],
+    [['Reset', '重設'], () => Object.assign(state, { x: 3.2, y: 1.6, l1: 2.7, l2: 2, branch: 0 })]
+  ];
+  presets.forEach(([names, choose]) => button(examples, names, () => { choose(); update(); }));
+  document.querySelectorAll('[data-guide-case]').forEach(control => {
+    control.addEventListener('click', () => {
+      presets[Number(control.dataset.guideCase)][1]();
+      $('reachability').focus();
+      update();
+      $('reachability').scrollIntoView({ block: 'center' });
+    });
+  });
+  for (const id of ['triangleCanvas', 'intersectionsCanvas', 'alphaCanvas', 'solutionsCanvas']) {
+    slider(id, ['Distance r', '距離 r'], distance, setDistance, distanceMin, outer, 'any', value => fmt(value, 2));
+  }
+  for (const id of ['betaCanvas', 'theta2Canvas']) {
+    slider(id, id === 'betaCanvas' ? ['Internal angle β', '內角 β'] : ['Bend |θ₂|', '彎曲幅度 |θ₂|'],
+      result => id === 'betaCanvas' ? 180 - K.toDegrees(Math.acos(result.c2)) : K.toDegrees(Math.acos(result.c2)),
+      value => {
+        const bend = K.toRadians(id === 'betaCanvas' ? 180 - value : value);
+        setDistance(Math.sqrt(Math.max(0, state.l1 ** 2 + state.l2 ** 2 + 2 * state.l1 * state.l2 * Math.cos(bend))));
+      }, 0, 180, 'any', angleFmt);
+  }
+  slider('phiCanvas', ['Direction φ', '目標方向 φ'], () => K.toDegrees(targetAngle()),
+    value => setPolar(distance(), K.toRadians(value)), -180, 180, 1, angleFmt);
+  const switchBranch = () => { state.branch = 1 - state.branch; update(); };
+  const shoulderBranch = button(panel('shoulderCanvas'), ['', ''], switchBranch);
+  $('animateSolutions').addEventListener('click', switchBranch);
+
+  function movePoint(event) {
+    const { canvas, frame, world } = drag;
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left, y = event.clientY - rect.top;
+    if (!world) {
+      const angle = K.toDegrees(Math.atan2(frame.pivot.y - y, x - frame.pivot.x));
+      state[localAngles[canvas.id]] = Math.round(wrap(angle - (frame.start || 0)));
+    } else {
+      const xWorld = K.clamp((x - frame.ox) / frame.scale, -8, 8);
+      const yWorld = K.clamp((frame.oy - y) / frame.scale, -8, 8);
+      if (canvas === canvases.problemCanvas) {
+        state.x = xWorld; state.y = yWorld;
+      } else {
+        setPolar(K.clamp(Math.hypot(xWorld, yWorld), distanceMin(), outer()), Math.atan2(yWorld, xWorld));
+      }
+    }
     update();
   }
-  canvases.problemCanvas.addEventListener('pointerdown', event => {
-    state.dragging = true; canvases.problemCanvas.setPointerCapture(event.pointerId); moveTarget(event);
-  });
-  canvases.problemCanvas.addEventListener('pointermove', event => { if (state.dragging) moveTarget(event); });
-  canvases.problemCanvas.addEventListener('pointerup', event => {
-    state.dragging = false; canvases.problemCanvas.releasePointerCapture(event.pointerId);
-  });
-  $('animateSolutions').addEventListener('click', () => { state.branch = state.branch ? 0 : 1; drawSolutions(); });
+
+  for (const canvas of Object.values(canvases)) {
+    canvas.classList.add('guide-draggable');
+    canvas.addEventListener('pointerdown', event => {
+      if (drag || event.button !== 0) return;
+      drag = { canvas, frame: frames.get(canvas), world: !localAngles[canvas.id], pointer: event.pointerId };
+      canvas.setPointerCapture(event.pointerId);
+      movePoint(event);
+    });
+    canvas.addEventListener('pointermove', event => {
+      if (drag?.canvas === canvas && drag.pointer === event.pointerId) movePoint(event);
+    });
+    for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+      canvas.addEventListener(type, event => {
+        if (drag?.canvas !== canvas || drag.pointer !== event.pointerId) return;
+        drag = null;
+        update();
+      });
+    }
+  }
   window.addEventListener('resize', update);
   window.addEventListener('languagechange', update);
   update();
