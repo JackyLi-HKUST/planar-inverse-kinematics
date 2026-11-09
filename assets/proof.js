@@ -1,242 +1,193 @@
-(() => {
-  const K = window.Kinematics;
-  const controls = {
-    x: document.getElementById('proofX'),
-    y: document.getElementById('proofY'),
-    l1: document.getElementById('proofL1'),
-    l2: document.getElementById('proofL2')
+document.addEventListener('DOMContentLoaded', () => {
+  const $ = id => document.getElementById(id);
+  const tr = (en, zh) => document.documentElement.lang.startsWith('zh') ? zh : en;
+  const state = { r: 2.4, angles: { a: 0, b: 90 }, equal: true, side: 1 };
+  const distance = $('follow-distance');
+  const lengthPicker = $('follow-lengths');
+  const branchPicker = $('follow-branch');
+  const innerButton = $('follow-inner');
+  const maxDistance = Number(distance.max);
+  const l1 = 2;
+  const lengths = () => {
+    const l2 = state.equal ? l1 : 1.25;
+    return { l2, inner: l1 - l2, outer: l1 + l2 };
   };
-  const outputs = {
-    x: document.getElementById('proofXValue'),
-    y: document.getElementById('proofYValue'),
-    l1: document.getElementById('proofL1Value'),
-    l2: document.getElementById('proofL2Value')
-  };
-  const workspace = document.getElementById('proofWorkspaceCanvas');
-  const jacobian = document.getElementById('jacobianCanvas');
-  if (!K || !workspace || !jacobian || Object.values(controls).some(control => !control)) return;
+  const angleInputs = { a: $('follow-angle-a'), b: $('follow-angle-b') };
+  const boards = {};
 
-  const state = { x: 3.2, y: 1.6, l1: 2.7, l2: 2, dragging: false, view: null, result: null };
-  const palette = { ink: '#17191d', muted: '#7b8089', line: '#e5e7eb', blue: '#5475e8', orange: '#ff5a36', purple: '#7b5bc7', paper: '#fcfcfd' };
+  for (const svg of document.querySelectorAll('[data-follow-board]')) {
+    // These are static SVG elements; only their geometry and text change.
+    svg.insertAdjacentHTML('beforeend', `
+      <circle class="follow-workspace" data-part="outer"/>
+      <circle class="follow-workspace-hole" data-part="inner"/>
+      <path class="follow-axes" d="M-4.3 0H4.3M0-4.3V4.3"/>
+      <text class="follow-axis-label" x="4.37" y="-.13">x</text>
+      <text class="follow-axis-label" x=".13" y="-4.36">y</text>
+      <line class="follow-ray" data-part="ray" x1="0" y1="0"/>
+      <circle class="follow-locus" data-part="locus" r="2"/>
+      <g data-part="pose">
+        <line class="follow-link link-one" data-part="link1" x1="0" y1="0"/>
+        <line class="follow-link link-two" data-part="link2"/>
+        <circle class="follow-elbow" data-part="elbow" r=".14"/>
+        <text class="follow-elbow-label" data-part="elbowLabel">E</text>
+      </g>
+      <circle class="follow-base" r=".11"/>
+      <text class="follow-base-label" x="-.19" y=".4" text-anchor="end">O</text>
+      <circle class="follow-target" data-part="target" r=".19"/>
+      <text class="follow-target-label" data-part="targetLabel">T</text>
+    `);
+    const parts = Object.fromEntries([...svg.querySelectorAll('[data-part]')].map(el => [el.dataset.part, el]));
+    boards[svg.dataset.followBoard] = { svg, title: svg.querySelector('title'), parts };
+  }
 
-  function isChinese() { return document.documentElement.lang.startsWith('zh'); }
-  function readControls() {
-    state.x = Number(controls.x.value);
-    state.y = Number(controls.y.value);
-    state.l1 = Number(controls.l1.value);
-    state.l2 = Number(controls.l2.value);
+  function point(element, x, y, xAttribute = 'cx', yAttribute = 'cy') {
+    element.setAttribute(xAttribute, x);
+    element.setAttribute(yAttribute, -y);
   }
-  function writeControls() {
-    controls.x.value = String(state.x);
-    controls.y.value = String(state.y);
-    controls.l1.value = String(state.l1);
-    controls.l2.value = String(state.l2);
-  }
-  function fitCanvas(canvas, aspectHeight) {
-    const width = Math.max(320, Math.round(canvas.clientWidth || 660));
-    const height = Math.round(width * aspectHeight / 660);
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    if (canvas.width !== Math.round(width * dpr) || canvas.height !== Math.round(height * dpr)) {
-      canvas.width = Math.round(width * dpr);
-      canvas.height = Math.round(height * dpr);
+  const visible = (el, show) => el.classList.toggle('follow-hidden', !show);
+  const formatted = value => (Math.abs(value) < .005 ? 0 : value).toFixed(2).replace('-', '−');
+
+  function drawPath(key, { l2, inner, outer }, atOrigin, reachable) {
+    const { title, parts } = boards[key];
+    const radians = state.angles[key] * Math.PI / 180;
+    const ux = Math.cos(radians), uy = Math.sin(radians);
+    const tx = state.r * ux, ty = state.r * uy;
+    const limit = atOrigin && state.equal;
+    parts.outer.setAttribute('r', outer);
+    parts.inner.setAttribute('r', inner);
+    visible(parts.inner, inner > 0);
+    point(parts.ray, 4.15 * ux, 4.15 * uy, 'x2', 'y2');
+    point(parts.target, tx, ty);
+    const left = tx > 3.35;
+    point(parts.targetLabel, tx + (left ? -.28 : .28), ty + (ty > 3.75 ? -.35 : .24), 'x', 'y');
+    parts.targetLabel.setAttribute('text-anchor', left ? 'end' : 'start');
+    parts.targetLabel.textContent = atOrigin ? 'T = O' : 'T';
+    visible(parts.pose, reachable);
+    visible(parts.locus, limit);
+    parts.pose.classList.toggle('follow-limit-pose', limit);
+    let description = tr('No pose reaches the target.', '沒有姿態能到達目標。');
+
+    if (reachable) {
+      // In the ray's frame, E = a u + h Ju. The equal-length limit is
+      // a = 0, h = ±L, and depends on the last direction outside O.
+      const a = state.equal ? state.r / 2 : (state.r ** 2 + l1 ** 2 - l2 ** 2) / (2 * state.r);
+      const h = state.side * Math.sqrt(Math.max(0, l1 ** 2 - a ** 2));
+      const ex = a * ux - h * uy, ey = a * uy + h * ux;
+      point(parts.link1, ex, ey, 'x2', 'y2');
+      point(parts.link2, ex, ey, 'x1', 'y1');
+      point(parts.link2, tx, ty, 'x2', 'y2');
+      point(parts.elbow, ex, ey);
+      point(parts.elbowLabel, ex + .2, ey + .19, 'x', 'y');
+      description = tr(`${limit ? 'Limit elbow' : 'Elbow'} (${formatted(ex)}, ${formatted(ey)}).`,
+        `${limit ? '極限肘點' : '肘點'}（${formatted(ex)}，${formatted(ey)}）。`);
     }
-    const ctx = canvas.getContext('2d');
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    return { ctx, width, height };
-  }
-  function circle(ctx, x, y, radius, fill, stroke, lineWidth = 1) {
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, Math.PI * 2);
-    if (fill) { ctx.fillStyle = fill; ctx.fill(); }
-    if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lineWidth; ctx.stroke(); }
-  }
-  function line(ctx, ax, ay, bx, by, color, width = 1, dash = []) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.setLineDash(dash);
-    ctx.moveTo(ax, ay);
-    ctx.lineTo(bx, by);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = width;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-    ctx.restore();
-  }
-  function label(ctx, text, x, y, color = palette.muted, align = 'center') {
-    ctx.fillStyle = color;
-    ctx.font = '10px ui-monospace, SFMono-Regular, Menlo, monospace';
-    ctx.textAlign = align;
-    ctx.textBaseline = 'middle';
-    ctx.fillText(text, x, y);
+
+    const degrees = `${String(state.angles[key]).replace('-', '−')}°`;
+    const name = key.toUpperCase();
+    const observation = limit ? tr('limit', '極限') : !reachable ? tr('unreachable', '不可達') : '';
+    $(`follow-readout-${key}`).textContent = observation ? `${degrees} · ${observation}` : degrees;
+    angleInputs[key].value = state.angles[key];
+    angleInputs[key].setAttribute('aria-valuetext', degrees);
+    title.textContent = tr(`Path ${name}, direction ${degrees}. ${description}`, `路徑 ${name}，方向 ${degrees}。${description}`);
   }
 
-  function classification(result) {
-    const close = (a, b) => Math.abs(a - b) <= 1e-7;
-    if (result.count === Infinity) return {
-      count: '∞', en: 'equal links fold back to the origin; θ₁ is arbitrary', zh: '等長連桿折回原點；θ₁ 可任意選擇', statusEn: 'singular · infinitely many', statusZh: '奇異點 · 無限多解'
-    };
-    if (!result.reachable) {
-      const tooFar = result.r > result.outer;
-      return { count: '0', en: tooFar ? 'outside the outer boundary' : 'inside the unreachable central hole', zh: tooFar ? '位於外邊界之外' : '位於不可達的中央空洞內', statusEn: 'unreachable', statusZh: '不可達' };
-    }
-    if (result.count === 2) return { count: '2', en: 'strictly inside the reachable annulus', zh: '嚴格位於可達圓環內部', statusEn: 'regular · two branches', statusZh: '正則 · 兩個分支' };
-    const outer = close(result.r, result.outer);
-    return { count: '1', en: outer ? 'outer boundary: the links are fully extended' : 'inner boundary: the links are fully folded', zh: outer ? '外邊界：兩連桿完全伸直' : '內邊界：兩連桿完全折疊', statusEn: 'singular · branches meet', statusZh: '奇異點 · 分支合併' };
-  }
+  function render() {
+    const geometry = lengths();
+    const { inner, outer } = geometry;
+    const atOrigin = state.r === 0;
+    const reachable = state.r >= inner && state.r <= outer;
+    const sameRay = (state.angles.a - state.angles.b) % 360 === 0;
+    distance.value = state.r;
+    $('follow-radius').textContent = formatted(state.r);
+    distance.setAttribute('aria-valuetext', formatted(state.r));
+    lengthPicker.value = state.equal ? 'equal' : 'unequal';
+    branchPicker.value = state.side;
+    innerButton.hidden = state.equal;
+    drawPath('a', geometry, atOrigin, reachable);
+    drawPath('b', geometry, atOrigin, reachable);
 
-  function drawArm(ctx, toScreen, solution, color, alpha = 1) {
-    const base = toScreen(0, 0);
-    const elbow = toScreen(solution.elbow.x, solution.elbow.y);
-    const end = toScreen(solution.end.x, solution.end.y);
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    line(ctx, base.x, base.y, elbow.x, elbow.y, color, 9);
-    line(ctx, elbow.x, elbow.y, end.x, end.y, color, 7);
-    circle(ctx, elbow.x, elbow.y, 7, '#fff', color, 3);
-    ctx.restore();
-  }
-
-  function drawWorkspace() {
-    const { ctx, width, height } = fitCanvas(workspace, 520);
-    const result = state.result;
-    const margin = 42;
-    const span = Math.max(5.4, result.outer * 1.2, Math.abs(state.x) * 1.18, Math.abs(state.y) * 1.18);
-    const scale = Math.min((width - margin * 2) / (span * 2), (height - margin * 2) / (span * 2));
-    const cx = width / 2, cy = height / 2;
-    const toScreen = (x, y) => ({ x: cx + x * scale, y: cy - y * scale });
-    state.view = { cx, cy, scale };
-    ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = palette.paper;
-    ctx.fillRect(0, 0, width, height);
-
-    line(ctx, margin, cy, width - margin, cy, '#e8e9ec');
-    line(ctx, cx, margin, cx, height - margin, '#e8e9ec');
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, cy, result.outer * scale, 0, Math.PI * 2);
-    if (result.inner > 1e-7) ctx.arc(cx, cy, result.inner * scale, 0, Math.PI * 2, true);
-    ctx.fillStyle = 'rgba(84,117,232,.09)';
-    ctx.fill('evenodd');
-    ctx.restore();
-
-    ctx.save();
-    ctx.setLineDash([6, 6]);
-    circle(ctx, cx, cy, result.outer * scale, null, '#8ca2f0', 1.5);
-    if (result.inner > 1e-7) circle(ctx, cx, cy, result.inner * scale, null, '#b6c3f5', 1.5);
-    ctx.restore();
-
-    if (result.count === Infinity) {
-      for (let i = 0; i < 8; i += 1) {
-        const theta1 = i * Math.PI / 4;
-        const pose = K.forward(theta1, Math.PI, state.l1, state.l2);
-        drawArm(ctx, toScreen, pose, i % 2 ? palette.orange : palette.blue, .27);
-      }
+    let heading, copy;
+    if (atOrigin && state.equal) {
+      heading = tr('One target. A whole circle of possible elbows.', '同一個目標，肘點可以在整個圓上。');
+      copy = sameRay
+        ? tr('The directions match, so the dashed limit poses match. Change one direction to see a different limit at the same target.',
+          '兩條路徑方向相同，虛線極限姿態也相同。改變其中一個方向，就能看到同一目標的另一個極限姿態。')
+        : tr('The dashed arms show the folded poses reached along these two rays using the same branch. The dotted circle shows all possible elbows at O.',
+          '虛線手臂顯示同一分支沿兩條射線接近時的折疊姿態。點線圓則顯示目標在 O 時所有可能的肘點。');
+    } else if (state.r < inner) {
+      heading = tr('The origin is out of reach.', '原點不可達。');
+      copy = tr('The longer link cannot fold back far enough. Try the inner edge at r = 0.75: each target on that circle has exactly one folded pose.',
+        '較長的連桿無法完全折回原點。試試 r = 0.75 的內邊界：圓上的每個目標都恰有一種折疊姿態。');
+    } else if (state.r > outer) {
+      heading = tr('Both targets are beyond the arm’s reach.', '兩個目標都在機械臂的可達範圍外。');
+      copy = tr(`Drag back inside the outer circle, whose radius is ${outer}.`, `把目標拖回半徑為 ${outer} 的外圓內。`);
+    } else if (state.r === inner || state.r === outer) {
+      heading = tr('The two branches meet at each boundary point.', '在每個邊界點，兩個分支會重合。');
+      copy = tr('The links are collinear. Switch the elbow branch: each target keeps its pose.',
+        '兩段連桿共線。試試切換肘點分支：每個目標的姿態都不變。');
     } else {
-      result.solutions.forEach((solution, index) => drawArm(ctx, toScreen, solution, index ? palette.orange : palette.blue, result.count === 1 ? .92 : .72));
+      heading = sameRay ? tr('Try a different direction for one path.', '試試改變其中一條路徑的方向。')
+        : tr('Same distance, different directions.', '距離相同，方向不同。');
+      copy = state.equal ? tr('Bring both targets to the centre. Compare where the two elbows end up.',
+        '把兩個目標移到中心，再比較兩個肘點最後的位置。')
+        : tr('Try approaching the inner edge. The hole around O is the part neither arm can reach.',
+          '試試接近內邊界。O 周圍的空洞是兩支手臂都無法到達的區域。');
     }
-
-    const base = toScreen(0, 0);
-    const target = toScreen(state.x, state.y);
-    circle(ctx, base.x, base.y, 7, '#fff', palette.ink, 2);
-    circle(ctx, target.x, target.y, 12, 'rgba(255,90,54,.12)', null);
-    circle(ctx, target.x, target.y, 6, palette.orange, '#fff', 2);
-    label(ctx, 'O', base.x - 13, base.y + 16, palette.ink);
-    label(ctx, 'T', target.x + 12, target.y - 13, palette.orange, 'left');
+    const title = $('follow-observation-title'), description = $('follow-observation-copy');
+    if (title.textContent !== heading) title.textContent = heading;
+    if (description.textContent !== copy) description.textContent = copy;
   }
 
-  function drawJacobian() {
-    const { ctx, width, height } = fitCanvas(jacobian, 420);
-    const pad = { left: 48, right: 24, top: 31, bottom: 40 };
-    const plotW = width - pad.left - pad.right;
-    const plotH = height - pad.top - pad.bottom;
-    const sx = theta => pad.left + (theta + Math.PI) / (Math.PI * 2) * plotW;
-    const sy = value => pad.top + (1.15 - value) / 2.3 * plotH;
-    ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = palette.paper;
-    ctx.fillRect(0, 0, width, height);
-    line(ctx, pad.left, sy(0), width - pad.right, sy(0), '#cfd2d7');
-    line(ctx, sx(0), pad.top, sx(0), height - pad.bottom, '#e3e4e7');
-    [-Math.PI, 0, Math.PI].forEach((theta, i) => label(ctx, i === 0 ? '−π' : i === 1 ? '0' : 'π', sx(theta), height - 20, palette.muted));
-    [-1, 1].forEach(value => label(ctx, String(value), pad.left - 17, sy(value), palette.muted));
-
-    const drawBranch = (start, end, color) => {
-      ctx.beginPath();
-      for (let i = 0; i <= 180; i += 1) {
-        const theta = start + (end - start) * i / 180;
-        const x = sx(theta), y = sy(Math.sin(theta));
-        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-      }
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 3;
-      ctx.stroke();
-    };
-    drawBranch(-Math.PI, 0, palette.orange);
-    drawBranch(0, Math.PI, palette.blue);
-    [-Math.PI, 0, Math.PI].forEach(theta => circle(ctx, sx(theta), sy(0), 4, '#fff', palette.ink, 1.5));
-
-    if (state.result.reachable && state.result.count !== Infinity) {
-      state.result.solutions.forEach((solution, index) => {
-        const theta = Math.max(-Math.PI, Math.min(Math.PI, solution.theta2));
-        line(ctx, sx(theta), sy(0), sx(theta), sy(Math.sin(theta)), index ? palette.orange : palette.blue, 1, [4, 4]);
-        circle(ctx, sx(theta), sy(Math.sin(theta)), 6, index ? palette.orange : palette.blue, '#fff', 2);
-      });
-    }
-    label(ctx, 'θ₂', width - 12, sy(0) - 13, palette.ink, 'right');
-    label(ctx, 'sin θ₂', pad.left + 4, 14, palette.purple, 'left');
+  function setRadius(r) { state.r = Math.round(Math.min(maxDistance, Math.max(0, r)) * 100) / 100; }
+  distance.addEventListener('input', () => { setRadius(Number(distance.value)); render(); });
+  lengthPicker.addEventListener('change', () => { state.equal = lengthPicker.value === 'equal'; render(); });
+  branchPicker.addEventListener('change', () => { state.side = Number(branchPicker.value); render(); });
+  for (const [key, input] of Object.entries(angleInputs)) {
+    input.addEventListener('input', () => { state.angles[key] = Number(input.value); render(); });
   }
-
-  function update() {
-    readControls();
-    state.result = K.inverse(state.x, state.y, state.l1, state.l2);
-    const info = classification(state.result);
-    outputs.x.textContent = state.x.toFixed(2);
-    outputs.y.textContent = state.y.toFixed(2);
-    outputs.l1.textContent = state.l1.toFixed(1);
-    outputs.l2.textContent = state.l2.toFixed(1);
-    document.getElementById('proofCount').textContent = info.count;
-    document.getElementById('proofReason').textContent = isChinese() ? info.zh : info.en;
-    const dText = Number.isFinite(state.result.c2) ? ` · D = ${state.result.c2.toFixed(3)}` : '';
-    document.getElementById('proofReadout').textContent = `r = ${state.result.r.toFixed(2)}${dText}`;
-    document.getElementById('jacobianStatus').textContent = isChinese() ? info.statusZh : info.statusEn;
-    document.querySelectorAll('[data-proof-preset]').forEach(button => button.classList.remove('active'));
-    drawWorkspace();
-    drawJacobian();
-  }
-
-  const presets = {
-    interior: { x: 3.2, y: 1.6, l1: 2.7, l2: 2 },
-    boundary: { x: 4.7, y: 0, l1: 2.7, l2: 2 },
-    outside: { x: 5, y: 1, l1: 2.7, l2: 2 },
-    infinite: { x: 0, y: 0, l1: 2, l2: 2 }
-  };
-  Object.values(controls).forEach(control => control.addEventListener('input', update));
-  document.querySelectorAll('[data-proof-preset]').forEach(button => button.addEventListener('click', () => {
-    Object.assign(state, presets[button.dataset.proofPreset]);
-    writeControls();
-    update();
-    button.classList.add('active');
-  }));
-
-  function targetFromPointer(event) {
-    const rect = workspace.getBoundingClientRect();
-    const px = (event.clientX - rect.left) * (workspace.clientWidth / rect.width);
-    const py = (event.clientY - rect.top) * (workspace.clientHeight / rect.height);
-    state.x = K.clamp((px - state.view.cx) / state.view.scale, -5, 5);
-    state.y = K.clamp((state.view.cy - py) / state.view.scale, -5, 5);
-    writeControls();
-    update();
-  }
-  workspace.addEventListener('pointerdown', event => {
-    state.dragging = true;
-    workspace.setPointerCapture(event.pointerId);
-    targetFromPointer(event);
+  $('follow-zero').addEventListener('click', () => { setRadius(0); render(); });
+  innerButton.addEventListener('click', () => { setRadius(lengths().inner); render(); });
+  $('follow-reset').addEventListener('click', () => {
+    Object.assign(state, { r: 2.4, angles: { a: 0, b: 90 }, equal: true, side: 1 });
+    render();
   });
-  workspace.addEventListener('pointermove', event => { if (state.dragging) targetFromPointer(event); });
-  workspace.addEventListener('pointerup', () => { state.dragging = false; });
-  workspace.addEventListener('pointercancel', () => { state.dragging = false; });
-  window.addEventListener('resize', update);
-  window.addEventListener('languagechange', update);
-  document.addEventListener('DOMContentLoaded', update);
-  update();
-})();
+
+  for (const [key, { svg }] of Object.entries(boards)) {
+    let pointer = null;
+    function move(event) {
+      const matrix = svg.getScreenCTM();
+      if (!matrix) return;
+      const p = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
+      const r = Math.hypot(p.x, p.y);
+      if (r > .13) state.angles[key] = Math.round(Math.atan2(-p.y, p.x) * 180 / Math.PI);
+      setRadius(r <= .13 ? 0 : r);
+      render();
+    }
+    svg.addEventListener('pointerdown', event => {
+      if (!event.isPrimary || event.button !== 0) return;
+      pointer = event.pointerId;
+      svg.setPointerCapture(pointer);
+      move(event);
+    });
+    svg.addEventListener('pointermove', event => { if (event.pointerId === pointer) move(event); });
+    for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+      svg.addEventListener(name, event => { if (event.pointerId === pointer) pointer = null; });
+    }
+  }
+
+  function localize() {
+    lengthPicker.options[0].textContent = tr('Equal · 2 and 2', '等長 · 2 和 2');
+    lengthPicker.options[1].textContent = tr('Unequal · 2 and 1.25', '不等長 · 2 和 1.25');
+    branchPicker.options[0].textContent = tr('Left of the ray', '射線左側');
+    branchPicker.options[1].textContent = tr('Right of the ray', '射線右側');
+    render();
+  }
+  function showLinkedProof() {
+    if (location.hash === '#proof') $('proof').open = true;
+  }
+  document.querySelector('a[href="#proof"]').addEventListener('click', () => { $('proof').open = true; });
+  window.addEventListener('hashchange', showLinkedProof);
+  window.addEventListener('languagechange', localize);
+  localize();
+  showLinkedProof();
+});
