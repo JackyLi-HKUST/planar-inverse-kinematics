@@ -22,7 +22,7 @@
       <a href="index.html"><span>01</span><b data-i18n="navPlayground">Playground</b></a>
       <a class="nav-subpage" href="game.html"><span aria-hidden="true">↳</span><b><span data-lang-en>Target Challenge</span><span data-lang-zh>目標挑戰</span></b></a>
       <a href="guide.html"><span>02</span><b data-i18n="navGuide">How it works</b></a>
-      <a href="proof.html"><span>03</span><b><span data-lang-en>Follow one solution</span><span data-lang-zh>跟着一組解</span></b></a>
+      <a href="proof.html"><span>03</span><b><span data-lang-en>Elbow Flip Lab</span><span data-lang-zh>翻肘實驗</span></b></a>
       <a class="active" href="about.html"><span>04</span><b><span data-lang-en>About &amp; credits</span><span data-lang-zh>關於與鳴謝</span></b></a>
       <p data-i18n="navOnPage">ON THIS PAGE</p>
       <a href="#project"><span>·</span><b><span data-lang-en>The project</span><span data-lang-zh>本專題</span></b></a>
@@ -72,13 +72,14 @@
         <a href="https://github.com/JackyLi-HKUST/planar-inverse-kinematics" target="_blank" rel="noreferrer"><span>SOURCE</span><div><strong>Project source on GitHub</strong><p data-lang-en>Download, inspect or adapt the complete static website and its mathematical tests.</p><p data-lang-zh>下載、查閱或修改完整靜態網站及其數學測試。</p></div><i>↗</i></a>
         <a href="https://github.com/just-the-docs/just-the-docs" target="_blank" rel="noreferrer"><span>LAYOUT</span><div><strong>Just the Docs</strong><p data-lang-en>Inspiration for the persistent sidebar and content-first documentation structure; no source code was copied.</p><p data-lang-zh>左側固定導覽與內容優先文件架構的靈感來源；未複製其原始碼。</p></div><i>↗</i></a>
         <a href="http://robotkinematics.study/" target="_blank" rel="noreferrer"><span>INTERACTION</span><div><strong>Robot Kinematics Simulator</strong><p data-lang-en>Visual and interaction reference for presenting robot kinematics; this project uses an independent implementation.</p><p data-lang-zh>機械臂運動學視覺與互動呈現的參考；本專題採用獨立實作。</p></div><i>↗</i></a>
+        <a href="https://arxiv.org/abs/1309.7960" target="_blank" rel="noreferrer"><span>MATHEMATICS</span><div><strong>Bhattacharya &amp; Pivtoraiko · Configuration Spaces of Planar Robot Arms</strong><p data-lang-en>Further reading on how fixing the tip can leave one or two connected sets of arm poses.</p><p data-lang-zh>延伸閱讀：固定機械臂末端後，姿態集合何以分成一個或兩個連通部分。</p></div><i>↗</i></a>
         <a href="https://developers.openai.com/learn/codex" target="_blank" rel="noreferrer"><span>DEVELOPMENT</span><div><strong>OpenAI Codex</strong><p data-lang-en>Official information about the coding assistant used during development.</p><p data-lang-zh>開發過程中所使用程式協作工具的官方資料。</p></div><i>↗</i></a>
         <a href="https://www.math.hkust.edu.hk/people/faculty/profile/masyleung/" target="_blank" rel="noreferrer"><span>COURSE</span><div><strong>HKUST · MATH3900</strong><p data-lang-en>Course context: Communicating Mathematics to the Public, taught by Prof. Shing-Yu Leung.</p><p data-lang-zh>課程背景：梁承裕教授任教的「向公眾傳達數學」MATH3900。</p></div><i>↗</i></a>
       </div>
       <div class="math-basis">
         <strong><span data-lang-en>Mathematical basis</span><span data-lang-zh>數學基礎</span></strong>
-        <p data-lang-en>The guide uses the Pythagorean theorem, triangle inequality, circle intersections and the law of cosines. The follow-up experiment uses vector projections and limits to ask whether a choice of pose can be continuous.</p>
-        <p data-lang-zh>原理解說使用勾股定理、三角不等式、圓的交點與餘弦定理；延伸實驗則以向量投影和極限探討能否連續地選擇姿態。</p>
+        <p data-lang-en>The two-link guide uses circle intersections, the triangle inequality and the law of cosines. The three-link guide reduces a pose to a wrist target; the lab uses that reduction to show how separate sets of poses can become connected.</p>
+        <p data-lang-zh>雙連桿教學使用圓的交點、三角不等式和餘弦定理。三連桿教學把指定姿態化為手腕目標；翻肘實驗沿用這套方法，解釋分離的姿態集合如何接起來。</p>
       </div>
     </section>
 
@@ -94,7 +95,7 @@
       </div>
     </section>
 
-    <footer class="about-footer"><a href="proof.html">← <span data-lang-en>Follow one solution</span><span data-lang-zh>跟着一組解</span></a><a href="index.html"><span data-lang-en>Open the playground</span><span data-lang-zh>開啟互動實驗室</span> →</a></footer>
+    <footer class="about-footer"><a href="proof.html">← <span data-lang-en>Elbow Flip Lab</span><span data-lang-zh>翻肘實驗</span></a><a href="index.html"><span data-lang-en>Open the playground</span><span data-lang-zh>開啟互動實驗室</span> →</a></footer>
   </main>
 
   <script src="assets/i18n.js"></script>

@@ -1,0 +1,42 @@
+.guide-models { display: flex; flex-wrap: wrap; gap: 4px; max-width: 1040px; margin: 0 auto 23px; }
+.guide-models a { padding: 7px 12px; border: 1px solid var(--line); border-radius: 6px; color: var(--muted); font-size: 12px; font-weight: 650; text-decoration: none; }
+.guide-models a:hover { border-color: #8b95a7; }
+.guide-models a[aria-current="page"] { border-color: #cbd7f5; background: #edf2ff; color: #284aa7; }
+.three-notebook { margin-top: 32px; }
+.three-section { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; gap: 22px 40px; padding: 32px 0; border-top: 1px solid var(--line); }
+.three-lesson h2 { margin: 0 0 10px; font-size: clamp(24px, 3vw, 36px); letter-spacing: -.035em; line-height: 1.13; }
+.three-lesson p:not(.eyebrow), .three-result p:not(.eyebrow) { color: var(--muted); font-size: 13px; line-height: 1.65; }
+.three-lesson a:not(.primary-link) { color: #345bca; text-underline-offset: 3px; }
+.three-lesson .math-block p { color: var(--ink); }
+.three-demo .demo-title { flex-wrap: wrap; }
+#three-diagram { display: block; width: 100%; max-height: 330px; background: #f9fafc; }
+#three-diagram text { fill: #354156; font: 700 .16px ui-monospace, monospace; }
+#three-diagram .three-wrist-label { fill: #284ba5; }
+#three-diagram .three-tip-label { fill: #b73b26; }
+.three-workspace { fill: #ecf1ff; stroke: #a9b9e5; stroke-width: .016; }
+.three-axes { fill: none; stroke: #cdd7ea; stroke-width: .014; }
+.three-circle { fill: none; stroke: #8594b2; stroke-width: .021; stroke-dasharray: .075 .06; }
+.three-ghost { fill: none; stroke: #9575a3; stroke-width: .029; stroke-dasharray: .06 .045; }
+.three-front { fill: none; stroke: #4569d1; stroke-width: .085; stroke-linecap: round; stroke-linejoin: round; }
+.three-tail { stroke: #d8654c; stroke-width: .065; stroke-linecap: round; }
+.three-unreachable .three-tail { stroke-dasharray: .09 .065; stroke-width: .034; }
+.three-base { fill: #26334c; stroke: white; stroke-width: .02; }
+.three-wrist { fill: #345bca; stroke: white; stroke-width: .024; }
+.three-tip { fill: #d54e37; stroke: white; stroke-width: .024; }
+.three-hidden { display: none; }
+.three-controls { display: grid; gap: 6px; padding: 11px 13px; border-top: 1px solid var(--line); }
+.three-controls label { display: grid; grid-template-columns: 68px minmax(0, 1fr) 48px; align-items: center; gap: 8px; color: var(--ink); font-size: 11px; font-weight: 650; }
+.three-controls input { min-width: 0; height: 26px; margin: 0; }
+.three-controls output { text-align: right; font: 11px ui-monospace, monospace; }
+.three-controls .three-demo-status { justify-self: start; padding: 3px 6px; border-radius: 4px; color: #284aa7; background: #edf2ff; }
+.three-controls .three-demo-status.three-no-solution { color: #a23b28; background: #fff1ec; }
+.three-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+.three-buttons button { padding: 7px 9px; border: 1px solid var(--line); border-radius: 5px; color: var(--ink); background: white; font-size: 11px; cursor: pointer; }
+.three-buttons button[aria-pressed="true"] { border-color: #a9b9e5; background: #edf2ff; }
+.three-buttons button:disabled { color: #6e7684; background: var(--soft); cursor: default; }
+.three-result { padding: 16px 18px; border: 1px solid var(--line); border-left: 3px solid #4569d1; border-radius: 0 8px 8px 0; background: #f9fafc; }
+.three-result h3 { margin: 0 0 8px; font-size: 19px; }
+.three-result p:last-child { margin-bottom: 0; }
+#three-distance, #three-angle-pair, #three-closure { font-family: ui-monospace, monospace; }
+.three-next { grid-template-columns: minmax(0, 730px); }
+@media (max-width: 1020px) { .three-section { grid-template-columns: minmax(0, 1fr); gap: 12px; } }

@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Drag a two-link arm towards the origin from different directions, then explore why pointwise solutions need not admit a continuous choice.">
-  <title>Can You Follow One Solution? — Planar Inverse Kinematics</title>
+  <meta name="description" content="A three-link planar arm challenge: keep the gripper fixed, drag the wrist and discover when two loops of poses join into one.">
+  <title>Can You Flip the Elbow? — Planar Inverse Kinematics</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/styles.css">
-  <link rel="stylesheet" href="assets/follow.css?v=1">
+  <link rel="stylesheet" href="assets/flip.css?v=1">
 </head>
 <body data-page="proof">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -20,114 +20,125 @@
       <a href="index.html"><span>01</span><b data-i18n="navPlayground">Playground</b></a>
       <a class="nav-subpage" href="game.html"><span aria-hidden="true">↳</span><b><span data-lang-en>Target Challenge</span><span data-lang-zh>目標挑戰</span></b></a>
       <a href="guide.html"><span>02</span><b data-i18n="navGuide">How it works</b></a>
-      <a class="active" href="proof.html" aria-current="page"><span>03</span><b><span data-lang-en>Follow one solution</span><span data-lang-zh>跟着一組解</span></b></a>
+      <a class="active" href="proof.html" aria-current="page"><span>03</span><b><span data-lang-en>Elbow Flip Lab</span><span data-lang-zh>翻肘實驗</span></b></a>
       <a href="about.html"><span>04</span><b><span data-lang-en>About &amp; credits</span><span data-lang-zh>關於與鳴謝</span></b></a>
       <p data-i18n="navOnPage">ON THIS PAGE</p>
-      <a href="#experiment"><span>·</span><b><span data-lang-en>The experiment</span><span data-lang-zh>互動實驗</span></b></a>
+      <a href="#experiment"><span>·</span><b><span data-lang-en>The challenge</span><span data-lang-zh>互動挑戰</span></b></a>
       <a href="#proof"><span>·</span><b><span data-lang-en>The proof</span><span data-lang-zh>數學證明</span></b></a>
     </nav>
     <div class="sidebar-foot"><button class="language-toggle" type="button" data-language-toggle aria-label="Switch language"><span class="selected">EN</span><span>繁中</span></button><p data-i18n="offline">Works fully offline</p></div>
   </aside>
 
-  <main id="main" class="main follow-main">
-    <header class="follow-hero">
-      <p class="eyebrow"><span data-lang-en>03 · A CLOSER LOOK</span><span data-lang-zh>03 · 深入探索</span></p>
-      <h1><span data-lang-en>Can You Follow One Solution?</span><span data-lang-zh>能一直跟着同一組解嗎？</span></h1>
-      <p class="lede" data-lang-en>Two arms start on different paths towards the same point. If you keep the same rule for choosing the elbow, will they fold into the same pose?</p>
-      <p class="lede" data-lang-zh>兩支手臂沿不同方向走向同一個點。如果一直用同一個規則選擇肘點，它們最後會折成同一個姿態嗎？</p>
+  <main id="main" class="main flip-main">
+    <header class="flip-hero">
+      <p class="eyebrow"><span data-lang-en>03 · THREE-LINK CHALLENGE</span><span data-lang-zh>03 · 三連桿挑戰</span></p>
+      <h1><span data-lang-en>Can You Flip the Elbow?</span><span data-lang-zh>夾爪不動，肘部能翻過去嗎？</span></h1>
+      <p class="lede" data-lang-en>The gripper starts pinned to the red point. Drag the blue wrist and try to reach the elbow on the other side of the dashed line. Then move the red point farther away and try again.</p>
+      <p class="lede" data-lang-zh>夾爪已固定在紅點。拖動藍色手腕，試着把肘點翻到虛線另一側。再把紅點移遠一點，看看結果會不會改變。</p>
     </header>
 
-    <section class="follow-experiment" id="experiment" aria-labelledby="follow-heading">
-      <div class="follow-intro">
-        <h2 id="follow-heading"><span data-lang-en>Two paths to the origin</span><span data-lang-zh>兩條通往原點的路徑</span></h2>
-        <p data-lang-en>Start with equal links. Drag either orange target <b>T</b> toward the centre, or move the shared distance slider. Both targets stay equally far from <b>O</b>. Watch the elbow <b>E</b>, not just the tip.</p>
-        <p data-lang-zh>先用兩段等長的連桿。把任一橙色目標 <b>T</b> 拖向中心，或移動共用距離滑桿。兩個目標到 <b>O</b> 的距離始終相同；除了末端，也留意肘點 <b>E</b>。</p>
-      </div>
-      <div class="follow-lab">
-        <div class="follow-controls">
-          <label><span><span data-lang-en>Link lengths</span><span data-lang-zh>連桿長度</span></span>
-            <select id="follow-lengths">
-              <option value="equal">Equal · 2 and 2</option>
-              <option value="unequal">Unequal · 2 and 1.25</option>
-            </select>
-          </label>
-          <label><span><span data-lang-en>Elbow branch</span><span data-lang-zh>肘點分支</span></span>
-            <select id="follow-branch">
-              <option value="1">Left of the ray</option>
-              <option value="-1">Right of the ray</option>
-            </select>
-          </label>
-          <label class="follow-range">
-            <span><span data-lang-en>Shared distance</span><span data-lang-zh>共用距離</span> <i>r</i></span>
-            <input id="follow-distance" type="range" min="0" max="4" step="0.01" value="2.4">
-          </label>
-          <output id="follow-radius" for="follow-distance">2.40</output>
+    <section id="experiment" aria-labelledby="flip-experiment-heading">
+      <h2 class="flip-section-title" id="flip-experiment-heading"><span data-lang-en>Try it yourself</span><span data-lang-zh>動手試試</span></h2>
+      <div class="flip-lab">
+        <div class="flip-physical">
+          <div class="flip-card-head">
+            <h3><span data-lang-en>The arm</span><span data-lang-zh>手臂</span></h3>
+            <span class="flip-badge"><span data-lang-en>Three links: 1, 1, 0.75</span><span data-lang-zh>連桿長度：1、1、0.75</span></span>
+          </div>
+          <svg id="flip-arm" viewBox="-2.22 -2.18 5.48 4.36" role="img" aria-labelledby="flip-arm-title">
+            <title id="flip-arm-title">Three-link arm with a draggable wrist and target</title>
+            <circle r="2" class="flip-workspace"/>
+            <path d="M-2.1 0H3M0-2.04V2.04" class="flip-axes"/>
+            <line x1=".9" x2="2.6" class="flip-target-rail"/>
+            <circle id="flip-wrist-circle" r=".75" class="flip-unreachable"/>
+            <path id="flip-wrist-path" class="flip-wrist-path"/>
+            <g class="flip-gates"><circle id="flip-gate-a" r=".07"/><circle id="flip-gate-b" r=".07"/></g>
+            <line id="flip-reference" class="flip-reference"/>
+            <polyline id="flip-other" class="flip-other"/>
+            <circle id="flip-other-elbow" r=".065" class="flip-other-elbow"/>
+            <line id="flip-link-1" class="flip-link flip-link-front"/>
+            <line id="flip-link-2" class="flip-link flip-link-front"/>
+            <line id="flip-link-3" class="flip-link flip-link-tail"/>
+            <circle r=".073" class="flip-base"/>
+            <text x="-.14" y=".20" text-anchor="end">O</text>
+            <circle id="flip-elbow" r=".075" class="flip-elbow"/>
+            <text id="flip-elbow-label" class="flip-elbow-label">E</text>
+            <g class="flip-handle" data-flip-drag="wrist">
+              <circle id="flip-wrist-hit" class="flip-hit-area" r=".26"/>
+              <circle id="flip-wrist" r=".12" class="flip-wrist"/>
+              <text id="flip-wrist-label" class="flip-wrist-label">W</text>
+            </g>
+            <g class="flip-handle" data-flip-drag="target">
+              <circle id="flip-target-hit" class="flip-hit-area" r=".24"/>
+              <circle id="flip-target" r=".118" class="flip-target"/>
+              <text id="flip-target-label" class="flip-target-label">T</text>
+            </g>
+          </svg>
+          <p class="flip-board-key"><span data-lang-en><b>Blue W:</b> drag to turn the wrist. <b>Red T:</b> drag along the rail between trials. The shaded disc is what the first two links can reach.</span><span data-lang-zh><b>藍色 W：</b>拖動手腕。<b>紅色 T：</b>每輪之間可沿軌道移動。淺藍圓盤是前兩段連桿的可達區域。</span></p>
         </div>
-        <div class="follow-boards">
-          <figure class="follow-path path-a">
-            <figcaption><strong><span class="follow-path-dot"></span><span data-lang-en>Path A</span><span data-lang-zh>路徑 A</span></strong><output id="follow-readout-a" for="follow-angle-a">0°</output></figcaption>
-            <svg data-follow-board="a" viewBox="-4.65 -4.65 9.3 9.3" role="img" aria-labelledby="follow-board-a-title">
-              <title id="follow-board-a-title">Path A: drag the target in the plane</title>
-            </svg>
-            <label class="follow-angle"><span data-lang-en>Direction A</span><span data-lang-zh>方向 A</span><input id="follow-angle-a" type="range" min="-180" max="180" step="1" value="0"></label>
-          </figure>
-          <figure class="follow-path path-b">
-            <figcaption><strong><span class="follow-path-dot"></span><span data-lang-en>Path B</span><span data-lang-zh>路徑 B</span></strong><output id="follow-readout-b" for="follow-angle-b">90°</output></figcaption>
-            <svg data-follow-board="b" viewBox="-4.65 -4.65 9.3 9.3" role="img" aria-labelledby="follow-board-b-title">
-              <title id="follow-board-b-title">Path B: drag the target in the plane</title>
-            </svg>
-            <label class="follow-angle"><span data-lang-en>Direction B</span><span data-lang-zh>方向 B</span><input id="follow-angle-b" type="range" min="-180" max="180" step="1" value="90"></label>
-          </figure>
+        <div class="flip-space">
+          <div class="flip-card-head"><h3><span data-lang-en>Map of poses</span><span data-lang-zh>姿態地圖</span></h3><output class="flip-badge" id="flip-space-count">Two separate loops</output></div>
+          <svg id="flip-map" viewBox="0 0 300 154" role="img" aria-labelledby="flip-map-title">
+            <title id="flip-map-title">Two separate loops of arm poses</title>
+            <path id="flip-map-positive" class="flip-map-loop"/>
+            <path id="flip-map-negative" class="flip-map-loop"/>
+            <g class="flip-map-gates"><circle id="flip-map-gate-a" r="4"/><circle id="flip-map-gate-b" r="4"/></g>
+            <circle id="flip-map-marker" r="6"/>
+          </svg>
+          <p class="flip-map-key"><span><i class="flip-positive"></i>θ₂ &gt; 0</span><span><i class="flip-negative"></i>θ₂ &lt; 0</span><span><i class="flip-join"></i><span data-lang-en>Straight pose</span><span data-lang-zh>伸直姿態</span></span></p>
+          <p class="flip-map-note" data-lang-en>Each point on this schematic is one full arm pose. The black dot follows your motion; you can change branches only where the coloured paths meet.</p>
+          <p class="flip-map-note" data-lang-zh>示意圖上每一點代表一個完整姿態。黑點跟着手臂移動；只有兩條色線相接時，才可以換到另一個分支。</p>
         </div>
-        <div class="follow-actions">
-          <button type="button" id="follow-zero"><span data-lang-en>Send both to O</span><span data-lang-zh>把兩個目標移到 O</span></button>
-          <button type="button" id="follow-inner" hidden><span data-lang-en>Go to the inner edge</span><span data-lang-zh>移到內邊界</span></button>
-          <button type="button" id="follow-reset"><span data-lang-en>Reset experiment</span><span data-lang-zh>重設實驗</span></button>
-          <span class="follow-legend"><span data-lang-en>Orange ring: target T · Blue dot: elbow E</span><span data-lang-zh>橙色圓圈：目標 T · 藍點：肘點 E</span></span>
+        <div class="flip-controls">
+          <label class="flip-range"><span><span data-lang-en>Target distance</span><span data-lang-zh>目標距離</span> <i>d</i></span><input id="flip-distance" type="range" min="0.9" max="2.6" step="0.01" value="1"><output id="flip-distance-value" for="flip-distance">1.00</output></label>
+          <label class="flip-range"><span><span data-lang-en>Last-link direction</span><span data-lang-zh>第三段方向</span> <i>φ</i></span><input id="flip-angle" type="range" min="-180" max="180" step="any" value="28"><output id="flip-angle-value" for="flip-angle">28°</output></label>
+          <div class="flip-actions">
+            <button type="button" data-flip-distance="1"><span data-lang-en>Near</span><span data-lang-zh>近處</span> · 1.00</button>
+            <button type="button" data-flip-distance="1.25"><span data-lang-en>Just touching</span><span data-lang-zh>剛好相切</span> · 1.25</button>
+            <button type="button" data-flip-distance="1.65"><span data-lang-en>Farther</span><span data-lang-zh>較遠</span> · 1.65</button>
+            <button type="button" id="flip-switch" disabled><span data-lang-en>Cross to the other branch</span><span data-lang-zh>轉到另一個分支</span></button>
+          </div>
         </div>
       </div>
-      <div class="follow-observation" aria-live="polite" aria-atomic="true">
-        <div><p class="eyebrow"><span data-lang-en>WHAT DO YOU NOTICE?</span><span data-lang-zh>你觀察到甚麼？</span></p><h3 id="follow-observation-title">Same distance, different directions.</h3></div>
-        <p id="follow-observation-copy">Bring both targets to the centre. Compare where the two elbows end up.</p>
+      <div class="flip-observation" aria-live="polite" aria-atomic="true">
+        <div><p class="eyebrow"><span data-lang-en>WHAT CHANGES?</span><span data-lang-zh>甚麼改變了？</span></p><h3 id="flip-status">Try moving the blue wrist.</h3></div>
+        <p id="flip-detail">Can you reach the dashed elbow pose without moving the red point?</p>
       </div>
-      <noscript><p>Enable JavaScript for the experiment. The proof below is available without it. · 請啟用 JavaScript 操作實驗；下方證明仍可閱讀。</p></noscript>
+      <noscript><p>Enable JavaScript to try the challenge. · 啟用 JavaScript 後即可操作挑戰。</p></noscript>
     </section>
 
-    <section class="follow-reading" aria-labelledby="follow-reading-heading">
-      <p class="eyebrow"><span data-lang-en>THE MATHEMATICAL IDEA</span><span data-lang-zh>背後的數學</span></p>
-      <h2 id="follow-reading-heading"><span data-lang-en>Having a solution at every point does not guarantee a continuous choice.</span><span data-lang-zh>每個點都有解，也不一定能連續地選解。</span></h2>
-      <p data-lang-en>To follow a solution continuously, a small movement of the target must produce a small change in the pose. At the origin, choosing any one of the folded poses would have to work for every direction of approach.</p>
-      <p data-lang-zh>如果能連續地跟着一組解，目標的一點移動就只會引起姿態的一點改變。在原點選定一個折疊姿態後，無論從哪個方向接近，都必須能接上同一個姿態。</p>
-      <details id="proof" class="follow-proof">
-        <summary><span data-lang-en>Show the proof</span><span data-lang-zh>展開數學證明</span><span class="follow-summary-icon" aria-hidden="true"></span></summary>
-        <div class="follow-proof-body">
-          <p data-lang-en><strong>Claim.</strong> For two freely rotating links of fixed positive lengths, a continuous choice of pose on the entire reachable set exists if and only if the lengths are unequal. A pose uses angles modulo a full turn. If <i>F</i> maps poses to tip positions, a choice <i>S</i> must satisfy <i>F</i>(<i>S</i>(<i>T</i>)) = <i>T</i> for every reachable target <i>T</i>.</p>
-          <p data-lang-zh><strong>命題。</strong> 對兩段長度固定、皆可自由旋轉的連桿，能在整個可達區域連續選擇姿態，當且僅當兩段長度不等。姿態的角度以一整圈為週期。若 <i>F</i> 把姿態映至末端位置，選解 <i>S</i> 必須對每個可達目標 <i>T</i> 滿足 <i>F</i>(<i>S</i>(<i>T</i>)) = <i>T</i>。</p>
+    <section class="flip-reading" aria-labelledby="flip-reading-heading">
+      <p class="eyebrow"><span data-lang-en>WHY IT WORKS</span><span data-lang-zh>背後的數學</span></p>
+      <h2 id="flip-reading-heading"><span data-lang-en>Two branches can join without moving the tip.</span><span data-lang-zh>兩個分支可以接起來，末端不用動。</span></h2>
+      <p data-lang-en>With the tip <i>T</i> pinned, the third link forces the wrist <i>W</i> to move on a circle. The first two links still solve the <a href="guide.html#two-solutions">same two-link problem</a>, now with <i>W</i> as their target. The key is whether that wrist circle reaches the edge of the shaded disc.</p>
+      <p data-lang-zh>末端 <i>T</i> 固定後，第三段連桿迫使手腕 <i>W</i> 沿圓周移動。前兩段仍然解的是<a href="guide.html#two-solutions">同一個雙連桿問題</a>，只是目標換成了 <i>W</i>。關鍵在於手腕圓是否碰到淺藍圓盤的邊界。</p>
 
-          <h3><span data-lang-en>1. Equal lengths: two directions give incompatible limits</span><span data-lang-zh>1. 等長：兩個方向給出不相容的極限</span></h3>
-          <p data-lang-en>At the origin the links point in opposite directions, so every elbow on the circle of radius <i>L</i> gives a folded pose. Can any of those poses be the limit for every approach?</p>
-          <p data-lang-zh>目標在原點時，兩段連桿方向相反，因此半徑為 <i>L</i> 的圓上每個肘點都對應一個折疊姿態。這些姿態之中，有沒有一個可以成為所有接近路徑的極限？</p>
-          <p data-lang-en>Write the common length as <i>L</i>. For a target <i>T</i> = <i>r u</i>, where <i>u</i> is a unit vector and <i>r</i> &gt; 0, any possible elbow <i>E</i> obeys |<i>E</i>| = |<i>E</i> − <i>r u</i>| = <i>L</i>. Squaring and subtracting gives</p>
-          <p data-lang-zh>令共同長度為 <i>L</i>。對目標 <i>T</i> = <i>r u</i>，其中 <i>u</i> 是單位向量且 <i>r</i> &gt; 0，任何合法肘點 <i>E</i> 都滿足 |<i>E</i>| = |<i>E</i> − <i>r u</i>| = <i>L</i>。把兩式平方後相減，得到</p>
-          <div class="follow-equation"><math display="block"><mrow><mn>0</mn><mo>=</mo><msup><mi>r</mi><mn>2</mn></msup><mo>−</mo><mn>2</mn><mi>r</mi><mi>E</mi><mo>·</mo><mi>u</mi><mspace width=".8em"/><mo>⇒</mo><mspace width=".8em"/><mi>E</mi><mo>·</mo><mi>u</mi><mo>=</mo><mfrac><mi>r</mi><mn>2</mn></mfrac></mrow></math></div>
-          <p data-lang-en>If the chosen pose were continuous at <i>O</i>, its elbow would also be continuous there. Taking <i>r</i> → 0 along the positive <i>x</i>-axis would force the chosen elbow at <i>O</i> to have zero <i>x</i>-coordinate. Approaching along the positive <i>y</i>-axis would force its <i>y</i>-coordinate to be zero. That would put the elbow at <i>O</i>, contradicting |<i>E</i>| = <i>L</i> &gt; 0. The argument applies to <em>any</em> choice of poses, including one that tries to switch branches.</p>
-          <p data-lang-zh>若所選姿態在 <i>O</i> 連續，它的肘點也必須在該處連續。沿正 <i>x</i> 軸令 <i>r</i> → 0，會迫使原點所選肘點的 <i>x</i> 座標為零；沿正 <i>y</i> 軸接近，則迫使其 <i>y</i> 座標為零。這樣肘點就要位於 <i>O</i>，與 |<i>E</i>| = <i>L</i> &gt; 0 矛盾。即使嘗試切換分支，這個論證仍適用於任何選解方式。</p>
-
-          <h3><span data-lang-en>2. Unequal lengths: construct a continuous choice</span><span data-lang-zh>2. 不等長：構造連續的選解</span></h3>
-          <p data-lang-en>Now every reachable <i>T</i> satisfies <i>r</i> = |<i>T</i>| ≥ |<i>L</i>₁ − <i>L</i>₂| &gt; 0. Put <i>u</i> = <i>T</i>/<i>r</i> and let <i>Ju</i> be <i>u</i> rotated counterclockwise by 90°. The two distance constraints determine the projection <i>a</i> of the elbow onto <i>u</i> and give its two possible positions:</p>
-          <p data-lang-zh>現在每個可達的 <i>T</i> 都滿足 <i>r</i> = |<i>T</i>| ≥ |<i>L</i>₁ − <i>L</i>₂| &gt; 0。令 <i>u</i> = <i>T</i>/<i>r</i>，並以 <i>Ju</i> 表示把 <i>u</i> 逆時針轉 90° 後的向量。兩個距離條件決定肘點在 <i>u</i> 上的投影 <i>a</i>，給出以下兩個可能位置：</p>
-          <div class="follow-equation"><math display="block"><mtable columnalign="left" rowspacing=".6em">
-            <mtr><mtd><mrow><mi>a</mi><mo>=</mo><mfrac><mrow><msup><mi>r</mi><mn>2</mn></msup><mo>+</mo><msubsup><mi>L</mi><mn>1</mn><mn>2</mn></msubsup><mo>−</mo><msubsup><mi>L</mi><mn>2</mn><mn>2</mn></msubsup></mrow><mrow><mn>2</mn><mi>r</mi></mrow></mfrac></mrow></mtd></mtr>
-            <mtr><mtd><mrow><msub><mi>E</mi><mo>±</mo></msub><mo>=</mo><mi>a</mi><mi>u</mi><mo>±</mo><msqrt><mrow><msubsup><mi>L</mi><mn>1</mn><mn>2</mn></msubsup><mo>−</mo><msup><mi>a</mi><mn>2</mn></msup></mrow></msqrt><mi>J</mi><mi>u</mi></mrow></mtd></mtr>
-          </mtable></math></div>
-          <p data-lang-en>Choose either sign and keep it fixed. Every term is continuous on the closed reachable annulus: the denominator never vanishes, and the square root is continuous even where it becomes zero. The directions <i>E</i>/<i>L</i>₁ and (<i>T</i> − <i>E</i>)/<i>L</i>₂ determine the pose continuously. This gives a continuous choice all the way to both boundary circles, where the two branches coincide. ∎</p>
-          <p data-lang-zh>選定一個正負號後保持不變。式中各項在整個閉可達圓環上都連續：分母從不為零，而平方根在等於零的地方仍然連續。兩段連桿的方向 <i>E</i>/<i>L</i>₁ 和 (<i>T</i> − <i>E</i>)/<i>L</i>₂ 連續地決定姿態。因此選解可一直延伸到兩條邊界圓；在每條邊界上，兩個分支都會重合。∎</p>
+      <details id="proof" class="flip-proof">
+        <summary><span data-lang-en>Show the proof: why one loop or two?</span><span data-lang-zh>展開證明：為何是一個圈或兩個圈？</span></summary>
+        <div class="flip-proof-body">
+          <h3><span data-lang-en>1. Fix the tip and describe every wrist position</span><span data-lang-zh>1. 固定末端，描述所有手腕位置</span></h3>
+          <p data-lang-en>Set <i>O</i> = (0,0), <i>T</i> = (<i>d</i>,0) and take link lengths 1, 1, and <i>c</i> = 0.75. Assume 0.9 ≤ <i>d</i> ≤ 2.6, free joints, and no collision constraints. If <i>φ</i> is the direction of the last link from wrist to tip, then</p>
+          <p data-lang-zh>令 <i>O</i> = (0,0)、<i>T</i> = (<i>d</i>,0)，三段長度為 1、1 和 <i>c</i> = 0.75。假設 0.9 ≤ <i>d</i> ≤ 2.6、關節可自由旋轉，且不考慮碰撞。若 <i>φ</i> 是第三段由手腕指向末端的方向，則</p>
+          <div class="flip-equation"><math display="block"><mrow><mi>W</mi><mo>(</mo><mi>φ</mi><mo>)</mo><mo>=</mo><mo>(</mo><mi>d</mi><mo>−</mo><mi>c</mi><mi>cos</mi><mi>φ</mi><mo>,</mo><mo>−</mo><mi>c</mi><mi>sin</mi><mi>φ</mi><mo>)</mo></mrow></math>
+          <math display="block"><mrow><msup><mrow><mo>|</mo><mi>W</mi><mo>|</mo></mrow><mn>2</mn></msup><mo>=</mo><msup><mi>d</mi><mn>2</mn></msup><mo>+</mo><msup><mi>c</mi><mn>2</mn></msup><mo>−</mo><mn>2</mn><mi>d</mi><mi>c</mi><mi>cos</mi><mi>φ</mi></mrow></math></div>
+          <p data-lang-en>In this range <i>W</i> never reaches <i>O</i>, because <i>d</i> &gt; <i>c</i>. For 0 &lt; |<i>W</i>| &lt; 2 there are exactly two poses of the first two links; for |<i>W</i>| = 2 there is one straight pose; and for |<i>W</i>| &gt; 2 there is none. A feasible wrist position and an elbow choice determine the entire arm, since the last link must join <i>W</i> to <i>T</i>.</p>
+          <p data-lang-zh>在此範圍內 <i>d</i> &gt; <i>c</i>，所以 <i>W</i> 不會到達 <i>O</i>。當 0 &lt; |<i>W</i>| &lt; 2，前兩段恰有兩種姿態；當 |<i>W</i>| = 2，只有一種伸直姿態；當 |<i>W</i>| &gt; 2 則無解。選定合法的手腕與肘點後，整支手臂便確定，因為第三段必須連接 <i>W</i> 和 <i>T</i>。</p>
+          <h3><span data-lang-en>2. Follow the two branches and see where they meet</span><span data-lang-zh>2. 沿兩個分支走，看它們在哪裏相接</span></h3>
+          <ul>
+            <li><span data-lang-en><strong><i>d</i> &lt; 1.25:</strong> even the farthest wrist point has |<i>W</i>| = <i>d</i> + <i>c</i> &lt; 2. Each elbow branch follows a full circle of wrist angles, and their poses never coincide: two separate loops.</span><span data-lang-zh><strong><i>d</i> &lt; 1.25：</strong>即使最遠的手腕點也滿足 |<i>W</i>| = <i>d</i> + <i>c</i> &lt; 2。兩個肘部分支都各自沿完整一圈移動，姿態從不重合，所以是兩個分離的圈。</span></li>
+            <li><span data-lang-en><strong><i>d</i> = 1.25:</strong> the full wrist circle is still reachable, but it touches the reach boundary at <i>φ</i> = π. The two pose loops share that one straight pose, forming a figure eight.</span><span data-lang-zh><strong><i>d</i> = 1.25：</strong>整個手腕圓仍然可達，但在 <i>φ</i> = π 與可達邊界相切。兩個姿態圈只共用這一個伸直姿態，形成八字形。</span></li>
+            <li><span data-lang-en><strong><i>d</i> &gt; 1.25:</strong> only one closed wrist arc is reachable. Indeed, |<i>W</i>| ≤ 2 gives cos <i>φ</i> ≥ (<i>d</i>² + <i>c</i>² − 4)/(2<i>dc</i>), with the right-hand side strictly between −1 and 1. Each elbow branch gives a copy of that arc; its two endpoints are straight poses shared by both copies. Following one arc out and the other back makes one loop.</span><span data-lang-zh><strong><i>d</i> &gt; 1.25：</strong>只有一段閉圓弧可達。由 |<i>W</i>| ≤ 2 得 cos <i>φ</i> ≥ (<i>d</i>² + <i>c</i>² − 4)/(2<i>dc</i>)，右邊嚴格介於 −1 和 1 之間。每個分支各有一份這段圓弧；兩個端點都是兩份共用的伸直姿態。沿一個分支走出去，再沿另一個走回來，便形成一個圈。</span></li>
+          </ul>
+          <p data-lang-en>In the interior of each branch the elbow varies continuously with the wrist, by the two-circle construction. At a straight pose those two elbow positions merge. These are the only identifications. The resulting glued space maps continuously and bijectively onto the space of arm poses; since the former is compact and the latter is Hausdorff, the map is a homeomorphism. So the loops describe the whole space of poses. ∎</p>
+          <p data-lang-zh>由雙圓作圖可知，在每個分支的內部，肘點隨手腕連續移動；到達伸直姿態時，兩個肘點重合。除此之外沒有其他重合。把共用的點接起來後，所得空間到姿態空間的映射是連續雙射；前者緊緻、後者是 Hausdorff 空間，所以這是同胚。這些圈描述的就是整個姿態空間。∎</p>
+          <p class="flip-source"><span data-lang-en>Further reading:</span><span data-lang-zh>延伸閱讀：</span> <a href="https://arxiv.org/abs/1309.7960">Bhattacharya &amp; Pivtoraiko</a><span data-lang-en>, on configuration spaces of planar arms with a fixed tip.</span><span data-lang-zh>，關於固定末端的平面機械臂構型空間。</span></p>
         </div>
       </details>
-      <footer class="follow-footer"><a href="guide.html#two-solutions">← <span data-lang-en>Review the two-circle construction</span><span data-lang-zh>回看雙圓作圖</span></a><a href="index.html"><span data-lang-en>Back to Playground</span><span data-lang-zh>返回互動實驗室</span> →</a></footer>
+      <footer class="flip-footer"><a href="guide-three.html">← <span data-lang-en>How it works: the three-link derivation</span><span data-lang-zh>原理解說：三連桿推導</span></a><a href="game.html"><span data-lang-en>Try the Target Challenge</span><span data-lang-zh>試玩目標挑戰</span> →</a></footer>
     </section>
   </main>
   <script src="assets/i18n.js"></script>
-  <script src="assets/proof.js?v=follow-1"></script>
+  <script src="assets/kinematics.js"></script>
+  <script src="assets/proof.js?v=flip-1"></script>
 </body>
 </html>

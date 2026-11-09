@@ -1,193 +1,243 @@
 document.addEventListener('DOMContentLoaded', () => {
   const $ = id => document.getElementById(id);
+  const K = window.Kinematics;
   const tr = (en, zh) => document.documentElement.lang.startsWith('zh') ? zh : en;
-  const state = { r: 2.4, angles: { a: 0, b: 90 }, equal: true, side: 1 };
-  const distance = $('follow-distance');
-  const lengthPicker = $('follow-lengths');
-  const branchPicker = $('follow-branch');
-  const innerButton = $('follow-inner');
-  const maxDistance = Number(distance.max);
-  const l1 = 2;
-  const lengths = () => {
-    const l2 = state.equal ? l1 : 1.25;
-    return { l2, inner: l1 - l2, outer: l1 + l2 };
-  };
-  const angleInputs = { a: $('follow-angle-a'), b: $('follow-angle-b') };
-  const boards = {};
+  const TAU = 2 * Math.PI, c = .75, threshold = 2 - c, eps = 1e-8;
+  const arm = $('flip-arm'), distance = $('flip-distance'), angle = $('flip-angle');
+  const switchButton = $('flip-switch');
+  const state = { d: 1, phi: K.toRadians(28), branch: 0, tried: false, flipped: false, justSwitched: false };
+  const presets = [...document.querySelectorAll('[data-flip-distance]')];
+  const dragHandles = [...arm.querySelectorAll('[data-flip-drag]')];
+  const parts = Object.fromEntries([...document.querySelectorAll('[id^="flip-"]')].map(el => [el.id.slice(5), el]));
+  const origin = { x: 0, y: 0 };
+  let drag = null;
 
-  for (const svg of document.querySelectorAll('[data-follow-board]')) {
-    // These are static SVG elements; only their geometry and text change.
-    svg.insertAdjacentHTML('beforeend', `
-      <circle class="follow-workspace" data-part="outer"/>
-      <circle class="follow-workspace-hole" data-part="inner"/>
-      <path class="follow-axes" d="M-4.3 0H4.3M0-4.3V4.3"/>
-      <text class="follow-axis-label" x="4.37" y="-.13">x</text>
-      <text class="follow-axis-label" x=".13" y="-4.36">y</text>
-      <line class="follow-ray" data-part="ray" x1="0" y1="0"/>
-      <circle class="follow-locus" data-part="locus" r="2"/>
-      <g data-part="pose">
-        <line class="follow-link link-one" data-part="link1" x1="0" y1="0"/>
-        <line class="follow-link link-two" data-part="link2"/>
-        <circle class="follow-elbow" data-part="elbow" r=".14"/>
-        <text class="follow-elbow-label" data-part="elbowLabel">E</text>
-      </g>
-      <circle class="follow-base" r=".11"/>
-      <text class="follow-base-label" x="-.19" y=".4" text-anchor="end">O</text>
-      <circle class="follow-target" data-part="target" r=".19"/>
-      <text class="follow-target-label" data-part="targetLabel">T</text>
-    `);
-    const parts = Object.fromEntries([...svg.querySelectorAll('[data-part]')].map(el => [el.dataset.part, el]));
-    boards[svg.dataset.followBoard] = { svg, title: svg.querySelector('title'), parts };
+  const wrap = a => Math.atan2(Math.sin(a), Math.cos(a));
+  const mode = () => state.d < threshold ? 'two' : state.d === threshold ? 'touch' : 'one';
+  const limit = () => mode() === 'one'
+    ? Math.acos(K.clamp((state.d ** 2 + c ** 2 - 4) / (2 * state.d * c), -1, 1)) : Math.PI;
+  const atJoin = () => mode() !== 'two' && Math.abs(Math.abs(state.phi) - limit()) < eps;
+  const wrist = phi => ({ x: state.d - c * Math.cos(phi), y: c * Math.sin(phi) }); // SVG coordinates
+  const format = (number, digits = 2) => (Math.abs(number) < .5 * 10 ** -digits ? 0 : number).toFixed(digits).replace('-', '−');
+  const coord = p => `${p.x},${p.y}`;
+  const moved = (p, x, y) => ({ x: p.x + x, y: p.y + y });
+  function point(el, p, x = 'cx', y = 'cy') { el.setAttribute(x, p.x); el.setAttribute(y, p.y); }
+  function line(el, a, b) { point(el, a, 'x1', 'y1'); point(el, b, 'x2', 'y2'); }
+  const show = (el, yes) => el.classList.toggle('flip-hidden', !yes);
+  const setText = (el, text) => { if (el.textContent !== text) el.textContent = text; };
+  function fullCircle(x, y, r) {
+    return `M${x - r},${y} a${r},${r} 0 1 0 ${2*r},0 a${r},${r} 0 1 0 ${-2*r},0`;
   }
 
-  function point(element, x, y, xAttribute = 'cx', yAttribute = 'cy') {
-    element.setAttribute(xAttribute, x);
-    element.setAttribute(yAttribute, -y);
+  function drawArm() {
+    const w = wrist(state.phi), t = { x: state.d, y: 0 };
+    const boundary = atJoin();
+    const result = K.inverse(w.x, -w.y, 1, 1);
+    // At a gate the geometric elbow is exactly halfway from O to W.
+    const elbows = boundary || result.solutions.length !== 2
+      ? Array(2).fill({ x: w.x / 2, y: w.y / 2 })
+      : result.solutions.map(s => ({ x: s.elbow.x, y: -s.elbow.y }));
+    const e = elbows[state.branch], other = elbows[1 - state.branch];
+    const alpha = limit(), gateA = wrist(-alpha), gateB = wrist(alpha);
+    point(parts['wrist-circle'], t);
+    parts['wrist-path'].setAttribute('d', mode() === 'one'
+      ? `M${coord(gateA)} A${c},${c} 0 ${alpha > Math.PI / 2 ? 1 : 0} 0 ${coord(gateB)}`
+      : fullCircle(t.x, 0, c));
+    point(parts['gate-a'], gateA);
+    point(parts['gate-b'], gateB);
+    show(parts['gate-a'], mode() !== 'two');
+    show(parts['gate-b'], mode() === 'one');
+    line(parts.reference, origin, w);
+    line(parts['link-1'], origin, e);
+    line(parts['link-2'], e, w);
+    line(parts['link-3'], w, t);
+    parts.other.setAttribute('points', [origin, other, w].map(coord).join(' '));
+    show(parts.other, !boundary);
+    point(parts['other-elbow'], other);
+    show(parts['other-elbow'], !boundary);
+    point(parts.elbow, e);
+    point(parts['elbow-label'], moved(e, -.09, e.y > .75 ? .19 : -.13), 'x', 'y');
+    point(parts.wrist, w);
+    point(parts['wrist-hit'], w);
+    point(parts['wrist-label'], moved(w, .15, w.y < -.5 ? -.11 : .19), 'x', 'y');
+    point(parts.target, t);
+    point(parts['target-hit'], t);
+    point(parts['target-label'], moved(t, .15, -.15), 'x', 'y');
+    arm.dataset.branch = boundary ? 'straight' : state.branch === 0 ? 'positive' : 'negative';
+    setText(parts['arm-title'], tr(
+      `Fixed tip at (${format(t.x)}, 0); wrist at (${format(w.x)}, ${format(-w.y)}). ${boundary ? 'Straight pose.' : 'Elbow at (' + format(e.x) + ', ' + format(-e.y) + ').'}`,
+      `末端固定於（${format(t.x)}，0）；手腕位於（${format(w.x)}，${format(-w.y)}）。${boundary ? '目前為伸直姿態。' : '肘點位於（' + format(e.x) + '，' + format(-e.y) + '）。'}`));
   }
-  const visible = (el, show) => el.classList.toggle('follow-hidden', !show);
-  const formatted = value => (Math.abs(value) < .005 ? 0 : value).toFixed(2).replace('-', '−');
 
-  function drawPath(key, { l2, inner, outer }, atOrigin, reachable) {
-    const { title, parts } = boards[key];
-    const radians = state.angles[key] * Math.PI / 180;
-    const ux = Math.cos(radians), uy = Math.sin(radians);
-    const tx = state.r * ux, ty = state.r * uy;
-    const limit = atOrigin && state.equal;
-    parts.outer.setAttribute('r', outer);
-    parts.inner.setAttribute('r', inner);
-    visible(parts.inner, inner > 0);
-    point(parts.ray, 4.15 * ux, 4.15 * uy, 'x2', 'y2');
-    point(parts.target, tx, ty);
-    const left = tx > 3.35;
-    point(parts.targetLabel, tx + (left ? -.28 : .28), ty + (ty > 3.75 ? -.35 : .24), 'x', 'y');
-    parts.targetLabel.setAttribute('text-anchor', left ? 'end' : 'start');
-    parts.targetLabel.textContent = atOrigin ? 'T = O' : 'T';
-    visible(parts.pose, reachable);
-    visible(parts.locus, limit);
-    parts.pose.classList.toggle('follow-limit-pose', limit);
-    let description = tr('No pose reaches the target.', '沒有姿態能到達目標。');
-
-    if (reachable) {
-      // In the ray's frame, E = a u + h Ju. The equal-length limit is
-      // a = 0, h = ±L, and depends on the last direction outside O.
-      const a = state.equal ? state.r / 2 : (state.r ** 2 + l1 ** 2 - l2 ** 2) / (2 * state.r);
-      const h = state.side * Math.sqrt(Math.max(0, l1 ** 2 - a ** 2));
-      const ex = a * ux - h * uy, ey = a * uy + h * ux;
-      point(parts.link1, ex, ey, 'x2', 'y2');
-      point(parts.link2, ex, ey, 'x1', 'y1');
-      point(parts.link2, tx, ty, 'x2', 'y2');
-      point(parts.elbow, ex, ey);
-      point(parts.elbowLabel, ex + .2, ey + .19, 'x', 'y');
-      description = tr(`${limit ? 'Limit elbow' : 'Elbow'} (${formatted(ex)}, ${formatted(ey)}).`,
-        `${limit ? '極限肘點' : '肘點'}（${formatted(ex)}，${formatted(ey)}）。`);
+  function drawMap() {
+    const current = mode(), alpha = limit(), plus = state.branch === 0;
+    const left = { x: 54, y: 77 }, right = { x: 246, y: 77 };
+    let p, label;
+    if (current === 'one') {
+      parts['map-positive'].setAttribute('d', 'M54,77 A96,52 0 0 1 246,77');
+      parts['map-negative'].setAttribute('d', 'M54,77 A96,52 0 0 0 246,77');
+      const a = Math.PI + (plus ? 1 : -1) * Math.PI * (state.phi + alpha) / (2 * alpha);
+      p = { x: 150 + 96 * Math.cos(a), y: 77 + 52 * Math.sin(a) };
+      point(parts['map-gate-a'], left);
+      point(parts['map-gate-b'], right);
+      label = tr('One connected loop', '一個相連的圈');
+    } else {
+      const touch = current === 'touch', r = touch ? 51 : 45;
+      const xA = touch ? 99 : 79, xB = touch ? 201 : 221;
+      parts['map-positive'].setAttribute('d', fullCircle(xA, 77, r));
+      parts['map-negative'].setAttribute('d', fullCircle(xB, 77, r));
+      const a = touch
+        ? (plus ? 0 : Math.PI) + (state.phi + Math.PI)
+        : -Math.PI / 2 + state.phi;
+      p = { x: (plus ? xA : xB) + r * Math.cos(a), y: 77 + r * Math.sin(a) };
+      point(parts['map-gate-a'], { x: 150, y: 77 });
+      label = touch ? tr('Figure eight · one join', '八字形 · 一個接點') : tr('Two separate loops', '兩個分離的圈');
     }
-
-    const degrees = `${String(state.angles[key]).replace('-', '−')}°`;
-    const name = key.toUpperCase();
-    const observation = limit ? tr('limit', '極限') : !reachable ? tr('unreachable', '不可達') : '';
-    $(`follow-readout-${key}`).textContent = observation ? `${degrees} · ${observation}` : degrees;
-    angleInputs[key].value = state.angles[key];
-    angleInputs[key].setAttribute('aria-valuetext', degrees);
-    title.textContent = tr(`Path ${name}, direction ${degrees}. ${description}`, `路徑 ${name}，方向 ${degrees}。${description}`);
+    point(parts['map-marker'], p);
+    show(parts['map-gate-a'], current !== 'two');
+    show(parts['map-gate-b'], current === 'one');
+    setText(parts['space-count'], label);
+    setText(parts['map-title'], label);
   }
 
   function render() {
-    const geometry = lengths();
-    const { inner, outer } = geometry;
-    const atOrigin = state.r === 0;
-    const reachable = state.r >= inner && state.r <= outer;
-    const sameRay = (state.angles.a - state.angles.b) % 360 === 0;
-    distance.value = state.r;
-    $('follow-radius').textContent = formatted(state.r);
-    distance.setAttribute('aria-valuetext', formatted(state.r));
-    lengthPicker.value = state.equal ? 'equal' : 'unequal';
-    branchPicker.value = state.side;
-    innerButton.hidden = state.equal;
-    drawPath('a', geometry, atOrigin, reachable);
-    drawPath('b', geometry, atOrigin, reachable);
+    const current = mode(), alpha = limit(), degrees = K.toDegrees(state.phi);
+    drawArm();
+    drawMap();
+    distance.value = state.d;
+    angle.min = -K.toDegrees(alpha);
+    angle.max = K.toDegrees(alpha);
+    angle.value = degrees;
+    const phiText = `${format(degrees, 1)}°`;
+    setText(parts['distance-value'], format(state.d));
+    setText(parts['angle-value'], phiText);
+    angle.setAttribute('aria-valuetext', phiText);
+    switchButton.disabled = !atJoin();
+    presets.forEach(button => button.setAttribute('aria-pressed', Number(button.dataset.flipDistance) === state.d));
 
-    let heading, copy;
-    if (atOrigin && state.equal) {
-      heading = tr('One target. A whole circle of possible elbows.', '同一個目標，肘點可以在整個圓上。');
-      copy = sameRay
-        ? tr('The directions match, so the dashed limit poses match. Change one direction to see a different limit at the same target.',
-          '兩條路徑方向相同，虛線極限姿態也相同。改變其中一個方向，就能看到同一目標的另一個極限姿態。')
-        : tr('The dashed arms show the folded poses reached along these two rays using the same branch. The dotted circle shows all possible elbows at O.',
-          '虛線手臂顯示同一分支沿兩條射線接近時的折疊姿態。點線圓則顯示目標在 O 時所有可能的肘點。');
-    } else if (state.r < inner) {
-      heading = tr('The origin is out of reach.', '原點不可達。');
-      copy = tr('The longer link cannot fold back far enough. Try the inner edge at r = 0.75: each target on that circle has exactly one folded pose.',
-        '較長的連桿無法完全折回原點。試試 r = 0.75 的內邊界：圓上的每個目標都恰有一種折疊姿態。');
-    } else if (state.r > outer) {
-      heading = tr('Both targets are beyond the arm’s reach.', '兩個目標都在機械臂的可達範圍外。');
-      copy = tr(`Drag back inside the outer circle, whose radius is ${outer}.`, `把目標拖回半徑為 ${outer} 的外圓內。`);
-    } else if (state.r === inner || state.r === outer) {
-      heading = tr('The two branches meet at each boundary point.', '在每個邊界點，兩個分支會重合。');
-      copy = tr('The links are collinear. Switch the elbow branch: each target keeps its pose.',
-        '兩段連桿共線。試試切換肘點分支：每個目標的姿態都不變。');
+    let heading, detail;
+    if (atJoin() && state.justSwitched) {
+      heading = tr('You crossed onto the other branch.', '你已轉到另一個分支。');
+      detail = tr('Move the wrist away from this straight pose. The elbow will now bend to the other side, while the tip stays fixed.',
+        '把手腕移離伸直姿態。肘部現在會彎向另一側，末端仍然固定。');
+    } else if (atJoin()) {
+      heading = tr('The two branches meet here.', '兩個分支在這裏相接。');
+      detail = current === 'one'
+        ? tr('Drag back along the blue arc to bend the other way, or press “Cross to the other branch”.',
+          '沿藍色圓弧往回拖，肘部就會往另一側彎；也可按「轉到另一個分支」。')
+        : tr('Drag through the touch point, or press “Cross to the other branch” and move the wrist away.',
+          '把手腕拖過相切點，或按「轉到另一個分支」後移開手腕。');
+    } else if (state.flipped) {
+      heading = tr('Elbow flipped. The tip never moved.', '肘部翻過去了，末端一直沒動。');
+      detail = tr('The front two links passed through one shared straight pose. The black dot is now on the other colour.',
+        '前兩段經過了共用的伸直姿態，黑點現在位於另一種顏色的路徑上。');
+    } else if (current === 'one') {
+      heading = tr('Try reaching a white dot on the blue arc.', '試試把手腕拖到藍色圓弧的白點。');
+      detail = tr('The blue arc ends at two straight poses. Can one of them help you reach the other elbow?',
+        '藍色圓弧的兩端都是伸直姿態。能不能利用其中一個，翻到另一側？');
+    } else if (current === 'touch') {
+      heading = tr('There is exactly one place to cross.', '只有一個地方可以轉到另一個分支。');
+      detail = tr('Drag the wrist to the white dot where the blue circle touches the edge of the disc.',
+        '把手腕拖到白點：那裏是藍色圓周與圓盤邊界的相切點。');
     } else {
-      heading = sameRay ? tr('Try a different direction for one path.', '試試改變其中一條路徑的方向。')
-        : tr('Same distance, different directions.', '距離相同，方向不同。');
-      copy = state.equal ? tr('Bring both targets to the centre. Compare where the two elbows end up.',
-        '把兩個目標移到中心，再比較兩個肘點最後的位置。')
-        : tr('Try approaching the inner edge. The hole around O is the part neither arm can reach.',
-          '試試接近內邊界。O 周圍的空洞是兩支手臂都無法到達的區域。');
+      heading = state.tried ? tr('A full turn still keeps you on one branch.', '繞一整圈也只會留在同一分支。')
+        : tr('Can you reach the dashed elbow pose?', '能翻到虛線所示的肘部姿態嗎？');
+      detail = tr('The whole blue circle is reachable, but the first two links never straighten. Move the red target farther out and try again.',
+        '藍色圓周處處可達，但前兩段從不伸直。把紅色目標移遠一點再試。');
     }
-    const title = $('follow-observation-title'), description = $('follow-observation-copy');
-    if (title.textContent !== heading) title.textContent = heading;
-    if (description.textContent !== copy) description.textContent = copy;
+    setText(parts.status, heading);
+    setText(parts.detail, detail);
   }
 
-  function setRadius(r) { state.r = Math.round(Math.min(maxDistance, Math.max(0, r)) * 100) / 100; }
-  distance.addEventListener('input', () => { setRadius(Number(distance.value)); render(); });
-  lengthPicker.addEventListener('change', () => { state.equal = lengthPicker.value === 'equal'; render(); });
-  branchPicker.addEventListener('change', () => { state.side = Number(branchPicker.value); render(); });
-  for (const [key, input] of Object.entries(angleInputs)) {
-    input.addEventListener('input', () => { state.angles[key] = Number(input.value); render(); });
-  }
-  $('follow-zero').addEventListener('click', () => { setRadius(0); render(); });
-  innerButton.addEventListener('click', () => { setRadius(lengths().inner); render(); });
-  $('follow-reset').addEventListener('click', () => {
-    Object.assign(state, { r: 2.4, angles: { a: 0, b: 90 }, equal: true, side: 1 });
+  function moveTarget(value) {
+    const next = Math.round(K.clamp(value, Number(distance.min), Number(distance.max)) * 100) / 100;
+    if (next === state.d) return;
+    state.d = next;
+    state.phi = K.clamp(state.phi, -limit(), limit());
+    state.tried = state.flipped = state.justSwitched = false;
     render();
-  });
+  }
+  function setAngle(phi) {
+    state.phi = K.clamp(phi, -limit(), limit());
+    state.tried = true;
+    if (!atJoin()) state.justSwitched = false;
+    render();
+  }
+  function changeBranch() {
+    state.branch = 1 - state.branch;
+    state.flipped = true;
+    state.justSwitched = true;
+  }
 
-  for (const [key, { svg }] of Object.entries(boards)) {
-    let pointer = null;
-    function move(event) {
-      const matrix = svg.getScreenCTM();
-      if (!matrix) return;
-      const p = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
-      const r = Math.hypot(p.x, p.y);
-      if (r > .13) state.angles[key] = Math.round(Math.atan2(-p.y, p.x) * 180 / Math.PI);
-      setRadius(r <= .13 ? 0 : r);
-      render();
-    }
-    svg.addEventListener('pointerdown', event => {
-      if (!event.isPrimary || event.button !== 0) return;
-      pointer = event.pointerId;
-      svg.setPointerCapture(pointer);
-      move(event);
+  distance.addEventListener('input', () => moveTarget(Number(distance.value)));
+  angle.addEventListener('input', () => setAngle(K.toRadians(Number(angle.value))));
+  switchButton.addEventListener('click', () => { if (atJoin()) { changeBranch(); render(); } });
+  presets.forEach(button => button.addEventListener('click', () => {
+    state.phi = K.toRadians(28);
+    state.branch = 0;
+    state.tried = state.flipped = state.justSwitched = false;
+    moveTarget(Number(button.dataset.flipDistance));
+    render();
+  }));
+
+  function localPoint(event) {
+    const matrix = arm.getScreenCTM();
+    return matrix ? new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse()) : null;
+  }
+  const fromPointer = p => Math.atan2(p.y, state.d - p.x);
+  for (const handle of dragHandles) {
+    handle.addEventListener('pointerdown', event => {
+      if (!event.isPrimary || event.button !== 0 || drag) return;
+      const p = localPoint(event);
+      if (!p) return;
+      drag = {
+        id: event.pointerId, kind: handle.dataset.flipDrag, last: fromPointer(p), startX: p.x, startD: state.d,
+        phase: state.phi, gate: mode() === 'one' && atJoin() && !state.justSwitched ? state.phi : null
+      };
+      arm.setPointerCapture(event.pointerId);
     });
-    svg.addEventListener('pointermove', event => { if (event.pointerId === pointer) move(event); });
-    for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) {
-      svg.addEventListener(name, event => { if (event.pointerId === pointer) pointer = null; });
+  }
+  arm.addEventListener('pointermove', event => {
+    if (drag?.id !== event.pointerId) return;
+    const p = localPoint(event);
+    if (!p) return;
+    if (drag.kind === 'target') {
+      moveTarget(drag.startD + p.x - drag.startX);
+      return;
     }
+    if (Math.hypot(p.x - state.d, p.y) < .12) return; // undefined direction at the red point
+    const desired = fromPointer(p), delta = wrap(desired - drag.last);
+    drag.last = desired;
+    const current = mode(), alpha = limit();
+    if (current !== 'one') {
+      const next = drag.phase + delta;
+      if (current === 'touch' && Math.floor((next + Math.PI) / TAU) !== Math.floor((drag.phase + Math.PI) / TAU)) changeBranch();
+      drag.phase = next;
+      setAngle(wrap(next));
+      return;
+    }
+    drag.phase = K.clamp(drag.phase + delta, -alpha, alpha);
+    if (drag.gate !== null) {
+      // The wrist reaches a straight pose first, then comes back along the same
+      // physical arc on the other branch. Hysteresis avoids flips from jitter.
+      if (Math.abs(drag.phase - drag.gate) > .045) {
+        changeBranch();
+        drag.gate = null;
+        setAngle(drag.phase);
+      } else setAngle(drag.gate);
+    } else {
+      if (Math.abs(drag.phase) === alpha && !state.justSwitched) drag.gate = drag.phase;
+      setAngle(drag.phase);
+    }
+  });
+  for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+    arm.addEventListener(type, event => { if (drag?.id === event.pointerId) drag = null; });
   }
 
-  function localize() {
-    lengthPicker.options[0].textContent = tr('Equal · 2 and 2', '等長 · 2 和 2');
-    lengthPicker.options[1].textContent = tr('Unequal · 2 and 1.25', '不等長 · 2 和 1.25');
-    branchPicker.options[0].textContent = tr('Left of the ray', '射線左側');
-    branchPicker.options[1].textContent = tr('Right of the ray', '射線右側');
-    render();
-  }
-  function showLinkedProof() {
-    if (location.hash === '#proof') $('proof').open = true;
-  }
+  const openProof = () => { if (location.hash === '#proof') $('proof').open = true; };
   document.querySelector('a[href="#proof"]').addEventListener('click', () => { $('proof').open = true; });
-  window.addEventListener('hashchange', showLinkedProof);
-  window.addEventListener('languagechange', localize);
-  localize();
-  showLinkedProof();
+  window.addEventListener('hashchange', openProof);
+  window.addEventListener('languagechange', render);
+  render();
+  openProof();
 });
