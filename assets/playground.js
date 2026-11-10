@@ -4,14 +4,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const ctx = canvas.getContext('2d');
   const wrap = document.getElementById('canvasWrap');
   const $ = id => document.getElementById(id);
+  const tokens = getComputedStyle(document.documentElement);
+  const color = name => tokens.getPropertyValue('--' + name).trim();
+  const branchColors = [color('branch-plus'), color('branch-minus')];
   const state = { mode: 'ik', branch: 0, target: { x: 3.2, y: 1.6 }, theta1: K.toRadians(-20), theta2: K.toRadians(75), l1: 2.7, l2: 2.0, dragging: false };
   let transform = { scale: 1, ox: 0, oy: 0 };
 
   function format(value, digits = 1) {
-    const text = Number(value).toFixed(digits);
+    const rounded = Number(value).toFixed(digits);
+    const text = Number(rounded) === 0 ? (0).toFixed(digits) : rounded;
     return text.startsWith('-') ? '−' + text.slice(1) : text;
   }
   const deg = radians => `${format(K.toDegrees(radians), 1)}°`;
+  const principal = radians => Math.atan2(Math.sin(radians), Math.cos(radians));
+  const selectedSolution = result => result.solutions[state.branch] || result.solutions[0];
+  function closestPose(result) {
+    const outer = result.r > result.outer;
+    const theta1 = Math.atan2(state.target.y, state.target.x) + (!outer && state.l2 > state.l1 ? Math.PI : 0);
+    const theta2 = outer ? 0 : Math.PI;
+    return { theta1, theta2, ...K.forward(theta1, theta2, state.l1, state.l2) };
+  }
   const worldToScreen = p => ({ x: transform.ox + p.x * transform.scale, y: transform.oy - p.y * transform.scale });
   const screenToWorld = p => ({ x: (p.x - transform.ox) / transform.scale, y: (transform.oy - p.y) / transform.scale });
 
@@ -23,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.height = Math.round(height * dpr);
     canvas.style.width = `${rect.width}px`;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    transform = { scale: Math.min(rect.width / 11.5, height / 8.2), ox: rect.width * .48, oy: height * .58 };
+    transform = { scale: Math.min(rect.width / 13.25, height / 13.25), ox: rect.width * .5, oy: height * .5 };
     draw();
   }
 
@@ -52,9 +64,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function drawGeometry(target, result) {
     if (!$('showGeometry').checked || state.mode !== 'ik') return;
     const base = worldToScreen({ x: 0, y: 0 }); const t = worldToScreen(target);
-    circle(base, state.l1 * transform.scale, 'rgba(84,117,232,.62)', 1.5, null, [6, 5]);
-    circle(t, state.l2 * transform.scale, 'rgba(255,90,54,.62)', 1.5, null, [6, 5]);
-    line(base, t, '#aeb3bb', 1, [4, 5]);
+    circle(base, state.l1 * transform.scale, color('link-one') + 'a0', 1.5, null, [6, 5]);
+    circle(t, state.l2 * transform.scale, color('link-two') + 'a0', 1.5, null, [6, 5]);
+    line(base, t, color('reference'), 1, [4, 5]);
     label(`r = ${format(Math.hypot(target.x, target.y), 2)}`, { x: (base.x + t.x) / 2, y: (base.y + t.y) / 2 - 9 });
     result.solutions.forEach((s, i) => {
       const e = worldToScreen(s.elbow); circle(e, 5, '#5475e8', 1.5, '#fff'); label(i === 0 ? 'E₁' : 'E₂', { x: e.x + 9, y: e.y - 8 }, '#5475e8', 'left');
@@ -73,13 +85,19 @@ document.addEventListener('DOMContentLoaded', () => {
   function drawBase(base) {
     ctx.save(); ctx.fillStyle = '#353941'; ctx.beginPath(); ctx.roundRect(base.x - 33, base.y + 17, 66, 25, 6); ctx.fill(); ctx.fillStyle = '#737b86'; ctx.fillRect(base.x - 22, base.y + 6, 44, 15); ctx.restore();
   }
-  function drawRobot(solution, ghost = false) {
+  function drawRobot(solution, ghost = false, branch = null) {
     const base = worldToScreen({ x: 0, y: 0 }); const elbow = worldToScreen(solution.elbow); const end = worldToScreen(solution.end);
     ctx.save(); if (ghost) ctx.globalAlpha = .14;
-    drawBase(base); roundedSegment(base, elbow, 27, '#dce1e7', '#363a41'); roundedSegment(elbow, end, 23, '#eef0f3', '#363a41'); drawJoint(base, 16, true); drawJoint(elbow, 14, false); drawGripper(end, solution.theta1 + solution.theta2); ctx.restore();
+    drawBase(base); roundedSegment(base, elbow, 25, '#dce1e7', '#363a41'); roundedSegment(elbow, end, 21, '#eef0f3', '#363a41'); drawJoint(base, 16, false); drawJoint(elbow, 13, false); drawGripper(end, solution.theta1 + solution.theta2);
+    if (!ghost && branch !== null) circle(elbow, 6, '#fff', 1.5, branchColors[branch]);
+    ctx.restore();
   }
-  function drawTarget(target, reachable) {
-    const p = worldToScreen(target); ctx.save(); ctx.strokeStyle = reachable ? '#ff5a36' : '#c94120'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(p.x, p.y, 12, 0, Math.PI * 2); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x - 17, p.y); ctx.lineTo(p.x + 17, p.y); ctx.moveTo(p.x, p.y - 17); ctx.lineTo(p.x, p.y + 17); ctx.stroke(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); ctx.restore(); label(`T (${format(target.x, 2)}, ${format(target.y, 2)})`, { x: p.x + 18, y: p.y - 20 }, reachable ? '#d94a2c' : '#c94120', 'left');
+  function drawTarget(target, isIK) {
+    const p = worldToScreen(target), tone = color(isIK ? 'target' : 'ink');
+    circle(p, 9, tone, 2, '#fff');
+    circle(p, 3, tone, 1, tone);
+    const left = p.x > wrap.clientWidth - 24;
+    label(isIK ? 'T' : 'P', { x: p.x + (left ? -14 : 14), y: Math.max(13, p.y - 13) }, tone, left ? 'right' : 'left');
   }
   function draw() {
     const width = parseFloat(canvas.style.width) || wrap.clientWidth; const height = parseFloat(getComputedStyle(canvas).height);
@@ -87,11 +105,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let solution, result, target;
     if (state.mode === 'ik') {
       target = state.target; result = K.inverse(target.x, target.y, state.l1, state.l2); drawGeometry(target, result);
-      if (result.solutions.length) { solution = result.solutions[Math.min(state.branch, result.solutions.length - 1)]; if (result.solutions.length > 1) drawRobot(result.solutions[1 - state.branch], true); drawRobot(solution); }
-      else { const r = Math.hypot(target.x, target.y) || 1; const reach = result.r > result.outer ? result.outer : result.inner; const angle = Math.atan2(target.y, target.x); const end = { x: reach * Math.cos(angle), y: reach * Math.sin(angle) }; const theta2 = result.r > result.outer ? 0 : Math.PI; const theta1 = Math.atan2(end.y, end.x) - (theta2 === Math.PI ? 0 : 0); solution = { theta1, theta2, ...K.forward(theta1, theta2, state.l1, state.l2) }; drawRobot(solution); }
-      drawTarget(target, result.reachable);
+      if (result.solutions.length > 1) drawRobot(result.solutions[1 - state.branch], true);
+      solution = selectedSolution(result) || closestPose(result);
+      drawRobot(solution, false, result.count === 2 ? state.branch : null);
+      if (!result.reachable) line(worldToScreen(solution.end), worldToScreen(target), color('reference'), 1.5, [4, 4]);
+      drawTarget(target, true);
     } else {
-      solution = { theta1: state.theta1, theta2: state.theta2, ...K.forward(state.theta1, state.theta2, state.l1, state.l2) }; target = solution.end; drawRobot(solution); drawTarget(target, true);
+      solution = { theta1: state.theta1, theta2: state.theta2, ...K.forward(state.theta1, state.theta2, state.l1, state.l2) }; target = solution.end; drawRobot(solution); drawTarget(target, false);
     }
   }
 
@@ -104,16 +124,31 @@ document.addEventListener('DOMContentLoaded', () => {
     $('theta1').value = K.toDegrees(state.theta1); $('theta2').value = K.toDegrees(state.theta2); $('theta1Value').textContent = deg(state.theta1); $('theta2Value').textContent = deg(state.theta2); $('anglePair').textContent = `(${deg(state.theta1)}, ${deg(state.theta2)})`;
     $('length1').value = state.l1; $('length2').value = state.l2; $('length1Value').textContent = state.l1.toFixed(1); $('length2Value').textContent = state.l2.toFixed(1); $('lengthPair').textContent = `${state.l1.toFixed(1)} + ${state.l2.toFixed(1)}`;
     const status = $('reachStatus'); status.className = 'status-pill';
-    if (!result.reachable) { status.classList.add('unreachable'); status.textContent = t.unreachable; }
+    if (state.mode === 'fk') status.textContent = lang === 'zh' ? '由角度求末端 P' : 'ANGLES → TIP P';
+    else if (!result.reachable) { status.classList.add('unreachable'); status.textContent = t.unreachable; }
     else if (result.count === Infinity) { status.classList.add('tangent'); status.textContent = t.infinite; }
     else if (result.count === 1) { status.classList.add('tangent'); status.textContent = t.tangent; }
     else status.textContent = t.reachable;
-    $('elbowUp').disabled = !result.reachable; $('elbowDown').disabled = result.solutions.length < 2;
+    $('branchChoices').hidden = result.solutions.length < 2;
+    $('branchChoices').classList.toggle('example-poses', result.count === Infinity);
+    $('branchSingle').hidden = result.count !== 1;
+    $('branchUnavailable').hidden = result.reachable;
+    $('playBranchNote').hidden = result.count !== Infinity;
+    $('ikSpecial').hidden = result.count !== Infinity;
+    $('ikRegular').hidden = result.count === Infinity;
+    for (const [button, index] of [[$('elbowUp'), 0], [$('elbowDown'), 1]]) {
+      const pressed = state.branch === index;
+      button.classList.toggle('active', pressed);
+      button.setAttribute('aria-pressed', String(pressed));
+      button.firstElementChild.textContent = result.count === Infinity
+        ? (lang === 'zh' ? `示例 ${index + 1}` : `Example ${index + 1}`) : (index === 0 ? 'θ₂ > 0' : 'θ₂ < 0');
+    }
     if (result.solutions.length) {
       const up = result.solutions[0]; const down = result.solutions[result.solutions.length - 1];
-      $('upAngles').textContent = `θ₁ ${deg(up.theta1)} · θ₂ ${deg(up.theta2)}`; $('downAngles').textContent = `θ₁ ${deg(down.theta1)} · θ₂ ${deg(down.theta2)}`;
-      const s = result.solutions[Math.min(state.branch, result.solutions.length - 1)];
-      $('theta1Result').textContent = deg(s.theta1); $('theta2Result').textContent = deg(s.theta2);
+      $('upAngles').textContent = `θ₁ ${deg(principal(up.theta1))} · θ₂ ${deg(up.theta2)}`; $('downAngles').textContent = `θ₁ ${deg(principal(down.theta1))} · θ₂ ${deg(down.theta2)}`;
+      const s = selectedSolution(result);
+      $('theta1Result').textContent = deg(principal(s.theta1)); $('theta2Result').textContent = deg(s.theta2);
+      $('branchSingle').textContent = `(θ₁, θ₂) = (${deg(principal(s.theta1))}, ${deg(s.theta2)})`;
     } else { $('theta1Result').textContent = '—'; $('theta2Result').textContent = '—'; }
     $('c2Substitution').textContent = `= (${format(state.target.x ** 2 + state.target.y ** 2, 2)} − ${format(state.l1 ** 2, 2)} − ${format(state.l2 ** 2, 2)}) / ${format(2 * state.l1 * state.l2, 2)}`;
     const fk = K.forward(state.theta1, state.theta2, state.l1, state.l2);
@@ -122,18 +157,38 @@ document.addEventListener('DOMContentLoaded', () => {
     draw();
   }
   function setMode(mode) {
+    if (mode !== state.mode) {
+      if (mode === 'fk') {
+        const result = K.inverse(state.target.x, state.target.y, state.l1, state.l2);
+        const pose = selectedSolution(result) || closestPose(result);
+        state.theta1 = principal(pose.theta1);
+        state.theta2 = principal(pose.theta2);
+      } else {
+        state.target = K.forward(state.theta1, state.theta2, state.l1, state.l2).end;
+        if (Math.abs(Math.sin(state.theta2)) > 1e-7) state.branch = state.theta2 > 0 ? 0 : 1;
+      }
+    }
     state.mode = mode; $('modeIK').classList.toggle('active', mode === 'ik'); $('modeFK').classList.toggle('active', mode === 'fk');
+    $('modeIK').setAttribute('aria-pressed', String(mode === 'ik'));
+    $('modeFK').setAttribute('aria-pressed', String(mode === 'fk'));
+    $('playTargetLegend').hidden = mode !== 'ik';
+    $('playTipLegend').hidden = mode !== 'fk';
     document.querySelectorAll('.ik-controls').forEach(el => el.hidden = mode !== 'ik'); document.querySelectorAll('.fk-controls').forEach(el => el.hidden = mode !== 'fk');
     $('ikFormula').hidden = mode !== 'ik'; $('fkFormula').hidden = mode !== 'fk'; $('formulaMode').textContent = mode.toUpperCase(); $('modeDescriptor').textContent = mode.toUpperCase(); $('dragHint').hidden = mode !== 'ik';
-    if (mode === 'fk') { const result = K.inverse(state.target.x, state.target.y, state.l1, state.l2); if (result.solutions.length) { state.theta1 = result.solutions[state.branch].theta1; state.theta2 = result.solutions[state.branch].theta2; } }
-    else { state.target = K.forward(state.theta1, state.theta2, state.l1, state.l2).end; }
     updateUI();
   }
   function pointerPosition(event) { const rect = canvas.getBoundingClientRect(); return { x: event.clientX - rect.left, y: event.clientY - rect.top }; }
-  function updateTargetFromPointer(event) { const p = screenToWorld(pointerPosition(event)); state.target.x = K.clamp(p.x, -4.8, 4.8); state.target.y = K.clamp(p.y, -4.2, 4.8); updateUI(); }
+  function updateTargetFromPointer(event) {
+    const p = screenToWorld(pointerPosition(event));
+    for (const [axis, control] of [['x', $('targetX')], ['y', $('targetY')]]) {
+      state.target[axis] = K.clamp(p[axis], Number(control.min), Number(control.max));
+    }
+    updateUI();
+  }
   canvas.addEventListener('pointerdown', event => { if (state.mode !== 'ik') return; state.dragging = true; canvas.setPointerCapture(event.pointerId); updateTargetFromPointer(event); });
   canvas.addEventListener('pointermove', event => { if (state.dragging) updateTargetFromPointer(event); });
   canvas.addEventListener('pointerup', event => { state.dragging = false; canvas.releasePointerCapture(event.pointerId); });
+  for (const name of ['pointercancel', 'lostpointercapture']) canvas.addEventListener(name, () => { state.dragging = false; });
   $('modeIK').addEventListener('click', () => setMode('ik')); $('modeFK').addEventListener('click', () => setMode('fk'));
   $('targetX').addEventListener('input', e => { state.target.x = +e.target.value; updateUI(); }); $('targetY').addEventListener('input', e => { state.target.y = +e.target.value; updateUI(); });
   $('theta1').addEventListener('input', e => { state.theta1 = K.toRadians(+e.target.value); updateUI(); }); $('theta2').addEventListener('input', e => { state.theta2 = K.toRadians(+e.target.value); updateUI(); });
@@ -142,5 +197,5 @@ document.addEventListener('DOMContentLoaded', () => {
   $('elbowDown').addEventListener('click', () => { state.branch = 1; $('elbowDown').classList.add('active'); $('elbowUp').classList.remove('active'); updateUI(); });
   $('showGeometry').addEventListener('change', draw); $('showWorkspace').addEventListener('change', draw);
   $('resetButton').addEventListener('click', () => { Object.assign(state, { mode: 'ik', branch: 0, target: { x: 3.2, y: 1.6 }, theta1: K.toRadians(-20), theta2: K.toRadians(75), l1: 2.7, l2: 2.0 }); $('elbowUp').classList.add('active'); $('elbowDown').classList.remove('active'); setMode('ik'); });
-  window.addEventListener('resize', resize); window.addEventListener('languagechange', updateUI); resize(); updateUI();
+  window.addEventListener('resize', resize); window.addEventListener('languagechange', updateUI); resize(); setMode('ik');
 });

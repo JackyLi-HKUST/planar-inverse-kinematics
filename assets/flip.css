@@ -1,4 +1,4 @@
-.flip-main { --flip-blue: #345bca; --flip-purple: #83499e; --flip-red: #c43927; }
+.flip-main { --flip-blue: var(--wrist); --flip-purple: var(--branch-minus); --flip-red: var(--target); }
 .flip-hero, .flip-main > section { max-width: 1100px; margin-inline: auto; }
 .flip-hero { margin-bottom: 36px; }
 .flip-hero h1 { max-width: 900px; }
@@ -21,34 +21,34 @@
 .flip-wrist-path { fill: none; stroke: #5276df; stroke-width: .026; }
 .flip-gates circle { fill: white; stroke: #283447; stroke-width: .022; }
 .flip-reference { stroke: #727d8e; stroke-width: .016; stroke-dasharray: .045 .04; }
-.flip-other { fill: none; stroke: #8d789a; stroke-width: .034; stroke-dasharray: .06 .05; }
-.flip-other-elbow { fill: white; stroke: #8d789a; stroke-width: .019; }
+.flip-other { fill: none; stroke: var(--reference); stroke-width: .034; stroke-dasharray: .06 .05; }
+.flip-other-elbow { fill: white; stroke: var(--reference); stroke-width: .019; }
 .flip-link { stroke-linecap: round; }
-.flip-link-front { stroke: var(--flip-blue); stroke-width: .088; }
+.flip-link-front { stroke: var(--branch-plus); stroke-width: .088; }
 #flip-arm[data-branch="negative"] .flip-link-front { stroke: var(--flip-purple); }
 #flip-arm[data-branch="straight"] .flip-link-front { stroke: #354055; }
-.flip-link-tail { stroke: #df866a; stroke-width: .065; }
+.flip-link-tail { stroke: var(--link-two); stroke-width: .065; }
 .flip-base, .flip-elbow { fill: #25334a; stroke: white; stroke-width: .022; }
 .flip-handle { cursor: grab; touch-action: none; }
 .flip-handle:active { cursor: grabbing; }
 .flip-handle circle { touch-action: none; }
 .flip-hit-area { fill: transparent; }
-.flip-wrist { fill: #365ed3; stroke: white; stroke-width: .024; }
-.flip-target { fill: #df503a; stroke: white; stroke-width: .024; }
+.flip-wrist { fill: var(--wrist); stroke: white; stroke-width: .024; }
+.flip-target { fill: var(--target); stroke: white; stroke-width: .024; }
 .flip-board-key, .flip-map-note { margin: 0; padding: 11px 15px; color: var(--muted); font-size: 11px; line-height: 1.6; }
 .flip-board-key { border-top: 1px solid var(--line); }
 .flip-board-key b:first-child { color: var(--flip-blue); }
 .flip-board-key b:nth-child(2) { color: var(--flip-red); }
 #flip-map { display: block; width: 100%; max-height: 215px; margin-top: 12px; }
 .flip-map-loop { fill: none; stroke-width: 4; stroke-linecap: round; }
-#flip-map-positive { stroke: var(--flip-blue); }
+#flip-map-positive { stroke: var(--branch-plus); }
 #flip-map-negative { stroke: var(--flip-purple); }
 .flip-map-gates circle { fill: white; stroke: #25334a; stroke-width: 1.6; }
 #flip-map-marker { fill: #20252d; stroke: white; stroke-width: 2; }
 .flip-map-key { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 16px; margin: 0; padding: 0 12px 6px; color: var(--muted); font-size: 11px; }
 .flip-map-key > span { display: inline-flex; align-items: center; gap: 5px; }
 .flip-map-key i { width: 9px; height: 9px; border-radius: 50%; }
-.flip-positive { background: var(--flip-blue); }
+.flip-positive { background: var(--branch-plus); }
 .flip-negative { background: var(--flip-purple); }
 .flip-join { border: 1px solid #25334a; background: white; }
 .flip-hidden { display: none; }
@@ -62,15 +62,15 @@
 .flip-actions button:hover:not(:disabled) { border-color: #727d8e; }
 #flip-switch { margin-left: auto; }
 .flip-actions button:disabled { color: #747b88; background: var(--soft); cursor: default; }
-.flip-observation { display: grid; grid-template-columns: minmax(160px, .9fr) minmax(0, 1.1fr); align-items: center; gap: 8px 24px; margin-top: 16px; padding: 15px 18px; border: 1px solid var(--line); border-left: 3px solid var(--flip-blue); border-radius: 0 8px 8px 0; background: #f9fafc; }
+.flip-observation { display: grid; grid-column: 1 / -1; grid-template-columns: minmax(160px, .9fr) minmax(0, 1.1fr); align-items: center; gap: 8px 24px; padding: 15px 18px; border-top: 1px solid var(--line); background: var(--figure-bg); }
 .flip-observation .eyebrow { margin-bottom: 6px; color: #3556b6; }
 .flip-observation h3 { margin: 0; font-size: 15px; }
 .flip-observation > p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
 .flip-reading { margin-top: 56px; padding-top: 32px; border-top: 1px solid var(--line); }
 .flip-reading h2 { max-width: 760px; margin-bottom: 10px; font-size: clamp(27px, 3.2vw, 42px); line-height: 1.14; letter-spacing: -.04em; }
-.flip-reading > p:not(.eyebrow), .flip-proof-body p, .flip-proof-body li { max-width: 780px; color: var(--muted); font-size: 14px; line-height: 1.75; }
+#flip-explainer p, .flip-proof-body p, .flip-proof-body li { max-width: 780px; color: var(--muted); font-size: 14px; line-height: 1.75; }
 .flip-proof { margin-top: 20px; border: 1px solid var(--line); border-radius: 9px; }
-.flip-proof summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 16px 18px; font-size: 14px; font-weight: 700; list-style: none; cursor: pointer; }
+.flip-proof > summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 16px 18px; font-size: 14px; font-weight: 700; list-style: none; cursor: pointer; }
 .flip-proof summary::-webkit-details-marker { display: none; }
 .flip-proof summary::after { content: "+"; color: var(--flip-blue); font: 18px ui-monospace, monospace; }
 .flip-proof[open] summary::after { content: "−"; }
@@ -85,12 +85,19 @@
 .flip-reading a { color: #3556b6; text-underline-offset: 3px; }
 .flip-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 24px; font-size: 12px; font-weight: 650; }
 .flip-main :focus-visible { outline: 2px solid #3556b6; outline-offset: 3px; }
-@media (max-width: 620px) {
+.flip-prompt { padding: 20px 17px; }
+.flip-prompt h3 { max-width: 32ch; margin-bottom: 10px; font-size: 18px; line-height: 1.3; }
+.flip-trials { display: grid; gap: 8px; margin: 0 0 12px; padding-left: 20px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+.flip-trials .trial-done { color: var(--branch-plus); font-weight: 650; }
+.flip-prompt-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+@media (max-width: 760px) {
   .flip-hero { margin-bottom: 25px; }
   .flip-lab, .flip-controls, .flip-observation { grid-template-columns: 1fr; }
   .flip-physical { grid-row: 1; }
   .flip-controls { grid-row: 2; }
-  .flip-space { grid-row: 3; border-top: 1px solid var(--line); border-left: 0; }
+  .flip-observation { grid-row: 3; }
+  .flip-space { grid-row: 4; border-top: 1px solid var(--line); border-left: 0; }
+  #flip-arm { max-height: 260px; }
   #flip-switch { margin-left: 0; }
   #flip-map { max-height: 157px; }
   .flip-equation { padding-inline: 8px; font-size: 15px; }

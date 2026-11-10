@@ -6,8 +6,8 @@
   <meta name="description" content="Learn three-link planar inverse kinematics by reducing a desired gripper pose to a two-link wrist target.">
   <title>How It Works: Three Links — Planar Inverse Kinematics</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/styles.css">
-  <link rel="stylesheet" href="assets/three-guide.css?v=1">
+  <link rel="stylesheet" href="assets/styles.css?v=learning-route">
+  <link rel="stylesheet" href="assets/three-guide.css?v=learning-route">
 </head>
 <body data-page="guide-three">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -36,7 +36,7 @@
       <a href="guide-three.html" aria-current="page"><span data-lang-en>Three links</span><span data-lang-zh>三連桿</span></a>
     </nav>
     <header class="article-hero">
-      <p class="eyebrow"><span data-lang-en>02 · INTERACTIVE NOTEBOOK</span><span data-lang-zh>02 · 互動筆記</span></p>
+      <p class="eyebrow"><span data-lang-en>02 · THREE-LINK GUIDE</span><span data-lang-zh>02 · 三連桿教學</span></p>
       <h1><span data-lang-en>Three links: solve the wrist first.</span><span data-lang-zh>三連桿：先求手腕位置。</span></h1>
       <p class="lede" data-lang-en>A gripper can point in different directions at the same location. If you specify both the tip position and its direction, the last link tells you exactly where the wrist must be.</p>
       <p class="lede" data-lang-zh>夾爪在同一位置可以指向不同方向。若同時指定末端位置和方向，第三段連桿就能唯一決定手腕在哪裏。</p>
@@ -47,18 +47,19 @@
         <div class="three-lesson">
           <p class="eyebrow"><span data-lang-en>01 · STEP BACK FROM THE TIP</span><span data-lang-zh>01 · 由末端往回走</span></p>
           <h2><span data-lang-en>Find the wrist W.</span><span data-lang-zh>找出手腕 W。</span></h2>
-          <p data-lang-en>Let <i>T</i> = (<i>x</i>, <i>y</i>) be the red target and <i>φ</i> the absolute direction of link 3, measured from +x. From <i>T</i>, step back by one link length in that direction to get the blue wrist <i>W</i>.</p>
-          <p data-lang-zh>令 <i>T</i> = (<i>x</i>, <i>y</i>) 為紅色目標，<i>φ</i> 為第三段相對正 x 軸的絕對方向。從 <i>T</i> 沿該方向往回走一段連桿的長度，就得到藍色手腕 <i>W</i>。</p>
+          <p data-lang-en>Let <i>T</i> = (<i>x</i>, <i>y</i>) be the red target and <i>ψ</i> the absolute direction of link 3, measured from +x. From <i>T</i>, step back by one link length in that direction to get the blue wrist <i>W</i>.</p>
+          <p data-lang-zh>令 <i>T</i> = (<i>x</i>, <i>y</i>) 為紅色目標，<i>ψ</i> 為第三段相對正 x 軸的絕對方向。從 <i>T</i> 沿該方向往回走一段連桿的長度，就得到藍色手腕 <i>W</i>。</p>
           <div class="math-block compact">
-            <p>W = T − L₃(cos φ, sin φ)</p>
+            <p>W = T − L₃(cos ψ, sin ψ)</p>
             <p class="calculation" id="three-substitution">= (1.65, 0.00) − 0.75(cos 30°, sin 30°)</p>
             <p class="boxed" id="three-wrist-value">W ≈ (1.00, −0.38)</p>
           </div>
-          <p data-lang-en>The sliders keep <i>T</i> on the positive x-axis, as in the Lab. Changing <i>φ</i> moves <i>W</i> while <i>T</i> stays fixed. The dashed circle shows where <i>W</i> could be if the direction were free.</p>
-          <p data-lang-zh>和實驗一樣，滑桿把 <i>T</i> 限制在正 x 軸上。改變 <i>φ</i> 會移動 <i>W</i>，而 <i>T</i> 留在原位。虛線圓表示不指定方向時，<i>W</i> 可能出現的位置。</p>
+          <p data-lang-en>The sliders keep <i>T</i> on the positive x-axis, as in the Lab. Changing <i>ψ</i> moves <i>W</i> while <i>T</i> stays fixed. The dashed circle shows where <i>W</i> could be if the direction were free.</p>
+          <p data-lang-zh>和實驗一樣，滑桿把 <i>T</i> 限制在正 x 軸上。改變 <i>ψ</i> 會移動 <i>W</i>，而 <i>T</i> 留在原位。虛線圓表示不指定方向時，<i>W</i> 可能出現的位置。</p>
         </div>
         <div class="demo-card three-demo">
           <div class="demo-title"><span data-lang-en>FROM TIP TO WRIST</span><span data-lang-zh>由末端到手腕</span><output>L₁ = L₂ = 1 · L₃ = 0.75</output></div>
+          <p class="diagram-prompt"><span data-lang-en>Keep T fixed and change ψ. Where does the wrist go?</span><span data-lang-zh>固定 T，改變 ψ。手腕會移到哪裏？</span></p>
           <svg id="three-diagram" viewBox="-2.2 -2.15 5.8 4.3" role="img" aria-labelledby="three-diagram-title">
             <title id="three-diagram-title">Gripper direction and the corresponding wrist target</title>
             <circle r="2" class="three-workspace"/>
@@ -74,7 +75,7 @@
           </svg>
           <div class="three-controls">
             <label><span><span data-lang-en>Target x</span><span data-lang-zh>目標 x</span></span><input id="three-target" type="range" min="0.9" max="2.6" step=".01" value="1.65"><output id="three-target-readout" for="three-target">1.65</output></label>
-            <label><span><span data-lang-en>Direction φ</span><span data-lang-zh>方向 φ</span></span><input id="three-angle" type="range" min="-180" max="180" step="1" value="30"><output id="three-angle-readout" for="three-angle">30°</output></label>
+            <label><span><span data-lang-en>Direction ψ</span><span data-lang-zh>方向 ψ</span></span><input id="three-angle" type="range" min="-180" max="180" step="1" value="30"><output id="three-angle-readout" for="three-angle">30°</output></label>
             <output id="three-demo-status" class="three-demo-status">Two elbow choices</output>
             <div class="three-buttons">
               <button type="button" data-three-example="inside"><span data-lang-en>Reachable pose</span><span data-lang-zh>可達姿態</span></button>
@@ -92,9 +93,9 @@
           <h2><span data-lang-en>Reach W, then turn the last joint.</span><span data-lang-zh>到達 W，再轉動最後一個關節。</span></h2>
           <p data-lang-en>Treat <i>W</i> as the target for links 1 and 2. Since both have length 1, their reachable region is the disc of radius 2. If <i>W</i> is outside that disc, no set of angles can reach the specified position <em>and</em> direction. In this demo <i>W</i> cannot be the origin: the minimum <i>x</i> is 0.9, larger than <i>L</i>₃.</p>
           <p data-lang-zh>把 <i>W</i> 當成前兩段的目標。由於兩段都長 1，可達區域就是半徑為 2 的圓盤。若 <i>W</i> 在圓盤外，就沒有一組角度能同時符合指定的位置和方向。這個示範中，最小的 <i>x</i> 是 0.9，大於 <i>L</i>₃，所以 <i>W</i> 不會落在原點。</p>
-          <p data-lang-en>For each <a href="guide.html#shoulder">two-link solution</a> (θ₁, θ₂), the direction of the second link is θ₁ + θ₂. The third joint turns from that direction to φ:</p>
-          <p data-lang-zh>對每組<a href="guide.html#shoulder">雙連桿解</a> (θ₁, θ₂)，第二段的方向是 θ₁ + θ₂。第三關節要從這個方向轉到 φ：</p>
-          <div class="math-block compact"><p class="boxed">θ₃ = φ − (θ₁ + θ₂) <small>(mod 360°)</small></p></div>
+          <p data-lang-en>For each <a href="guide.html#shoulder">two-link solution</a> (θ₁, θ₂), the direction of the second link is θ₁ + θ₂. The third joint turns from that direction to ψ:</p>
+          <p data-lang-zh>對每組<a href="guide.html#shoulder">雙連桿解</a> (θ₁, θ₂)，第二段的方向是 θ₁ + θ₂。第三關節要從這個方向轉到 ψ：</p>
+          <div class="math-block compact"><p class="boxed">θ₃ = ψ − (θ₁ + θ₂) <small>(mod 360°)</small></p></div>
         </div>
         <div class="three-result" aria-live="polite" aria-atomic="true">
           <p class="eyebrow"><span data-lang-en>LIVE SOLUTION FOR THE SELECTED POSE</span><span data-lang-zh>指定姿態的即時解</span></p>
@@ -109,15 +110,15 @@
         <div class="three-lesson">
           <p class="eyebrow"><span data-lang-en>03 · REMOVE ONE CONSTRAINT</span><span data-lang-zh>03 · 放開一項限制</span></p>
           <h2><span data-lang-en>What if we only pin the tip?</span><span data-lang-zh>如果只固定末端呢？</span></h2>
-          <p data-lang-en>Now φ is free. Every point of the dashed wrist circle that lies in the shaded disc gives at least one valid pose. In the Lab you can move along this set, and find out whether a continuous motion can take you from one elbow branch to the other.</p>
-          <p data-lang-zh>現在 φ 可以改變。虛線手腕圓上落在淺藍圓盤內的每個點，都對應至少一種合法姿態。在實驗中，你可以沿着這些姿態移動，看看能否連續地從一個肘部分支走到另一個。</p>
-          <a class="primary-link" href="proof.html"><span data-lang-en>Try the Elbow Flip Lab</span><span data-lang-zh>試玩翻肘實驗</span> →</a>
+          <p data-lang-en>Now ψ is free. Every point of the dashed wrist circle that lies in the shaded disc gives at least one valid pose. In the Lab you can move along this set, and find out whether a continuous motion can take you from one elbow branch to the other.</p>
+          <p data-lang-zh>現在 ψ 可以改變。虛線手腕圓上落在淺藍圓盤內的每個點，都對應至少一種合法姿態。在實驗中，你可以沿着這些姿態移動，看看能否連續地從一個肘部分支走到另一個。</p>
+          <a class="lesson-next" href="proof.html"><span><small data-lang-en>NEXT · ELBOW FLIP LAB</small><small data-lang-zh>下一步 · 翻肘實驗</small><b data-lang-en>Keep the tip fixed. Can you flip the elbow?</b><b data-lang-zh>固定末端，能翻肘嗎？</b></span><i aria-hidden="true">→</i></a>
         </div>
       </section>
     </article>
   </main>
-  <script src="assets/i18n.js"></script>
-  <script src="assets/kinematics.js"></script>
-  <script src="assets/three-guide.js?v=1"></script>
+  <script src="assets/i18n.js?v=learning-route"></script>
+  <script src="assets/kinematics.js?v=learning-route"></script>
+  <script src="assets/three-guide.js?v=learning-route"></script>
 </body>
 </html>

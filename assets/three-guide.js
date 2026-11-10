@@ -18,18 +18,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const label = (id, p, dx, dy) => point(id, { x: p.x + dx, y: p.y + dy }, 'x', 'y');
 
   function render() {
-    const x = Number(targetInput.value), angle = Number(angleInput.value), phi = K.toRadians(angle);
+    const x = Number(targetInput.value), angle = Number(angleInput.value), psi = K.toRadians(angle);
     const t = { x, y: 0 };
-    const w = { x: x - c * Math.cos(phi), y: -c * Math.sin(phi) };
+    const w = { x: x - c * Math.cos(psi), y: -c * Math.sin(psi) };
     const result = K.inverse(w.x, w.y, 1, 1);
     const solution = result.solutions[branch] || result.solutions[0];
     const ghost = result.count === 2 ? result.solutions[1 - branch] : null;
-    const phiText = `${fmt(angle, 0)}°`;
-    text('substitution', `= (${fmt(x)}, 0.00) − 0.75(cos ${phiText}, sin ${phiText})`);
+    const psiText = `${fmt(angle, 0)}°`;
+    text('substitution', `= (${fmt(x)}, 0.00) − 0.75(cos ${psiText}, sin ${psiText})`);
     text('wrist-value', `W ≈ (${fmt(w.x)}, ${fmt(w.y)})`);
     text('target-readout', fmt(x));
-    text('angle-readout', phiText);
-    angleInput.setAttribute('aria-valuetext', phiText);
+    text('angle-readout', psiText);
+    angleInput.setAttribute('aria-valuetext', psiText);
     text('distance', result.count === 1 ? '|OW| = 2' : `|OW| ≈ ${fmt(result.r, 3)}`);
     const title = result.count === 2 ? tr('Two elbow choices', '有兩個肘點可選')
       : result.count === 1 ? tr('One straight pose', '只有一個伸直姿態')
@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
     point('tail', w, 'x1', 'y1');
     point('tail', t, 'x2', 'y2');
     $('diagram').classList.toggle('three-unreachable', !result.reachable);
+    $('diagram').dataset.branch = result.count === 1 ? 'straight' : branch === 0 ? 'positive' : 'negative';
     visible('front', !!solution);
     visible('elbow', !!solution);
     visible('ghost', !!ghost);
@@ -56,10 +57,10 @@ document.addEventListener('DOMContentLoaded', () => {
       point('elbow', solution.elbow);
       $('front').setAttribute('points', [origin, solution.elbow, w].map(coord).join(' '));
       const { theta1, theta2 } = solution;
-      const difference = phi - theta1 - theta2;
+      const difference = psi - theta1 - theta2;
       const theta3 = Math.atan2(Math.sin(difference), Math.cos(difference));
       text('angle-pair', `(θ₁, θ₂, θ₃) ≈ (${degrees(theta1)}, ${degrees(theta2)}, ${degrees(theta3)})`);
-      text('closure', `θ₁ + θ₂ + θ₃ ≡ φ = ${phiText} (mod 360°)`);
+      text('closure', `θ₁ + θ₂ + θ₃ ≡ ψ = ${psiText} (mod 360°)`);
     } else {
       text('angle-pair', tr('The dashed last link shows the requested direction; the wrist lies outside the disc.', '虛線第三段表示指定的方向；手腕落在圓盤之外。'));
       text('closure', '');

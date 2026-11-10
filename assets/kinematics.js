@@ -33,7 +33,9 @@
     const reach = reachability(x, y, l1, l2);
     const rawC2 = (x * x + y * y - l1 * l1 - l2 * l2) / (2 * l1 * l2);
     if (!reach.reachable) return { ...reach, c2: rawC2, solutions: [] };
-    const c2 = clamp(rawC2, -1, 1);
+    const c2 = reach.count === 1
+      ? (Math.abs(reach.r - reach.outer) < Math.abs(reach.r - reach.inner) ? 1 : -1)
+      : clamp(rawC2, -1, 1);
     const magnitude = Math.acos(c2);
     // At the origin with equal links there are infinitely many folded poses.
     // Return two representative poses so the renderer still has useful output.

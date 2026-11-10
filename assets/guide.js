@@ -1,5 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
   const K = window.Kinematics;
+  const tokens = getComputedStyle(document.documentElement);
+  const theme = name => tokens.getPropertyValue('--' + name).trim();
+  const linkOne = theme('link-one'), linkTwo = theme('link-two'), targetColor = theme('target');
+  const branches = [theme('branch-plus'), theme('branch-minus')];
   const state = { x: 3.2, y: 1.6, l1: 2.7, l2: 2.0, branch: 0, theta1: 38, theta2: 72, baseAngle: 36, targetAngle: 143 };
   const $ = id => document.getElementById(id);
   const ids = ['theta1DefinitionCanvas', 'theta2DefinitionCanvas', 'problemCanvas', 'triangleCanvas', 'betaCanvas', 'theta2Canvas', 'radiusBaseCanvas', 'radiusTargetCanvas', 'intersectionsCanvas', 'phiCanvas', 'alphaCanvas', 'shoulderCanvas', 'solutionsCanvas'];
@@ -10,7 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let drag = null;
 
   const fmt = (number, digits = 1) => {
-    const value = Number(number).toFixed(digits);
+    const rounded = Number(number).toFixed(digits);
+    const value = Number(rounded) === 0 ? (0).toFixed(digits) : rounded;
     return value.startsWith('-') ? '−' + value.slice(1) : value;
   };
   const deg = radians => `${fmt(K.toDegrees(radians), 1)}°`;
@@ -118,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.save(); ctx.globalAlpha = opacity;
     segment(ctx, o, e, 18, '#dce1e7');
     segment(ctx, e, t, 15, '#eef0f3');
-    joint(h, o, '#ff6c4d', 10); joint(h, e, '#d6dbe1', 9);
+    joint(h, o, '#d6dbe1', 10); joint(h, e, '#d6dbe1', 9);
     ctx.restore();
   }
   function sideLabel(h, a, b, value, color, normalOffset, fraction = .5) {
@@ -173,12 +178,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const xEnd = { x: o.x + length * 1.15, y: o.y };
       const e = { x: o.x + length * Math.cos(endAngle), y: o.y + length * Math.sin(endAngle) };
       h.line(o, xEnd, '#9da3ad', 2, [7, 5]);
-      h.line(o, e, '#5475e8', 7);
-      h.circle(o, 8, '#17191d', '#fff', 2); h.circle(e, 7, '#5475e8', '#fff', 2);
-      const labelAt = directedArc(ctx, o, Math.min(44, length * .52), 0, endAngle, '#5475e8');
-      if (Math.abs(state.theta1) >= 14) h.text('θ₁', labelAt, '#3f61d6', 'center', 13, 800);
+      h.line(o, e, linkOne, 7);
+      h.circle(o, 8, '#17191d', '#fff', 2); h.circle(e, 7, linkOne, '#fff', 2);
+      const labelAt = directedArc(ctx, o, Math.min(44, length * .52), 0, endAngle, linkOne);
+      if (Math.abs(state.theta1) >= 14) h.text('θ₁', labelAt, linkOne, 'center', 13, 800);
       h.text('O', { x: o.x - 13, y: o.y + 15 }, '#17191d', 'right', 11, 700);
-      h.text('E', { x: e.x + 11, y: e.y - 10 }, '#5475e8', 'left', 11, 700);
+      h.text('E', { x: e.x + 11, y: e.y - 10 }, linkOne, 'left', 11, 700);
       h.text(chinese() ? '起始：正 x 軸' : 'START · +x axis', { x: xEnd.x, y: xEnd.y + 17 }, '#7d828a', 'right', 10, 700);
     }
     {
@@ -192,15 +197,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const behind = { x: e.x - length * .60 * Math.cos(startAngle), y: e.y - length * .60 * Math.sin(startAngle) };
       const forward = { x: e.x + length * 1.02 * Math.cos(startAngle), y: e.y + length * 1.02 * Math.sin(startAngle) };
       const t = { x: e.x + length * .84 * Math.cos(endAngle), y: e.y + length * .84 * Math.sin(endAngle) };
-      h.line(behind, e, '#5475e8', 7);
+      h.line(behind, e, linkOne, 7);
       h.line(e, forward, '#9da3ad', 2, [7, 5]);
-      h.line(e, t, '#ff5a36', 7);
-      h.circle(e, 8, '#17191d', '#fff', 2); h.circle(t, 7, '#ff5a36', '#fff', 2);
-      const labelAt = directedArc(ctx, e, Math.min(44, length * .45), startAngle, -K.toRadians(state.theta2), '#ff5a36');
-      if (Math.abs(state.theta2) >= 14) h.text('θ₂', labelAt, '#e24a2b', 'center', 13, 800);
+      h.line(e, t, linkTwo, 7);
+      h.circle(e, 8, '#17191d', '#fff', 2); h.circle(t, 7, targetColor, '#fff', 2);
+      const labelAt = directedArc(ctx, e, Math.min(44, length * .45), startAngle, -K.toRadians(state.theta2), linkTwo);
+      if (Math.abs(state.theta2) >= 14) h.text('θ₂', labelAt, linkTwo, 'center', 13, 800);
       h.text('E', { x: e.x - 13, y: e.y + 15 }, '#17191d', 'right', 11, 700);
-      h.text('T', { x: t.x + 11, y: t.y - 9 }, '#ff5a36', 'left', 11, 700);
-      h.text(chinese() ? '第一段連桿' : 'link 1', midpoint(behind, e, -5, 17), '#5475e8', 'center', 10, 700);
+      h.text('T', { x: t.x + 11, y: t.y - 9 }, targetColor, 'left', 11, 700);
+      h.text(chinese() ? '第一段連桿' : 'link 1', midpoint(behind, e, -5, 17), linkOne, 'center', 10, 700);
       h.text(chinese() ? '起始' : 'START', { x: forward.x - 10, y: forward.y + 20 }, '#7d828a', 'center', 10, 700);
     }
   }
@@ -213,12 +218,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const o = h.point({ x: 0, y: 0 }), e = h.point(pose.elbow), end = h.point(pose.end);
     const target = h.point({ x: state.x, y: state.y });
     h.text(chinese() ? 'O  底座' : 'O  base', { x: o.x - 17, y: o.y + 28 }, '#17191d', 'right');
-    h.text(chinese() ? 'E  肘部' : 'E  elbow', { x: e.x + 15, y: e.y - 22 }, '#5475e8', 'left');
-    h.circle(target, 13, '#ff5a36', '#fff', 2); h.line({ x: target.x - 18, y: target.y }, { x: target.x + 18, y: target.y }, '#ff5a36', 2);
-    h.line({ x: target.x, y: target.y - 18 }, { x: target.x, y: target.y + 18 }, '#ff5a36', 2);
-    h.text('T', { x: target.x + 18, y: target.y - 22 }, '#ff5a36', 'left', 12, 700);
-    sideLabel(h, o, e, 'L₁', '#5475e8', -22);
-    sideLabel(h, e, end, 'L₂', '#ff5a36', -22);
+    h.text(chinese() ? 'E  肘部' : 'E  elbow', { x: e.x + 15, y: e.y - 22 }, linkOne, 'left');
+    h.circle(target, 13, targetColor, '#fff', 2); h.line({ x: target.x - 18, y: target.y }, { x: target.x + 18, y: target.y }, targetColor, 2);
+    h.line({ x: target.x, y: target.y - 18 }, { x: target.x, y: target.y + 18 }, targetColor, 2);
+    h.text('T', { x: target.x + 18, y: target.y - 22 }, targetColor, 'left', 12, 700);
+    sideLabel(h, o, e, 'L₁', linkOne, -22);
+    sideLabel(h, e, end, 'L₂', linkTwo, -22);
     if (!result.reachable) {
       h.line(end, target, '#c94120', 2, [6, 5]);
       h.label(chinese() ? '無法到達' : 'OUT OF REACH', midpoint(end, target, 0, -17), '#c94120');
@@ -237,11 +242,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Keep the physical two-link arm visible as context, but subordinate it
     // to the right-triangle construction that explains r.
-    h.line(o, e, 'rgba(84,117,232,.58)', 7);
-    h.line(e, t, 'rgba(255,90,54,.58)', 7);
+    h.line(o, e, '#485c7799', 7);
+    h.line(e, t, '#99601d99', 7);
     h.circle(e, 6, '#7b5bc7', '#fff', 2);
-    sideLabel(h, o, e, 'L₁', '#5475e8', -18);
-    sideLabel(h, e, t, 'L₂', '#ff5a36', -18);
+    sideLabel(h, o, e, 'L₁', linkOne, -18);
+    sideLabel(h, e, t, 'L₂', linkTwo, -18);
 
     // Coordinate projections form the right triangle used by Pythagoras.
     h.line(o, p, '#9da3ad', 2.5, [7, 5]);
@@ -263,10 +268,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     h.circle(o, 7, '#17191d', '#fff', 2);
     h.circle(p, 5, '#a2a7af', '#fff', 1.5);
-    h.circle(t, 8, '#ff5a36', '#fff', 2);
+    h.circle(t, 8, targetColor, '#fff', 2);
     h.text('O = (0,0)', { x: o.x - 12, y: o.y + (state.y >= 0 ? 22 : -22) }, '#17191d', 'right');
     h.text('P', { x: p.x + (state.x >= 0 ? 12 : -12), y: p.y + (state.y >= 0 ? 20 : -20) }, '#7d828a', state.x >= 0 ? 'left' : 'right');
-    h.text('T', { x: t.x + (state.x >= 0 ? 14 : -14), y: t.y - (state.y >= 0 ? 16 : -16) }, '#ff5a36', state.x >= 0 ? 'left' : 'right', 12, 700);
+    h.text('T', { x: t.x + (state.x >= 0 ? 14 : -14), y: t.y - (state.y >= 0 ? 16 : -16) }, targetColor, state.x >= 0 ? 'left' : 'right', 12, 700);
     h.text('|x|', midpoint(o, p, 0, state.y >= 0 ? 20 : -20), '#7d828a', 'center', 12, 700);
     h.text('|y|', midpoint(p, t, state.x >= 0 ? 23 : -23, 0), '#7d828a', 'center', 12, 700);
     const outside = state.x * state.y >= 0 ? -27 : 27;
@@ -277,11 +282,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const { ctx, tr } = setup(canvases.betaCanvas); const h = drawing(ctx, tr); clear(ctx, tr);
     const { solution } = activeSolution(); if (!solution) return;
     const o = h.point({ x: 0, y: 0 }), e = h.point(solution.elbow), t = h.point(solution.end);
-    h.line(o, e, '#5475e8', 4); h.line(e, t, '#ff5a36', 4); h.line(o, t, '#aeb3bb', 2);
-    h.circle(o, 6, '#17191d', '#fff', 2); h.circle(e, 7, '#5475e8', '#fff', 2); h.circle(t, 6, '#ff5a36', '#fff', 2);
+    h.line(o, e, linkOne, 4); h.line(e, t, linkTwo, 4); h.line(o, t, '#aeb3bb', 2);
+    h.circle(o, 6, '#17191d', '#fff', 2); h.circle(e, 7, linkOne, '#fff', 2); h.circle(t, 6, targetColor, '#fff', 2);
     const labelAt = arcBetween(ctx, e, 34, o, t, '#7b5bc7');
     h.text('β', labelAt, '#6e4eb6', 'center', 13, 800);
-    h.text('O', { x: o.x - 13, y: o.y + 15 }); h.text('E', { x: e.x, y: e.y - 18 }, '#5475e8'); h.text('T', { x: t.x + 13, y: t.y + 12 }, '#ff5a36');
+    h.text('O', { x: o.x - 13, y: o.y + 15 }); h.text('E', { x: e.x, y: e.y - 18 }, linkOne); h.text('T', { x: t.x + 13, y: t.y + 12 }, targetColor);
     sideLabel(h, o, t, 'r', '#17191d', 18);
   }
 
@@ -292,11 +297,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const dx = e.x - o.x, dy = e.y - o.y, length = Math.hypot(dx, dy);
     const extension = Math.min(57, tr.scale * 1.2);
     const forward = { x: e.x + dx / length * extension, y: e.y + dy / length * extension };
-    h.line(o, e, '#5475e8', 6); h.line(e, t, '#ff5a36', 6); h.line(e, forward, '#7f858e', 2, [6, 5]);
-    h.circle(o, 6, '#17191d', '#fff', 2); h.circle(e, 7, '#5475e8', '#fff', 2); h.circle(t, 6, '#ff5a36', '#fff', 2);
+    h.line(o, e, linkOne, 6); h.line(e, t, linkTwo, 6); h.line(e, forward, '#7f858e', 2, [6, 5]);
+    h.circle(o, 6, '#17191d', '#fff', 2); h.circle(e, 7, linkOne, '#fff', 2); h.circle(t, 6, targetColor, '#fff', 2);
     const start = -solution.theta1;
-    const labelAt = directedArc(ctx, e, Math.min(30, extension * .55), start, -solution.theta2, '#ff5a36');
-    if (Math.abs(solution.theta2) > .2) h.text('θ₂', labelAt, '#e24a2b', 'center', 12, 800);
+    const labelAt = directedArc(ctx, e, Math.min(30, extension * .55), start, -solution.theta2, linkTwo);
+    if (Math.abs(solution.theta2) > .2) h.text('θ₂', labelAt, linkTwo, 'center', 12, 800);
   }
 
   function drawSingleRadius(canvas, type) {
@@ -307,12 +312,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const angle = -K.toRadians(type === 'base' ? state.baseAngle : state.targetAngle);
     tr.pivot = center;
     const end = { x: center.x + radius * Math.cos(angle), y: center.y + radius * Math.sin(angle) };
-    const color = type === 'base' ? '#5475e8' : '#ff5a36';
-    const fill = type === 'base' ? 'rgba(84,117,232,.05)' : 'rgba(255,90,54,.045)';
+    const color = type === 'base' ? linkOne : linkTwo;
+    const fill = type === 'base' ? '#485c770d' : '#99601d0d';
     const symbol = type === 'base' ? 'L₁' : 'L₂';
     h.circle(center, radius, color, fill, 2, [6, 5]); h.line(center, end, color, 5);
-    h.circle(center, 8, color, '#fff', 2); h.circle(end, 7, color, '#fff', 2);
-    h.text(type === 'base' ? 'O' : 'T', { x: center.x, y: center.y + 22 }, color, 'center', 12, 700);
+    const centreColor = type === 'base' ? theme('ink') : targetColor;
+    h.circle(center, 8, centreColor, '#fff', 2); h.circle(end, 7, color, '#fff', 2);
+    h.text(type === 'base' ? 'O' : 'T', { x: center.x, y: center.y + 22 }, centreColor, 'center', 12, 700);
     h.text('E', { x: end.x + (type === 'base' ? 13 : -13), y: end.y - 12 }, color, type === 'base' ? 'left' : 'right', 12, 700);
     sideLabel(h, center, end, symbol, color, -18);
     h.text(chinese() ? `圓心：${type === 'base' ? '底座 O' : '目標 T'}` : `centre: ${type === 'base' ? 'base O' : 'target T'}`, { x: center.x, y: tr.height - 20 }, '#6d727b');
@@ -322,19 +328,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const { ctx, tr } = setup(canvases.intersectionsCanvas, 'intersections'); const h = drawing(ctx, tr); clear(ctx, tr);
     const result = K.inverse(state.x, state.y, state.l1, state.l2);
     const o = h.point({ x: 0, y: 0 }), t = h.point({ x: state.x, y: state.y });
-    h.circle(o, state.l1 * tr.scale, '#5475e8', 'rgba(84,117,232,.04)', 2, [6, 5]);
-    h.circle(t, state.l2 * tr.scale, '#ff5a36', 'rgba(255,90,54,.035)', 2, [6, 5]);
+    h.circle(o, state.l1 * tr.scale, linkOne, '#485c770d', 2, [6, 5]);
+    h.circle(t, state.l2 * tr.scale, linkTwo, '#99601d0d', 2, [6, 5]);
     result.solutions.forEach((solution, index) => {
       const e = h.point(solution.elbow);
       ctx.save(); ctx.globalAlpha = index === 0 ? .78 : .42;
-      h.line(o, e, '#5475e8', 4); h.line(e, t, '#ff5a36', 4);
+      h.line(o, e, linkOne, 4); h.line(e, t, linkTwo, 4);
       ctx.restore();
     });
-    h.circle(o, 7, '#17191d', '#fff', 2); h.circle(t, 7, '#ff5a36', '#fff', 2);
-    h.text('O', { x: o.x - 13, y: o.y + 14 }, '#17191d'); h.text('T', { x: t.x + 13, y: t.y + 12 }, '#ff5a36');
+    h.circle(o, 7, '#17191d', '#fff', 2); h.circle(t, 7, targetColor, '#fff', 2);
+    h.text('O', { x: o.x - 13, y: o.y + 14 }, '#17191d'); h.text('T', { x: t.x + 13, y: t.y + 12 }, targetColor);
     result.solutions.forEach((solution, index) => {
-      const e = h.point(solution.elbow); h.circle(e, 8, '#7b5bc7', '#fff', 2);
-      h.text(result.count === 1 ? 'E' : index === 0 ? 'E₊' : 'E₋', { x: e.x + 13, y: e.y + (index === 0 ? -12 : 13) }, '#6e4eb6', 'left', 12, 700);
+      const e = h.point(solution.elbow), tone = result.count === 2 ? branches[index] : theme('ink');
+      h.circle(e, 8, tone, '#fff', 2);
+      h.text(result.count === 1 ? 'E' : index === 0 ? 'E₊' : 'E₋', { x: e.x + 13, y: e.y + (index === 0 ? -12 : 13) }, tone, 'left', 12, 700);
     });
   }
 
@@ -346,26 +353,26 @@ document.addEventListener('DOMContentLoaded', () => {
     h.line(o, p, '#a5aab2', 2, [6, 5]);
     h.line(p, t, '#a5aab2', 2, [6, 5]);
     h.line(o, t, '#7b5bc7', 4);
-    h.circle(o, 7, '#17191d', '#fff', 2); h.circle(p, 4, '#a2a7af', '#fff', 1.5); h.circle(t, 8, '#ff5a36', '#fff', 2);
+    h.circle(o, 7, '#17191d', '#fff', 2); h.circle(p, 4, '#a2a7af', '#fff', 1.5); h.circle(t, 8, targetColor, '#fff', 2);
     const phiAt = directedArc(ctx, o, 35, 0, Math.atan2(t.y - o.y, t.x - o.x), '#7b5bc7');
     h.text('φ', phiAt, '#6e4eb6', 'center', 13, 800);
     h.text('x', midpoint(o, p, 0, state.y >= 0 ? 18 : -18), '#7d828a', 'center', 12, 700);
     h.text('y', midpoint(p, t, state.x >= 0 ? 20 : -20, 0), '#7d828a', 'center', 12, 700);
-    h.text('O', { x: o.x - 13, y: o.y + 15 }, '#17191d'); h.text('T', { x: t.x + 13, y: t.y - 13 }, '#ff5a36', 'left');
+    h.text('O', { x: o.x - 13, y: o.y + 15 }, '#17191d'); h.text('T', { x: t.x + 13, y: t.y - 13 }, targetColor, 'left');
   }
 
   function drawAlpha() {
     const { ctx, tr } = setup(canvases.alphaCanvas); const h = drawing(ctx, tr); clear(ctx, tr);
     const { solution } = activeSolution(); if (!solution) return;
     const o = h.point({ x: 0, y: 0 }), e = h.point(solution.elbow), t = h.point(solution.end);
-    h.line(o, e, '#5475e8', 5); h.line(e, t, '#ff5a36', 5); h.line(o, t, '#7b5bc7', 2.5, [7, 5]);
-    h.circle(o, 8, '#17191d', '#fff', 2); h.circle(e, 7, '#5475e8', '#fff', 2); h.circle(t, 7, '#ff5a36', '#fff', 2);
-    const alphaAt = arcBetween(ctx, o, 43, t, e, '#ff5a36');
-    h.text('α', alphaAt, '#e24a2b', 'center', 13, 800);
-    sideLabel(h, o, e, 'L₁', '#5475e8', -20, .70);
-    sideLabel(h, e, t, 'L₂', '#ff5a36', -20);
+    h.line(o, e, linkOne, 5); h.line(e, t, linkTwo, 5); h.line(o, t, '#7b5bc7', 2.5, [7, 5]);
+    h.circle(o, 8, '#17191d', '#fff', 2); h.circle(e, 7, linkOne, '#fff', 2); h.circle(t, 7, targetColor, '#fff', 2);
+    const alphaAt = arcBetween(ctx, o, 43, t, e, linkTwo);
+    h.text('α', alphaAt, linkTwo, 'center', 13, 800);
+    sideLabel(h, o, e, 'L₁', linkOne, -20, .70);
+    sideLabel(h, e, t, 'L₂', linkTwo, -20);
     sideLabel(h, o, t, 'r', '#6e4eb6', 22, .68);
-    h.text('O', { x: o.x - 13, y: o.y + 15 }, '#17191d'); h.text('E', { x: e.x, y: e.y - 16 }, '#5475e8'); h.text('T', { x: t.x + 13, y: t.y + 12 }, '#ff5a36');
+    h.text('O', { x: o.x - 13, y: o.y + 15 }, '#17191d'); h.text('E', { x: e.x, y: e.y - 16 }, linkOne); h.text('T', { x: t.x + 13, y: t.y + 12 }, targetColor);
   }
 
   function drawShoulder() {
@@ -373,12 +380,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const { solution } = activeSolution(); if (!solution) return;
     const o = h.point({ x: 0, y: 0 }), e = h.point(solution.elbow), t = h.point(solution.end);
     h.line(o, t, 'rgba(123,91,199,.38)', 2, [7, 5]);
-    h.line(o, e, '#5475e8', 7);
-    h.line(e, t, 'rgba(255,90,54,.22)', 5);
-    h.circle(o, 8, '#17191d', '#fff', 2); h.circle(e, 7, '#5475e8', '#fff', 2); h.circle(t, 6, '#ff5a36', '#fff', 2);
-    const thetaAt = directedArc(ctx, o, 37, 0, -solution.theta1, '#5475e8');
-    h.text('θ₁', thetaAt, '#3f61d6', 'center', 13, 800);
-    h.text(chinese() ? '第一段連桿 OE' : 'link 1 · OE', midpoint(o, e, 0, 22), '#5475e8');
+    h.line(o, e, linkOne, 7);
+    h.line(e, t, '#99601d38', 5);
+    h.circle(o, 8, '#17191d', '#fff', 2); h.circle(e, 7, linkOne, '#fff', 2); h.circle(t, 6, targetColor, '#fff', 2);
+    const thetaAt = directedArc(ctx, o, 37, 0, -solution.theta1, linkOne);
+    h.text('θ₁', thetaAt, linkOne, 'center', 13, 800);
+    h.text(chinese() ? '第一段連桿 OE' : 'link 1 · OE', midpoint(o, e, 0, 22), linkOne);
     h.text(chinese() ? '目標方向 OT' : 'target direction · OT', midpoint(o, t, 0, -18), '#6e4eb6');
   }
 
@@ -387,10 +394,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const result = K.inverse(state.x, state.y, state.l1, state.l2);
     const selected = result.solutions[state.branch] || result.solutions[0];
     result.solutions.filter(solution => solution !== selected).forEach(solution => robot(ctx, h, solution, .16));
-    if (selected) robot(ctx, h, selected);
+    if (selected) {
+      robot(ctx, h, selected);
+      if (result.count === 2) h.circle(h.point(selected.elbow), 4, '#fff', branches[state.branch], 1);
+    }
     const target = h.point({ x: state.x, y: state.y });
-    h.circle(target, 12, '#ff5a36', '#fff', 2);
-    h.text('T', { x: target.x + 16, y: target.y - 20 }, '#ff5a36', 'left', 12, 700);
+    h.circle(target, 12, targetColor, '#fff', 2);
+    h.text('T', { x: target.x + 16, y: target.y - 20 }, targetColor, 'left', 12, 700);
   }
 
   function update() {
@@ -399,6 +409,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const derivation = $('derivationContent');
     const regular = result.reachable && result.count !== Infinity;
     derivation.hidden = !regular;
+    $('guideRecovery').hidden = regular;
     document.querySelectorAll('[data-derivation-nav]').forEach(link => { link.hidden = !regular; });
     document.querySelectorAll('[data-guide-x]').forEach(node => node.textContent = fmt(state.x, 2));
     document.querySelectorAll('[data-guide-y]').forEach(node => node.textContent = fmt(state.y, 2));
@@ -406,6 +417,8 @@ document.addEventListener('DOMContentLoaded', () => {
     $('guideLength2').textContent = fmt(state.l2);
     $('guideR').textContent = fmt(r, 2);
     $('targetReadout').textContent = `T = (${fmt(state.x, 2)}, ${fmt(state.y, 2)})`;
+    $('guideModelStatus').textContent = result.count === Infinity ? trText('∞ poses', '無限多解')
+      : trText(`${result.count} ${result.count === 1 ? 'pose' : 'poses'}`, `${result.count} 組解`);
     const statusBox = $('reachStatusBox');
     statusBox.classList.toggle('unreachable', !result.reachable);
     statusBox.classList.toggle('reachable', result.reachable);
@@ -451,6 +464,8 @@ document.addEventListener('DOMContentLoaded', () => {
       $('alphaInline').textContent = deg(alpha); $('thetaPhi').textContent = deg(phi); $('thetaAlpha').textContent = deg(alpha);
       document.querySelectorAll('[data-guide-offset-sign]').forEach(node => { node.textContent = selected.theta2 < 0 ? '+' : '−'; });
       $('guideUpPair').textContent = `(θ₁, θ₂) = (${fmt(wrap(K.toDegrees(up.theta1)))}°, ${deg(up.theta2)})`;
+      $('guideFirstBranch').textContent = down ? 'θ₂ > 0' : trText('Boundary pose', '邊界姿態');
+      $('guideFirstBranch').classList.toggle('branch-plus', Boolean(down));
       $('guideDownPair').parentElement.hidden = !down;
       if (down) $('guideDownPair').textContent = `(θ₁, θ₂) = (${fmt(wrap(K.toDegrees(down.theta1)))}°, ${deg(down.theta2)})`;
       $('intersectionSet').textContent = down ? '{ E₊, E₋ }' : '{ E }';
@@ -458,7 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ? trText('The two intersections E₊ and E₋ give two poses that reach the same T.', '兩個交點 E₊、E₋ 對應兩種到達同一個 T 的姿態。')
         : trText('The circles touch at E, so only one pose reaches T.', '兩圓在 E 點相切，因此只有一種姿態能到達 T。');
       $('intersectionExplanation').textContent = down
-        ? trText('The ± sign describes mirror triangles on opposite sides of OT.', '± 代表位於 OT 兩側、互為鏡像的三角形。')
+        ? trText('These mirror triangles bend in opposite directions. Next we calculate the two signed angles.', '這兩個鏡像三角形的彎曲方向相反。接下來求出兩個帶符號的角度。')
         : trText('At tangency, the mirror triangles collapse onto the same line.', '兩圓相切時，鏡像三角形都退化在同一直線上。');
       $('solutionHeading').textContent = down
         ? trText('Two angle pairs, one target.', '兩組角度，同一個目標。')
