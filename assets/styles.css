@@ -54,7 +54,6 @@ a { color: inherit; }
 .nav a:hover { color: var(--ink); background: #f0f1f3; }
 .nav a.active { color: var(--ink); background: #eceef1; }
 .nav a.active span { color: var(--accent); }
-.nav a.nav-subpage { padding-left: 22px; }
 .sidebar-foot { margin-top: auto; }
 .sidebar-foot p { margin: 13px 4px 0; color: #a0a4ac; font-size: 10px; }
 .language-toggle { display: grid; grid-template-columns: 1fr 1fr; width: 100%; padding: 3px; border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--muted); cursor: pointer; }
