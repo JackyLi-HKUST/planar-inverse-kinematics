@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Program a two-link robot to draw shapes and plan paths through its reachable workspace.">
+  <title>IK Plotter — Planar Inverse Kinematics</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/styles.css?v=ik-plotter-beta">
+  <link rel="stylesheet" href="assets/ik-plotter.css?v=1">
+</head>
+<body data-page="ik-plotter">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <button class="mobile-menu" id="mobileMenu" aria-label="Open navigation" aria-expanded="false">☰</button>
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span><strong data-i18n="brand">Planar Inverse Kinematics</strong><small>MATH3900 · GEOMETRY OF IK</small></span></a>
+    <nav class="nav" aria-label="Main navigation">
+      <p data-i18n="navExplore">EXPLORE</p>
+      <a href="introduction.html"><span>00</span><b><span data-lang-en>Introduction</span><span data-lang-zh>導論</span></b></a>
+      <a href="index.html"><span>01</span><b data-i18n="navPlayground">Playground</b></a>
+      <a href="game.html"><span>02</span><b><span data-lang-en>Target Challenge</span><span data-lang-zh>目標挑戰</span></b></a>
+      <a class="active" href="ik-plotter.html" aria-current="page"><span aria-hidden="true">↳</span><b><span data-lang-en>IK Plotter</span><span data-lang-zh>IK 畫圖挑戰</span> <small class="nav-beta">Beta</small></b></a>
+      <a href="guide.html"><span>03</span><b data-i18n="navGuide">How it works</b></a>
+      <a href="about.html"><span>04</span><b><span data-lang-en>About &amp; credits</span><span data-lang-zh>關於與鳴謝</span></b></a>
+    </nav>
+    <div class="sidebar-foot"><button class="language-toggle" type="button" data-language-toggle aria-label="Switch language"><span class="selected">EN</span><span>繁中</span></button><p data-i18n="offline">Works fully offline</p></div>
+  </aside>
+
+  <main class="main" id="main">
+    <header class="hero">
+      <div>
+        <p class="eyebrow"><span data-lang-en>02 · INVERSE KINEMATICS GAME</span><span data-lang-zh>02 · 逆運動學遊戲</span></p>
+        <h1><span data-lang-en>IK Plotter</span><span data-lang-zh>IK 畫圖挑戰</span></h1>
+        <p class="lede" data-lang-en>Give the robot coordinates and watch it draw. It uses inverse kinematics to calculate both joint angles at each point along your path.</p>
+        <p class="lede" data-lang-zh>用座標指揮機械臂畫圖。沿着你指定的路徑，機械臂會在每一點用逆運動學求出兩個關節角度。</p>
+      </div>
+      <a class="quiet-link" href="guide.html"><span data-lang-en>See the IK derivation</span><span data-lang-zh>查看逆運動學推導</span> →</a>
+    </header>
+
+    <nav class="plotter-levels" aria-label="Drawing challenges / 畫圖關卡">
+      <button type="button" data-game-level="0" aria-pressed="true"><small>01</small><span data-lang-en>Triangle</span><span data-lang-zh>三角形</span></button>
+      <button type="button" data-game-level="1" aria-pressed="false"><small>02</small><span data-lang-en>Square</span><span data-lang-zh>正方形</span></button>
+      <button type="button" data-game-level="2" aria-pressed="false"><small>03</small><span data-lang-en>Find a detour</span><span data-lang-zh>找一條繞路</span></button>
+      <button type="button" data-game-level="3" aria-pressed="false"><small>04</small><span data-lang-en>Two strokes</span><span data-lang-zh>畫兩筆</span></button>
+      <button type="button" data-game-level="4" aria-pressed="false"><small>+</small><span data-lang-en>Free draw</span><span data-lang-zh>自由畫圖</span></button>
+    </nav>
+
+    <div class="playground plotter-layout">
+      <section class="stage-card" aria-labelledby="game-board-heading">
+        <div class="plotter-stage-bar">
+          <h2 id="game-board-heading"><span data-lang-en>Drawing board</span><span data-lang-zh>畫板</span></h2>
+          <div class="plotter-dimensions">L₁ = 2.7 · L₂ = 2.0</div>
+        </div>
+        <div class="plotter-board">
+          <svg id="gameBoard" viewBox="-5.2 -5.2 10.4 10.4" role="img" aria-labelledby="gameBoardTitle">
+            <title id="gameBoardTitle">Two-link drawing arm and its reachable workspace</title>
+            <defs><pattern id="game-grid" width="1" height="1" patternUnits="userSpaceOnUse"><path d="M0 1V0H1"/></pattern></defs>
+            <path d="M4.7 0a4.7 4.7 0 1 0-9.4 0a4.7 4.7 0 1 0 9.4 0z M.7 0a.7 .7 0 1 0-1.4 0a.7 .7 0 1 0 1.4 0z" fill-rule="evenodd" class="plotter-workspace"/>
+            <rect x="-5" y="-5" width="10" height="10" fill="url(#game-grid)"/>
+            <circle r=".7" class="plotter-hole"/>
+            <path d="M-5 0H5M0-5V5" class="plotter-axes"/>
+            <text x="5" y="-.16" text-anchor="end">x</text><text x=".12" y="-4.85">y</text>
+            <g id="gameTicks"/>
+            <path id="gameGuide" class="plotter-guide"/>
+            <path id="gameInk" class="plotter-ink"/>
+            <path id="gameBlocked" class="plotter-blocked"/>
+            <line id="gameLink1" class="plotter-link plotter-link-1" x1="0" y1="0"/>
+            <line id="gameLink2" class="plotter-link plotter-link-2"/>
+            <circle r=".23" class="plotter-joint"/><circle r=".075" class="plotter-joint-core"/>
+            <circle id="gameElbow" r=".19" class="plotter-joint"/><circle id="gameElbowCore" r=".065" class="plotter-joint-core"/>
+            <circle id="gamePen" class="plotter-pen" r=".11"/>
+            <g id="gameWaypoints" class="plotter-waypoints"/>
+          </svg>
+        </div>
+        <div class="plotter-legend">
+          <span><i class="plotter-swatch guide-swatch"></i><span data-lang-en>Goal</span><span data-lang-zh>目標</span></span>
+          <span><i class="plotter-swatch ink-swatch"></i><span data-lang-en>Your drawing</span><span data-lang-zh>你的筆跡</span></span>
+          <span><i class="plotter-swatch hole-swatch"></i><span data-lang-en>Unreachable centre</span><span data-lang-zh>中央不可達區</span></span>
+        </div>
+        <dl class="plotter-readouts">
+          <div><dt><span data-lang-en>Pen (x, y)</span><span data-lang-zh>筆尖 (x, y)</span></dt><dd><output id="gamePosition">—</output></dd></div>
+          <div><dt>θ₁</dt><dd><output id="gameTheta1">—</output></dd></div>
+          <div><dt>θ₂</dt><dd><output id="gameTheta2">—</output></dd></div>
+        </dl>
+      </section>
+
+      <section class="control-card plotter-controls" aria-labelledby="game-level-heading">
+        <p class="eyebrow" id="gameLevelNumber">01 / 04</p>
+        <h2 id="game-level-heading"><span data-lang-en>Finish the triangle</span><span data-lang-zh>完成三角形</span></h2>
+        <p class="plotter-copy" id="gameTask"></p>
+        <ul class="plotter-points" id="gamePoints" aria-label="Waypoint coordinates / 路點座標"></ul>
+        <div class="plotter-commands" id="gameCommands">
+          <p><code>MOVE x y</code> <span data-lang-en>Move with the pen up.</span><span data-lang-zh>抬筆移動。</span></p>
+          <p><code>DRAW x y</code> <span data-lang-en>Draw a straight line to (x, y).</span><span data-lang-zh>畫直線到 (x, y)。</span></p>
+        </div>
+        <label class="plotter-editor-label" for="gameProgram"><span data-lang-en>Your program</span><span data-lang-zh>你的程式</span></label>
+        <textarea id="gameProgram" rows="6" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="gameCommands"></textarea>
+        <div class="plotter-actions">
+          <button type="button" id="gameRun" class="primary-link"><span data-lang-en>Run program</span><span data-lang-zh>執行程式</span><span aria-hidden="true">▶</span></button>
+          <button type="button" id="gameReset" class="lesson-button"><span data-lang-en>Reset</span><span data-lang-zh>重設</span></button>
+          <button type="button" id="gameNext" class="lesson-button" hidden><span data-lang-en>Next level</span><span data-lang-zh>下一關</span> →</button>
+        </div>
+        <p class="plotter-status" id="gameStatus" role="status"></p>
+        <details class="lesson-disclosure plotter-hint" id="gameHint">
+          <summary><span data-lang-en>Hint</span><span data-lang-zh>提示</span></summary>
+          <p id="gameHintText"></p>
+        </details>
+        <noscript><p>Enable JavaScript to run a program. · 啟用 JavaScript 後即可執行程式。</p></noscript>
+      </section>
+    </div>
+  </main>
+  <script src="assets/i18n.js?v=learning-route"></script>
+  <script src="assets/kinematics.js?v=learning-route"></script>
+  <script src="assets/ik-plotter.js?v=1"></script>
+</body>
+</html>

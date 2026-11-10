@@ -704,6 +704,7 @@ input[type="range"] { width: 100%; height: 3px; accent-color: var(--ink); cursor
 .sidebar-foot { padding-top: 14px; }
 .nav a > span { flex: 0 0 18px; }
 .nav a b span, .nav a.active b span { color: inherit; font-weight: inherit; }
+.nav-beta { display: inline-block; padding: 1px 5px; border: 1px solid #c5d2e4; border-radius: 4px; background: #edf3fc; color: #385579; font-size: 9px; font-weight: 700; vertical-align: 1px; }
 .mobile-top { display: none; }
 .lesson-jumps { display: flex; flex-wrap: wrap; gap: 5px 14px; margin-top: 13px; }
 .lesson-jumps a { color: #385579; font-size: 12px; font-weight: 640; text-underline-offset: 3px; }
