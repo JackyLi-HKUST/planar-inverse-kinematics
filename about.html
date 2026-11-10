@@ -22,8 +22,7 @@
       <a href="index.html"><span>01</span><b data-i18n="navPlayground">Playground</b></a>
       <a href="game.html"><span>02</span><b><span data-lang-en>Target Challenge</span><span data-lang-zh>目標挑戰</span></b></a>
       <a href="guide.html"><span>03</span><b data-i18n="navGuide">How it works</b></a>
-      <a href="proof.html"><span>04</span><b><span data-lang-en>Elbow Flip Lab</span><span data-lang-zh>翻肘實驗</span></b></a>
-      <a class="active" href="about.html"><span>05</span><b><span data-lang-en>About &amp; credits</span><span data-lang-zh>關於與鳴謝</span></b></a>
+      <a class="active" href="about.html"><span>04</span><b><span data-lang-en>About &amp; credits</span><span data-lang-zh>關於與鳴謝</span></b></a>
       <p data-i18n="navOnPage">ON THIS PAGE</p>
       <a href="#project"><span>·</span><b><span data-lang-en>The project</span><span data-lang-zh>本專題</span></b></a>
       <a href="#technology"><span>·</span><b><span data-lang-en>Technology</span><span data-lang-zh>技術</span></b></a>
@@ -35,10 +34,10 @@
 
   <main id="main" class="main about-main">
     <header class="about-hero" id="project">
-      <p class="eyebrow"><span data-lang-en>05 · ABOUT THIS PROJECT</span><span data-lang-zh>05 · 關於本專題</span></p>
+      <p class="eyebrow"><span data-lang-en>04 · ABOUT THIS PROJECT</span><span data-lang-zh>04 · 關於本專題</span></p>
       <h1><span data-lang-en>Made to make inverse kinematics understandable.</span><span data-lang-zh>把逆運動學變成看得見、想得通的數學。</span></h1>
-      <p class="lede" data-lang-en>Planar Inverse Kinematics is a bilingual mathematics project. A two-link arm introduces why one target can have several poses; a three-link experiment asks whether those poses can be connected without moving the tip.</p>
-      <p class="lede" data-lang-zh>《平面逆運動學》是一個雙語數學專題。先用雙連桿解釋同一目標為甚麼有多種姿態，再用三連桿實驗探討末端不動時，這些姿態能不能連接起來。</p>
+      <p class="lede" data-lang-en>Planar Inverse Kinematics is a bilingual mathematics project. A two-link arm shows why one target can have several poses. A three-link arm extends the same geometry to targets with a specified direction.</p>
+      <p class="lede" data-lang-zh>《平面逆運動學》是一個雙語數學專題。先用雙連桿解釋同一目標為甚麼可以有多種姿態，再用相同的幾何方法求解指定末端方向的三連桿問題。</p>
       <div class="project-signature">
         <div><span data-lang-en>CREATED BY</span><span data-lang-zh>製作者</span><a href="https://jackyli-hkust.github.io/" target="_blank" rel="noreferrer">Jacky Li ↗</a></div>
         <div><span data-lang-en>COURSE</span><span data-lang-zh>課程</span><strong>MATH3900 · Communicating Mathematics to the Public</strong></div>
@@ -72,14 +71,13 @@
         <a href="https://github.com/JackyLi-HKUST/planar-inverse-kinematics" target="_blank" rel="noreferrer"><span>SOURCE</span><div><strong>Project source on GitHub</strong><p data-lang-en>Download, inspect or adapt the complete static website and its mathematical tests.</p><p data-lang-zh>下載、查閱或修改完整靜態網站及其數學測試。</p></div><i>↗</i></a>
         <a href="https://github.com/just-the-docs/just-the-docs" target="_blank" rel="noreferrer"><span>LAYOUT</span><div><strong>Just the Docs</strong><p data-lang-en>Inspiration for the persistent sidebar and content-first documentation structure; no source code was copied.</p><p data-lang-zh>左側固定導覽與內容優先文件架構的靈感來源；未複製其原始碼。</p></div><i>↗</i></a>
         <a href="http://robotkinematics.study/" target="_blank" rel="noreferrer"><span>INTERACTION</span><div><strong>Robot Kinematics Simulator</strong><p data-lang-en>Visual and interaction reference for presenting robot kinematics; this project uses an independent implementation.</p><p data-lang-zh>機械臂運動學視覺與互動呈現的參考；本專題採用獨立實作。</p></div><i>↗</i></a>
-        <a href="https://arxiv.org/abs/1309.7960" target="_blank" rel="noreferrer"><span>MATHEMATICS</span><div><strong>Bhattacharya &amp; Pivtoraiko · Configuration Spaces of Planar Robot Arms</strong><p data-lang-en>Further reading on how fixing the tip can leave one or two connected sets of arm poses.</p><p data-lang-zh>延伸閱讀：固定機械臂末端後，姿態集合何以分成一個或兩個連通部分。</p></div><i>↗</i></a>
         <a href="https://developers.openai.com/learn/codex" target="_blank" rel="noreferrer"><span>DEVELOPMENT</span><div><strong>OpenAI Codex</strong><p data-lang-en>Official information about the coding assistant used during development.</p><p data-lang-zh>開發過程中所使用程式協作工具的官方資料。</p></div><i>↗</i></a>
         <a href="https://www.math.hkust.edu.hk/people/faculty/profile/masyleung/" target="_blank" rel="noreferrer"><span>COURSE</span><div><strong>HKUST · MATH3900</strong><p data-lang-en>Course context: Communicating Mathematics to the Public, taught by Prof. Shing-Yu Leung.</p><p data-lang-zh>課程背景：梁承裕教授任教的「向公眾傳達數學」MATH3900。</p></div><i>↗</i></a>
       </div>
       <div class="math-basis">
         <strong><span data-lang-en>Mathematical basis</span><span data-lang-zh>數學基礎</span></strong>
-        <p data-lang-en>The two-link guide uses circle intersections, the triangle inequality and the law of cosines. The three-link guide reduces a pose to a wrist target; the lab uses that reduction to show how separate sets of poses can become connected.</p>
-        <p data-lang-zh>雙連桿教學使用圓的交點、三角不等式和餘弦定理。三連桿教學把指定姿態化為手腕目標；翻肘實驗沿用這套方法，解釋分離的姿態集合如何接起來。</p>
+        <p data-lang-en>The two-link guide uses circle intersections, the triangle inequality and the law of cosines. The three-link guide finds the wrist from the desired tip position and direction, then applies the two-link result.</p>
+        <p data-lang-zh>雙連桿教學使用圓的交點、三角不等式和餘弦定理。三連桿教學先由指定的末端位置和方向求出手腕位置，再套用雙連桿的結果。</p>
       </div>
     </section>
 
@@ -95,7 +93,7 @@
       </div>
     </section>
 
-    <footer class="about-footer"><a href="proof.html">← <span data-lang-en>Elbow Flip Lab</span><span data-lang-zh>翻肘實驗</span></a><a href="index.html"><span data-lang-en>Open the playground</span><span data-lang-zh>開啟互動實驗室</span> →</a></footer>
+    <footer class="about-footer"><a href="guide-three.html">← <span data-lang-en>Three-link guide</span><span data-lang-zh>三連桿教學</span></a><a href="index.html"><span data-lang-en>Open the playground</span><span data-lang-zh>開啟互動實驗室</span> →</a></footer>
   </main>
 
   <script src="assets/i18n.js?v=learning-route"></script>

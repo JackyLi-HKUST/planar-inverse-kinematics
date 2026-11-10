@@ -707,7 +707,7 @@ input[type="range"] { width: 100%; height: 3px; accent-color: var(--ink); cursor
 .mobile-top { display: none; }
 .lesson-jumps { display: flex; flex-wrap: wrap; gap: 5px 14px; margin-top: 13px; }
 .lesson-jumps a { color: #385579; font-size: 12px; font-weight: 640; text-underline-offset: 3px; }
-.lesson-route { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 24px; }
+.lesson-route { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 24px; }
 .lesson-route a, .lesson-next { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--figure-bg); color: var(--ink); font-size: 13px; font-weight: 650; text-decoration: none; }
 .lesson-route a:hover, .lesson-next:hover { border-color: #9aacc7; background: #eef3fb; }
 .lesson-route small, .lesson-next small { color: #415c80; font-size: 9px; font-weight: 750; letter-spacing: .08em; }
