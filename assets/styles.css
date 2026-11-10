@@ -759,6 +759,18 @@ input[type="range"] { width: 100%; height: 3px; accent-color: var(--ink); cursor
 #problem { padding-top: 28px; }
 .diagram-prompt { color: var(--ink); }
 .main :focus-visible { outline: 2px solid #345a94; outline-offset: 3px; }
+.formula-summary { margin-top: 24px; padding-block: 26px; border-top: 1px solid var(--line); }
+.formula-summary h2 { margin: 0 0 10px; font-size: clamp(23px, 4vw, 32px); letter-spacing: -.035em; }
+.formula-summary > p:not(.eyebrow) { max-width: 740px; color: var(--muted); font-size: 14px; line-height: 1.55; }
+.formula-summary-box, .formula-summary-example { max-width: 740px; margin: 14px 0; padding: 14px 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--figure-bg); }
+.formula-summary-box { border-left: 3px solid var(--wrist); }
+.formula-summary-line { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 6px; align-items: center; padding: 5px 0; overflow-wrap: anywhere; font: 16px/1.5 Georgia, "Times New Roman", serif; }
+.formula-summary-line b { text-align: right; }
+.formula-summary-line small { white-space: nowrap; }
+.formula-summary-example { overflow-wrap: anywhere; }
+.formula-summary-example strong { color: #385579; font-size: 12px; }
+.formula-summary-example p { margin: 6px 0 0; color: var(--ink); font: 13px/1.55 Georgia, "Times New Roman", serif; }
+.formula-summary > .formula-summary-note { font-size: 12px; }
 
 @media (max-width: 760px) {
   :root { scroll-padding-top: 60px; }

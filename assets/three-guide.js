@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const psiText = `${fmt(angle, 0)}°`;
     text('substitution', `= (${fmt(x)}, 0.00) − 0.75(cos ${psiText}, sin ${psiText})`);
     text('wrist-value', `W ≈ (${fmt(w.x)}, ${fmt(w.y)})`);
+    text('plug-wrist', `W ≈ (${fmt(w.x, 4)}, ${fmt(w.y, 4)})`);
     text('target-readout', fmt(x));
     text('angle-readout', psiText);
     angleInput.setAttribute('aria-valuetext', psiText);
@@ -61,9 +62,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const theta3 = Math.atan2(Math.sin(difference), Math.cos(difference));
       text('angle-pair', `(θ₁, θ₂, θ₃) ≈ (${degrees(theta1)}, ${degrees(theta2)}, ${degrees(theta3)})`);
       text('closure', `θ₁ + θ₂ + θ₃ ≡ ψ = ${psiText} (mod 360°)`);
+      text('plug-theta', `θ₃ ≈ ${psiText} − (${degrees(theta1)}) − (${degrees(theta2)}) ≈ ${degrees(theta3)} (mod 360°)`);
     } else {
       text('angle-pair', tr('The dashed last link shows the requested direction; the wrist lies outside the disc.', '虛線第三段表示指定的方向；手腕落在圓盤之外。'));
       text('closure', '');
+      text('plug-theta', tr('No angle triple: W is outside the reach of links 1 and 2.', '無解：W 不在前兩段連桿的可達範圍內。'));
     }
   }
   targetInput.addEventListener('input', render);

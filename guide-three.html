@@ -6,7 +6,7 @@
   <meta name="description" content="Learn three-link planar inverse kinematics by reducing a desired gripper pose to a two-link wrist target.">
   <title>How It Works: Three Links — Planar Inverse Kinematics</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/styles.css?v=learning-route">
+  <link rel="stylesheet" href="assets/styles.css?v=final-formulas">
   <link rel="stylesheet" href="assets/three-guide.css?v=learning-route">
 </head>
 <body data-page="guide-three">
@@ -26,6 +26,7 @@
       <a href="#wrist"><span>·</span><b><span data-lang-en>Find the wrist</span><span data-lang-zh>找出手腕</span></b></a>
       <a href="#angles"><span>·</span><b><span data-lang-en>Solve the angles</span><span data-lang-zh>求出角度</span></b></a>
       <a href="#free-direction"><span>·</span><b><span data-lang-en>Free direction</span><span data-lang-zh>方向自由</span></b></a>
+      <a href="#final-formulas"><span>·</span><b><span data-lang-en>Final equations</span><span data-lang-zh>最終公式</span></b></a>
     </nav>
     <div class="sidebar-foot"><button class="language-toggle" type="button" data-language-toggle aria-label="Switch language"><span class="selected">EN</span><span>繁中</span></button><p data-i18n="offline">Works fully offline</p></div>
   </aside>
@@ -112,13 +113,28 @@
           <h2><span data-lang-en>What if we only pin the tip?</span><span data-lang-zh>如果只固定末端呢？</span></h2>
           <p data-lang-en>Now ψ is free. Every point of the dashed wrist circle that lies in the shaded disc gives at least one valid pose. In the Lab you can move along this set, and find out whether a continuous motion can take you from one elbow branch to the other.</p>
           <p data-lang-zh>現在 ψ 可以改變。虛線手腕圓上落在淺藍圓盤內的每個點，都對應至少一種合法姿態。在實驗中，你可以沿着這些姿態移動，看看能否連續地從一個肘部分支走到另一個。</p>
-          <a class="lesson-next" href="proof.html"><span><small data-lang-en>NEXT · ELBOW FLIP LAB</small><small data-lang-zh>下一步 · 翻肘實驗</small><b data-lang-en>Keep the tip fixed. Can you flip the elbow?</b><b data-lang-zh>固定末端，能翻肘嗎？</b></span><i aria-hidden="true">→</i></a>
         </div>
+      </section>
+      <section class="formula-summary" id="final-formulas" aria-labelledby="final-formulas-heading">
+        <p class="eyebrow"><span data-lang-en>PUT IT TOGETHER</span><span data-lang-zh>整理成一套公式</span></p>
+        <h2 id="final-formulas-heading"><span data-lang-en>From tip position and direction to three angles.</span><span data-lang-zh>由末端位置和方向，算出三個角度。</span></h2>
+        <p data-lang-en>Given the tip (x, y), its direction ψ and the three link lengths, first find W, then plug its coordinates into the <a href="guide.html#final-formulas">two-link equations</a>. Use each resulting pair to find the third joint angle.</p>
+        <p data-lang-zh>已知末端 (x, y)、方向 ψ 和三段連桿長度，先求 W，再把手腕座標代入<a href="guide.html#final-formulas">雙連桿公式</a>。每組 θ₁、θ₂ 都可用來算出第三個角度。</p>
+        <div class="formula-summary-box">
+          <div class="formula-summary-line"><b>W</b><span>= (x − L₃ cos ψ, y − L₃ sin ψ)</span></div>
+          <div class="formula-summary-line"><b>θ₃</b><span>≡ ψ − θ₁ − θ₂ <small>(mod 360°)</small></span></div>
+        </div>
+        <div class="formula-summary-example">
+          <strong><span data-lang-en>Live substitution · current branch</span><span data-lang-zh>即時代入 · 目前分支</span></strong>
+          <p id="three-plug-wrist"></p>
+          <p id="three-plug-theta"></p>
+        </div>
+        <a class="lesson-next" href="proof.html"><span><small data-lang-en>NEXT · ELBOW FLIP LAB</small><small data-lang-zh>下一步 · 翻肘實驗</small><b data-lang-en>Keep the tip fixed. Can you flip the elbow?</b><b data-lang-zh>固定末端，能翻肘嗎？</b></span><i aria-hidden="true">→</i></a>
       </section>
     </article>
   </main>
   <script src="assets/i18n.js?v=learning-route"></script>
   <script src="assets/kinematics.js?v=learning-route"></script>
-  <script src="assets/three-guide.js?v=learning-route"></script>
+  <script src="assets/three-guide.js?v=final-formulas"></script>
 </body>
 </html>

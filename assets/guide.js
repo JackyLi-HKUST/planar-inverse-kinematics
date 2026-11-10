@@ -455,6 +455,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const selected = result.solutions[state.branch] || up;
       const beta = Math.PI - Math.abs(up.theta2);
       const phi = Math.atan2(state.y, state.x);
+      const wrapAngle = angle => `${fmt(wrap(K.toDegrees(angle)))}°`;
+      const inputNumber = value => fmt(value, 4).replace(/\.?0+$/, '');
+      const offsetY = state.l2 * Math.sin(selected.theta2);
+      const offsetX = state.l1 + state.l2 * Math.cos(selected.theta2);
+      $('guidePlugC').textContent = `c = [(${inputNumber(state.x)})² + (${inputNumber(state.y)})² − ${inputNumber(state.l1)}² − ${inputNumber(state.l2)}²] / [2 × ${inputNumber(state.l1)} × ${inputNumber(state.l2)}] ≈ ${fmt(result.c2, 6)}`;
+      const sign = down && selected.theta2 < 0 ? '−' : '';
+      $('guidePlugTheta2').textContent = `θ₂ ≈ ${sign}arccos(${fmt(result.c2, 6)}) ≈ ${deg(selected.theta2)}`;
+      $('guidePlugTheta1').textContent = `θ₁ ≈ atan2(${inputNumber(state.y)}, ${inputNumber(state.x)}) − atan2(${inputNumber(offsetY)}, ${inputNumber(offsetX)}) ≈ ${wrapAngle(selected.theta1)} (mod 360°)`;
       const alpha = Math.abs(Math.atan2(state.l2 * Math.sin(up.theta2), state.l1 + state.l2 * Math.cos(up.theta2)));
       $('betaValue').textContent = deg(beta); $('guideTheta2').textContent = deg(Math.abs(up.theta2));
       $('theta2Sign').textContent = result.count === 2 ? '± ' : '';

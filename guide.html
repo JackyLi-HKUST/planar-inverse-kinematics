@@ -6,7 +6,7 @@
   <meta name="description" content="A visual, bilingual explanation of 2-DOF planar inverse kinematics.">
   <title>How It Works — Planar Inverse Kinematics</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/styles.css?v=learning-route">
+  <link rel="stylesheet" href="assets/styles.css?v=final-formulas">
   <link rel="stylesheet" href="assets/three-guide.css?v=learning-route">
 </head>
 <body data-page="guide">
@@ -30,6 +30,7 @@
       <a href="#two-solutions" data-derivation-nav><span>·</span><b><span data-lang-en>Why two answers?</span><span data-lang-zh>為何有兩個解</span></b></a>
       <a href="#elbow" data-derivation-nav><span>·</span><b><span data-lang-en>Find θ₂</span><span data-lang-zh>求 θ₂</span></b></a>
       <a href="#shoulder" data-derivation-nav><span>·</span><b><span data-lang-en>Find θ₁</span><span data-lang-zh>求 θ₁</span></b></a>
+      <a href="#final-formulas" data-derivation-nav><span>·</span><b><span data-lang-en>Final equations</span><span data-lang-zh>最終公式</span></b></a>
     </nav>
     <div class="sidebar-foot"><button class="language-toggle" type="button" data-language-toggle><span class="selected">EN</span><span>繁中</span></button><p data-i18n="offline">Works fully offline</p></div>
   </aside>
@@ -350,12 +351,33 @@
           <article><span class="case-icon two">2</span><h3 data-i18n="twoSolutions">2 solutions</h3><p data-i18n="twoCaseText">The circles cross. Both signs of θ₂ are possible.</p><button type="button" data-guide-case="0"><span data-lang-en>Try two solutions</span><span data-lang-zh>試試有兩組解的目標</span></button></article>
         </div>
       </section>
+      <section class="formula-summary" id="final-formulas" aria-labelledby="final-formulas-heading">
+        <p class="eyebrow"><span data-lang-en>PUT IT TOGETHER</span><span data-lang-zh>整理成一套公式</span></p>
+        <h2 id="final-formulas-heading"><span data-lang-en>Plug in the numbers.</span><span data-lang-zh>代入數字，就能算出角度。</span></h2>
+        <p data-lang-en>Given the target <i>(x,y)</i> and link lengths <i>L</i>₁, <i>L</i>₂, calculate these three lines in order. Use the same signed θ₂ in both the sine and cosine terms.</p>
+        <p data-lang-zh>已知目標 <i>(x,y)</i> 及連桿長度 <i>L</i>₁、<i>L</i>₂，依次計算以下三行。代入正弦和餘弦時，記得使用同一個帶正負號的 θ₂。</p>
+        <div class="formula-summary-box">
+          <div class="formula-summary-line"><b>c</b><span>= <span class="fraction"><span>x² + y² − L₁² − L₂²</span><span>2L₁L₂</span></span></span></div>
+          <div class="formula-summary-line"><b>θ₂</b><span>= ± arccos(c)</span></div>
+          <div class="formula-summary-line"><b>θ₁</b><span>≡ atan2(y, x) <wbr>− atan2(L₂ sin θ₂, L₁ + L₂ cos θ₂) <small>(mod 360°)</small></span></div>
+        </div>
+        <p data-lang-en>The first atan2 gives the target direction. The second gives the signed offset, measured in a frame where link 1 points along +x. Here atan2 takes the vertical component first. Keep the angle units consistent; the example uses degrees.</p>
+        <p data-lang-zh>第一個 atan2 求目標方向，第二個 atan2 求帶正負號的偏角：它是在第一段連桿指向正 x 軸的座標中量度的。atan2 先輸入垂直分量。整個計算要使用同一種角度單位；下方例子用度數。</p>
+        <div class="formula-summary-example">
+          <strong><span data-lang-en>Live substitution · current branch</span><span data-lang-zh>即時代入 · 目前分支</span></strong>
+          <p id="guidePlugC"></p>
+          <p id="guidePlugTheta2"></p>
+          <p id="guidePlugTheta1"></p>
+        </div>
+        <p class="formula-summary-note" data-lang-en>If |c| &gt; 1, there is no solution. At c = ±1 the two signs describe the same pose, except when equal links fold back to the origin: then θ₂ = 180° and θ₁ is free. Otherwise choose the other sign and recompute θ₁ for the second pose.</p>
+        <p class="formula-summary-note" data-lang-zh>若 |c| &gt; 1，則無解。若 c = ±1，兩個符號代表同一姿態；唯一的例外是等長連桿折回原點，此時 θ₂ = 180°，θ₁ 可以任選。在有兩解的情況下，換另一個符號並重算 θ₁，就得到第二組姿態。</p>
+      </section>
       </div>
       <footer class="lesson-footer"><a href="index.html">← <span data-i18n="backPlayground">Back to the playground</span></a><a class="lesson-next" href="guide-three.html"><span><small data-lang-en>NEXT · THREE LINKS</small><small data-lang-zh>下一步 · 三連桿</small><b data-lang-en>Find the wrist first</b><b data-lang-zh>先找手腕位置</b></span><i aria-hidden="true">→</i></a></footer>
     </article>
   </main>
   <script src="assets/i18n.js?v=learning-route"></script>
   <script src="assets/kinematics.js?v=learning-route"></script>
-  <script src="assets/guide.js?v=learning-route"></script>
+  <script src="assets/guide.js?v=final-formulas"></script>
 </body>
 </html>
