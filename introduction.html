@@ -6,7 +6,7 @@
   <meta name="description" content="Why forward and inverse kinematics matter in robotics, introduced through an approachable 2-DOF planar robot arm.">
   <title>Introduction — Planar Inverse Kinematics</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/styles.css?v=learning-route">
+  <link rel="stylesheet" href="assets/styles.css?v=mereq">
 </head>
 <body data-page="introduction">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -32,7 +32,7 @@
     </nav>
     <div class="sidebar-foot">
       <button class="language-toggle" type="button" data-language-toggle aria-label="Switch language"><span class="selected">EN</span><span>繁中</span></button>
-      <p data-i18n="offline">Works fully offline</p>
+      <p><span data-lang-en>Lessons work offline</span><span data-lang-zh>教學內容可離線使用</span></p>
     </div>
   </aside>
 
@@ -49,8 +49,22 @@
         </div>
       </div>
       <figure class="intro-hero-media">
-        <img src="assets/industrial-robot-arm.jpg" alt="A robotic gripper handling components in a manufacturing cell" width="1280" height="720">
-        <figcaption><span data-lang-en>The physical machine motivates the mathematics: a target point is known, while the joint angles that reach it are unknown.</span><span data-lang-zh>真實機械臂提供數學動機：目標點已知，能到達它的關節角度則是未知數。</span></figcaption>
+        <div class="intro-demo-frame">
+          <img id="mereq-fallback" src="assets/robot-arm-nih.png" alt="Illustration of a multi-jointed industrial robot arm" width="960" height="715">
+          <img id="mereq-animation" data-src="https://thomaschen98.github.io/images/mereq.gif" referrerpolicy="no-referrer" alt="A yellow robot arm moves its gripper towards a bottle on a workbench" width="340" height="191" hidden>
+          <canvas id="mereq-still" role="img" aria-label="Still frame of the MEReQ robot arm and bottle" width="340" height="191" hidden></canvas>
+        </div>
+        <figcaption>
+          <span data-lang-en>Suppose the bottle is the target. Which joint angles put the gripper where it needs to be?</span><span data-lang-zh>假設瓶子就是目標，機械臂要轉到哪些關節角度，才能讓夾爪到達指定位置？</span>
+          <div class="intro-demo-meta">
+            <a href="https://thomaschen98.github.io/mereq.github.io/"><span data-lang-en>MEReQ demo · Yuxin Chen et al. · CoRL 2025 ↗</span><span data-lang-zh>MEReQ 動圖 · Yuxin Chen 等 · CoRL 2025 ↗</span></a>
+            <button class="lesson-button" id="mereq-toggle" type="button" hidden>
+              <span data-mereq-play><span data-lang-en>Play animation</span><span data-lang-zh>播放動圖</span></span>
+              <span data-mereq-pause hidden><span data-lang-en>Pause animation</span><span data-lang-zh>暫停動圖</span></span>
+            </button>
+          </div>
+          <p id="mereq-unavailable" role="status" hidden><span data-lang-en>Animation unavailable. Showing the offline illustration.</span><span data-lang-zh>動圖暫時無法載入，現正顯示離線插圖。</span></p>
+        </figcaption>
       </figure>
     </header>
 
@@ -138,11 +152,12 @@
     </section>
 
     <footer class="intro-credits">
-      <p><span data-lang-en>Image credits:</span><span data-lang-zh>圖片來源：</span> <a href="https://commons.wikimedia.org/wiki/File:Lexington_Medical,_Inc._Manufacturing_Robot_Arm.jpg">Lexington Medical, Inc. manufacturing robot arm</a> (CC0); <a href="https://commons.wikimedia.org/wiki/File:Robot_Arm_(NIH_BioArt_457).png">NIAID / Ryan Kissinger robot-arm illustration</a> (U.S. public domain).</p>
+      <p><span data-lang-en>Illustration credit:</span><span data-lang-zh>插圖來源：</span> <a href="https://commons.wikimedia.org/wiki/File:Robot_Arm_(NIH_BioArt_457).png">NIAID / Ryan Kissinger</a> (U.S. public domain).</p>
       <a href="index.html"><span data-lang-en>Continue to Playground 01</span><span data-lang-zh>繼續前往 01 互動實驗室</span> →</a>
     </footer>
   </main>
 
   <script src="assets/i18n.js?v=learning-route"></script>
+  <script src="assets/introduction.js?v=mereq"></script>
 </body>
 </html>
